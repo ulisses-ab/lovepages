@@ -35,6 +35,16 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
   }
 
+  if (block.fullBleed) {
+    return (
+      <div className={wrapperClass} style={wrapperStyle}>
+        <div className="max-w-3xl mx-auto p-4">
+          {renderBlock()}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={wrapperClass} style={wrapperStyle}>
       {renderBlock()}
