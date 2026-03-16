@@ -116,9 +116,9 @@ function HousingTexture() {
 }
 
 // ── Single flip panel (one time unit) ─────────────────────────────────────────
-const PANEL_W = 68
-const PANEL_H = 84
-const HALF    = 42
+const PANEL_W = 58
+const PANEL_H = 70
+const HALF    = 35
 
 function FlipPanel({ value }) {
   const { topVal, botVal, phase, prevTop, nextBot } = useFlipPanel(value)
@@ -127,7 +127,7 @@ function FlipPanel({ value }) {
     position: 'absolute', left: 0, right: 0, top: 0, height: PANEL_H,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: "'Courier New', Courier, monospace",
-    fontSize: 46, fontWeight: '700',
+    fontSize: 38, fontWeight: '700',
     color: '#ddd7c8',
     letterSpacing: 2,
     textShadow: '0 1px 8px rgba(0,0,0,0.6)',
@@ -254,8 +254,8 @@ function ColonSep() {
 }
 
 // ── Full flip clock ────────────────────────────────────────────────────────────
-const CLOCK_BASE_W = 392
-const CLOCK_BASE_H = 152
+const CLOCK_BASE_W = 370
+const CLOCK_BASE_H = 124
 
 function FlipClock({ days, hours, minutes, seconds }) {
   const { t } = useT()
@@ -298,7 +298,7 @@ function FlipClock({ days, hours, minutes, seconds }) {
             position: 'relative',
             background: 'linear-gradient(168deg, #282828 0%, #181818 45%, #212121 75%, #111 100%)',
             borderRadius: 14,
-            padding: '20px 28px 18px',
+            padding: '14px 22px 12px',
             boxShadow: [
               '0 18px 60px rgba(0,0,0,0.75)',
               '0 4px 16px rgba(0,0,0,0.5)',
@@ -317,14 +317,6 @@ function FlipClock({ days, hours, minutes, seconds }) {
                 boxShadow: '0 3px 6px rgba(0,0,0,0.7)',
               }} />
             ))}
-
-            {/* Power LED */}
-            <div style={{
-              position: 'absolute', top: 10, right: 12,
-              width: 5, height: 5, borderRadius: '50%',
-              background: 'radial-gradient(circle at 35% 28%, #88ff99, #22cc55 65%)',
-              boxShadow: '0 0 4px rgba(34,204,85,0.5)',
-            }} />
 
             {/* Panel row */}
             <div style={{
