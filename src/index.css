@@ -5,9 +5,14 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html, body {
     @apply m-0 bg-base text-fg font-sans;
     min-height: 100vh;
+    max-width: 100vw;
+  }
+  #root {
+    width: 100vw;
+    overflow-x: hidden;
   }
 }
 
@@ -25,3 +30,4 @@
   from { transform: rotateX(90deg); }
   to   { transform: rotateX(0deg); }
 }
+
