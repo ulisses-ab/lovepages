@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { inputClass, colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ColorPicker from '../ui/ColorPicker'
