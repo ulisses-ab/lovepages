@@ -172,13 +172,31 @@ export default function TextBlock({ block, isEditing, onChange }) {
                   onChange={val => onChange({ outlineColor: val })}
                 />
               )}
+              <div className="flex-1" />
+              {[
+                { a: 'left',   Icon: AlignLeft },
+                { a: 'center', Icon: AlignCenter },
+                { a: 'right',  Icon: AlignRight },
+              ].map(({ a, Icon }) => (
+                <button
+                  key={a}
+                  onClick={() => onChange({ align: a })}
+                  className={`w-9 h-9 flex items-center justify-center rounded border transition ${
+                    (block.align || 'left') === a
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                >
+                  <Icon size={14} />
+                </button>
+              ))}
             </div>
           </>
         )}
 
-        {/* Size for physical variants */}
+        {/* Size + align for physical variants */}
         {isPhysical && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs text-fg-muted shrink-0">Size</span>
             <input
               type="number"
@@ -188,6 +206,24 @@ export default function TextBlock({ block, isEditing, onChange }) {
               className={inputClass + ' w-20 py-1'}
             />
             <span className="text-xs text-fg-ghost">px</span>
+            <div className="flex-1" />
+            {[
+              { a: 'left',   Icon: AlignLeft },
+              { a: 'center', Icon: AlignCenter },
+              { a: 'right',  Icon: AlignRight },
+            ].map(({ a, Icon }) => (
+              <button
+                key={a}
+                onClick={() => onChange({ align: a })}
+                className={`w-9 h-9 flex items-center justify-center rounded border transition ${
+                  (block.align || 'left') === a
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                }`}
+              >
+                <Icon size={14} />
+              </button>
+            ))}
           </div>
         )}
 
