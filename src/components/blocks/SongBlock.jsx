@@ -516,21 +516,39 @@ export default function SongBlock({ block, isEditing, onChange }) {
               top: 0,
               width: CTRL_W,
               height: PLAT,
-              borderRadius: 6,
-              background: '#1e1e1e',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.5)',
+              borderRadius: 7,
+              background: 'linear-gradient(170deg, #2a2a2a 0%, #181818 55%, #222 100%)',
+              boxShadow: [
+                'inset 0 1px 0 rgba(255,255,255,0.07)',
+                'inset 0 0 0 1px rgba(255,255,255,0.04)',
+                '0 6px 20px rgba(0,0,0,0.65)',
+                'inset 0 -1px 0 rgba(0,0,0,0.5)',
+              ].join(', '),
+              overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: '10px 0 11px',
+              padding: '9px 0 10px',
             }}>
+              {/* Brushed-metal texture overlay */}
+              <div style={{
+                position: 'absolute', inset: 0, pointerEvents: 'none',
+                backgroundImage: 'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(255,255,255,0.013) 3px, rgba(255,255,255,0.013) 6px)',
+              }} />
+              {/* Top bevel */}
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: 1, pointerEvents: 'none',
+                background: 'rgba(255,255,255,0.08)',
+              }} />
+
               {/* "PITCH" label */}
               <div style={{
-                fontSize: 6.5, letterSpacing: 2,
-                color: 'rgba(255,255,255,0.2)',
+                fontSize: 6.5, letterSpacing: 2.5,
+                color: 'rgba(255,255,255,0.22)',
                 fontFamily: 'monospace',
                 textTransform: 'uppercase',
-                marginBottom: 8,
+                marginBottom: 7,
+                position: 'relative', zIndex: 1,
               }}>PITCH</div>
 
               {/* Fader area */}
@@ -541,43 +559,47 @@ export default function SongBlock({ block, isEditing, onChange }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
+                zIndex: 1,
               }}>
-                {/* Scale marks */}
+                {/* Scale marks — left side */}
                 <div style={{
                   position: 'absolute',
-                  left: '24%',
-                  top: '10%',
-                  height: '80%',
+                  left: '22%',
+                  top: '8%',
+                  height: '84%',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                 }}>
-                  {[true, false, false, true, false, false, true].map((big, i) => (
+                  {[true,false,false,true,false,false,true,false,false,true].map((big, i) => (
                     <div key={i} style={{
-                      width: big ? 5 : 3,
+                      width: big ? 6 : 4,
                       height: 1,
-                      background: `rgba(255,255,255,${big ? 0.22 : 0.08})`,
+                      background: `rgba(255,255,255,${big ? 0.28 : 0.1})`,
                     }} />
                   ))}
                 </div>
 
                 {/* Fader track */}
                 <div style={{
-                  width: 4,
-                  height: '78%',
-                  borderRadius: 2,
-                  background: '#0d0d0d',
-                  boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.8)',
+                  width: 5,
+                  height: '80%',
+                  borderRadius: 3,
+                  background: 'linear-gradient(to bottom, #060606, #1c1c1c 50%, #060606)',
+                  boxShadow: [
+                    'inset 0 2px 5px rgba(0,0,0,1)',
+                    'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                  ].join(', '),
                   position: 'relative',
                 }}>
-                  {/* Centre mark */}
+                  {/* Centre reference line */}
                   <div style={{
                     position: 'absolute',
                     top: '50%',
-                    left: -7,
-                    right: -7,
+                    left: -9,
+                    right: -9,
                     height: 1,
-                    background: 'rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.18)',
                     transform: 'translateY(-50%)',
                   }} />
                 </div>
@@ -586,66 +608,86 @@ export default function SongBlock({ block, isEditing, onChange }) {
                 <div style={{
                   position: 'absolute',
                   left: '50%',
-                  top: '38%',
+                  top: '37%',
                   transform: 'translate(-50%, -50%)',
-                  width: 32,
-                  height: 14,
+                  width: 34,
+                  height: 15,
                   borderRadius: 2,
-                  background: 'linear-gradient(to bottom, #d8d8d8, #a0a0a0)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  background: [
+                    'linear-gradient(to bottom,',
+                    '#e8e8e8 0%,',
+                    '#d0d0d0 25%,',
+                    '#a8a8a8 50%,',
+                    '#c0c0c0 75%,',
+                    '#b0b0b0 100%)',
+                  ].join(' '),
+                  boxShadow: [
+                    '0 4px 10px rgba(0,0,0,0.85)',
+                    '0 1px 2px rgba(0,0,0,0.6)',
+                    'inset 0 1px 0 rgba(255,255,255,0.7)',
+                    'inset 0 -1px 0 rgba(0,0,0,0.25)',
+                    '0 0 0 0.5px rgba(0,0,0,0.4)',
+                  ].join(', '),
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: 2.5,
                 }}>
-                  {/* Single centre grip line */}
-                  <div style={{
-                    width: '48%', height: 1.5,
-                    background: 'rgba(0,0,0,0.35)',
-                    borderRadius: 1,
-                  }} />
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{
+                      width: '52%',
+                      height: i === 1 ? 1.5 : 0.75,
+                      background: i === 1
+                        ? 'rgba(0,0,0,0.55)'
+                        : 'rgba(0,0,0,0.28)',
+                      borderRadius: 1,
+                    }} />
+                  ))}
                 </div>
               </div>
 
-              {/* RPM buttons */}
-              <div style={{ display: 'flex', gap: 5, marginTop: 9 }}>
-                {[{ label: '33', active: true }, { label: '45', active: false }].map(({ label, active }) => (
+              {/* RPM + LED row */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                marginTop: 8,
+                position: 'relative',
+                zIndex: 1,
+              }}>
+                {[
+                  { label: '33', active: true },
+                  { label: '45', active: false },
+                ].map(({ label, active }) => (
                   <div key={label} style={{
-                    width: 28,
-                    height: 18,
+                    width: 22,
+                    height: 11,
                     borderRadius: 2,
-                    background: active ? '#141414' : '#2c2c2c',
+                    background: active ? '#1a1a1a' : '#252525',
                     boxShadow: active
-                      ? 'inset 0 2px 4px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04)'
-                      : '0 2px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.05)',
+                      ? 'inset 0 2px 3px rgba(0,0,0,0.9), 0 0 0 0.5px rgba(255,255,255,0.04)'
+                      : '0 1px 3px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 0.5px rgba(255,255,255,0.05)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: 7,
-                    fontFamily: 'monospace',
-                    fontWeight: 'bold',
+                    fontSize: 6,
                     letterSpacing: 0.5,
-                    color: active ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.22)',
+                    fontFamily: 'monospace',
+                    color: active ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.18)',
                   }}>
                     {label}
                   </div>
                 ))}
-              </div>
-
-              {/* LED indicators */}
-              <div style={{ display: 'flex', gap: 5, marginTop: 8 }}>
-                {[
-                  { color: '#2a9e4f', on: true },
-                  { color: '#c47a00', on: false },
-                  { color: '#9e2a2a', on: false },
-                ].map((led, i) => (
-                  <div key={i} style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    background: led.on ? led.color : `${led.color}44`,
-                    boxShadow: led.on ? `0 0 3px ${led.color}88` : 'none',
-                  }} />
-                ))}
+                {/* Single status LED */}
+                <div style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 35% 28%, #88ff99, #22cc55 65%)',
+                  boxShadow: '0 0 3px rgba(34,204,85,0.45)',
+                  marginLeft: 2,
+                }} />
               </div>
             </div>
           </div>
