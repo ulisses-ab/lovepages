@@ -322,7 +322,16 @@ function AlbumView({ block }) {
       {pageSize && (
         <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible' } : {}}>
           <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
-            <div style={{ boxShadow: '0 4px 12px rgba(20,10,5,0.45), 0 16px 40px rgba(20,10,5,0.35), 0 32px 64px rgba(0,0,0,0.2)' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              {/* Shadow sized to the visible book area only */}
+              <div style={{
+                position: 'absolute', zIndex: 0, pointerEvents: 'none',
+                top: 0, bottom: 0,
+                left:  page === 0             ? '50%' : 0,
+                right: page === totalPages - 1 ? '50%' : 0,
+                boxShadow: '0 4px 12px rgba(20,10,5,0.45), 0 16px 40px rgba(20,10,5,0.35), 0 32px 64px rgba(0,0,0,0.2)',
+              }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
               <HTMLFlipBook
                 key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
                 ref={bookRef}
@@ -344,6 +353,7 @@ function AlbumView({ block }) {
                 ))}
                 <AlbumBackCover coverColor={coverColor} />
               </HTMLFlipBook>
+              </div>
             </div>
           </div>
         </div>
