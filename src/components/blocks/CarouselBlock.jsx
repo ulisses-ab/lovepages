@@ -330,6 +330,7 @@ function AlbumView({ block }) {
                 left:  page === 0             ? '50%' : 0,
                 right: page === totalPages - 1 ? '50%' : 0,
                 boxShadow: '0 4px 12px rgba(20,10,5,0.45), 0 16px 40px rgba(20,10,5,0.35), 0 32px 64px rgba(0,0,0,0.2)',
+                transition: 'left 0.5s ease, right 0.5s ease',
               }} />
               <div style={{ position: 'relative', zIndex: 1 }}>
               <HTMLFlipBook
