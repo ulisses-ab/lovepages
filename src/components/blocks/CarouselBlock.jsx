@@ -509,7 +509,6 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
               clearable={!!block.coverColor}
               onClear={() => onChange({ coverColor: '' })}
             />
-            </div>
           </>
         )}
 
