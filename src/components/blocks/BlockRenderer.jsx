@@ -24,6 +24,15 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     block.shadow ? 'shadow-md' : '',
   ].filter(Boolean).join(' ')
 
+  // In the editor, never apply block backgrounds — they're preview-only.
+  if (isEditing) {
+    return (
+      <div className={`w-full min-w-0 p-4 rounded-lg ${decorationClass}`}>
+        {renderBlock()}
+      </div>
+    )
+  }
+
   // Fade: two stacked absolute layers (bg2 below, bg1 above with a downward mask),
   // content sits above both as position:relative.
   if (block.bgFade) {
@@ -40,7 +49,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
       position: 'absolute', inset: 0,
       backgroundColor: block.bgColor2 || undefined,
       backgroundImage: block.bgImage2 ? `url(${block.bgImage2})` : undefined,
-      backgroundSize: block.bgImage2 ? (fit2 === 'tile' ? '200px' : fit2) : undefined,
+      backgroundSize: block.bgImage2 ? (fit2 === 'tile' ? 'var(--bg-tile-size)' : fit2) : undefined,
       backgroundRepeat: block.bgImage2 ? (fit2 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
       backgroundPosition: block.bgImage2 ? 'center' : undefined,
     }
@@ -49,7 +58,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
       position: 'absolute', inset: 0,
       backgroundColor: block.bgColor || undefined,
       backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-      backgroundSize: block.bgImage ? (fit1 === 'tile' ? '200px' : fit1) : undefined,
+      backgroundSize: block.bgImage ? (fit1 === 'tile' ? 'var(--bg-tile-size)' : fit1) : undefined,
       backgroundRepeat: block.bgImage ? (fit1 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
       backgroundPosition: block.bgImage ? 'center' : undefined,
       maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
@@ -75,7 +84,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   const wrapperStyle = {
     backgroundColor: block.bgColor || undefined,
     backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-    backgroundSize: block.bgImage ? (fit === 'tile' ? '200px' : fit) : undefined,
+    backgroundSize: block.bgImage ? (fit === 'tile' ? 'var(--bg-tile-size)' : fit) : undefined,
     backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
     backgroundPosition: block.bgImage ? 'center' : undefined,
   }
