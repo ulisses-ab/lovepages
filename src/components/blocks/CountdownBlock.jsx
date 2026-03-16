@@ -120,22 +120,30 @@ function LabelTag({ text }) {
         {/* Clear tape strip */}
         <div style={{
           position: 'absolute',
-          top: -10, left: '50%', transform: 'translateX(-50%)',
-          width: 58, height: 20,
-          background: 'linear-gradient(180deg, rgba(255,252,240,0.08) 0%, rgba(245,240,220,0.18) 40%, rgba(255,252,240,0.08) 100%)',
-          borderTop: '0.5px solid rgba(255,255,255,0.45)',
-          borderBottom: '0.5px solid rgba(200,190,160,0.3)',
+          top: -11, left: '50%', transform: 'translateX(-50%)',
+          width: 60, height: 22,
           pointerEvents: 'none',
+          overflow: 'hidden',
         }}>
-          {/* Main specular streak */}
+          {/* Top edge — brightest part, where tape catches light */}
           <div style={{
-            position: 'absolute', top: '18%', left: 0, right: 0, height: '28%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.38) 20%, rgba(255,255,255,0.52) 50%, rgba(255,255,255,0.38) 80%, transparent 100%)',
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.75) 80%, transparent)',
           }} />
-          {/* Secondary faint sheen */}
+          {/* Tape body — nearly invisible warm film */}
           <div style={{
-            position: 'absolute', bottom: '15%', left: '10%', right: '10%', height: '12%',
-            background: 'rgba(255,255,255,0.15)',
+            position: 'absolute', top: 1.5, left: 0, right: 0, bottom: 1.5,
+            background: 'rgba(248,242,218,0.13)',
+          }} />
+          {/* Diagonal glint across the body */}
+          <div style={{
+            position: 'absolute', top: 2, left: '-10%', right: '-10%', bottom: 2,
+            background: 'linear-gradient(108deg, transparent 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.32) 52%, transparent 70%)',
+          }} />
+          {/* Bottom edge — dimmer than top */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(210,200,170,0.5) 20%, rgba(210,200,170,0.6) 50%, rgba(210,200,170,0.5) 80%, transparent)',
           }} />
         </div>
       </div>
