@@ -120,18 +120,22 @@ function LabelTag({ text }) {
         {/* Clear tape strip */}
         <div style={{
           position: 'absolute',
-          top: -9, left: '50%', transform: 'translateX(-50%)',
-          width: 52, height: 18,
-          background: 'linear-gradient(180deg, rgba(210,230,255,0.18) 0%, rgba(255,255,255,0.22) 45%, rgba(200,220,255,0.14) 100%)',
-          boxShadow: '0 0 0 0.5px rgba(180,200,240,0.35), inset 0 1px 0 rgba(255,255,255,0.4)',
-          borderRadius: 1,
+          top: -10, left: '50%', transform: 'translateX(-50%)',
+          width: 58, height: 20,
+          background: 'linear-gradient(180deg, rgba(255,252,240,0.08) 0%, rgba(245,240,220,0.18) 40%, rgba(255,252,240,0.08) 100%)',
+          borderTop: '0.5px solid rgba(255,255,255,0.45)',
+          borderBottom: '0.5px solid rgba(200,190,160,0.3)',
           pointerEvents: 'none',
         }}>
-          {/* Tape sheen */}
+          {/* Main specular streak */}
           <div style={{
-            position: 'absolute', top: '20%', left: '8%', right: '8%', height: '25%',
-            background: 'rgba(255,255,255,0.28)',
-            borderRadius: 1,
+            position: 'absolute', top: '18%', left: 0, right: 0, height: '28%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.38) 20%, rgba(255,255,255,0.52) 50%, rgba(255,255,255,0.38) 80%, transparent 100%)',
+          }} />
+          {/* Secondary faint sheen */}
+          <div style={{
+            position: 'absolute', bottom: '15%', left: '10%', right: '10%', height: '12%',
+            background: 'rgba(255,255,255,0.15)',
           }} />
         </div>
       </div>
