@@ -1,8 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
+@import 'react-colorful/dist/index.css';
+
+/* react-colorful skin — match app dark theme */
+.react-colorful { gap: 10px; }
+.react-colorful__saturation { border-radius: 6px; border-bottom: none; }
+.react-colorful__hue,
+.react-colorful__alpha { border-radius: 6px; height: 10px; }
+.react-colorful__pointer {
+  width: 16px; height: 16px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root { --bg-tile-size: 90px; }
+@media (min-width: 768px) { :root { --bg-tile-size: 180px; } }
 
 @layer base {
   html {

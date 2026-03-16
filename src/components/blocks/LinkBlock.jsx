@@ -1,5 +1,6 @@
 import { colors, inputClass } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
+import ColorPicker from '../ui/ColorPicker'
 
 export default function LinkBlock({ block, isEditing, onChange }) {
   const { href, label, color } = block
@@ -20,15 +21,11 @@ export default function LinkBlock({ block, isEditing, onChange }) {
           value={href}
           onChange={e => onChange({ href: e.target.value })}
         />
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-fg-muted">{t('link.buttonColor')}</label>
-          <input
-            type="color"
-            value={color || colors.primary}
-            onChange={e => onChange({ color: e.target.value })}
-            className="w-8 h-8 rounded cursor-pointer border-0"
-          />
-        </div>
+        <ColorPicker
+          value={color || colors.primary}
+          onChange={val => onChange({ color: val })}
+          label={t('link.buttonColor')}
+        />
       </div>
     )
   }

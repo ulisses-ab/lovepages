@@ -1,6 +1,6 @@
-import { colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import BackgroundChooser from '../ui/BackgroundChooser'
+import ColorPicker from '../ui/ColorPicker'
 
 export default function BlockStyleControls({ block, onChange }) {
   const { t } = useT()
@@ -25,27 +25,13 @@ export default function BlockStyleControls({ block, onChange }) {
 
       {/* Text color — text blocks only */}
       {block.type === 'text' && (
-        <div className="flex items-center gap-2">
-          <label className="relative cursor-pointer shrink-0">
-            <div
-              className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
-              style={{ backgroundColor: block.color || colors.fg }}
-            />
-            <input
-              type="color"
-              value={block.color || colors.fg}
-              onChange={e => onChange({ color: e.target.value })}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            />
-          </label>
-          <span className="text-xs text-fg-faint">{t('style.textColor')}</span>
-          {block.color && (
-            <button
-              onClick={() => onChange({ color: '' })}
-              className="ml-auto text-fg-ghost hover:text-fg-muted text-base leading-none"
-            >×</button>
-          )}
-        </div>
+        <ColorPicker
+          value={block.color}
+          onChange={val => onChange({ color: val })}
+          label={t('style.textColor')}
+          clearable
+          onClear={() => onChange({ color: '' })}
+        />
       )}
 
       {/* Border / Shadow / Full bleed — pill toggles */}

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { inputClass, colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ImageUpload from '../ui/ImageUpload'
+import ColorPicker from '../ui/ColorPicker'
 
 // ── Album aesthetic constants ─────────────────────────────────────────────────
 const AL = {
@@ -501,23 +502,13 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
                 >{opt.label}</button>
               ))}
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-xs" style={{ color: colors.fgMuted }}>Cover color</label>
-              <input
-                type="color"
-                value={block.coverColor || AL.cover}
-                onChange={e => onChange({ coverColor: e.target.value })}
-                className="w-7 h-7 rounded cursor-pointer border-0 bg-transparent p-0"
-              />
-              {block.coverColor && (
-                <button
-                  onClick={() => onChange({ coverColor: '' })}
-                  className="text-xs"
-                  style={{ color: colors.fgFaint }}
-                >
-                  Reset
-                </button>
-              )}
+            <ColorPicker
+              value={block.coverColor || AL.cover}
+              onChange={val => onChange({ coverColor: val })}
+              label="Cover color"
+              clearable={!!block.coverColor}
+              onClear={() => onChange({ coverColor: '' })}
+            />
             </div>
           </>
         )}

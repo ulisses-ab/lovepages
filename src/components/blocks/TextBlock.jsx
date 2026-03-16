@@ -1,90 +1,205 @@
-import { inputClass } from '../../lib/theme'
+import { useState, useRef, useEffect } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { inputClass, colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
+import ColorPicker from '../ui/ColorPicker'
+
+// All available fonts — each key maps to its CSS font-family stack.
+// These are loaded via Google Fonts in index.html.
+export const FONTS = {
+  inter:      { label: 'Inter',              css: "'Inter', system-ui, sans-serif" },
+  playfair:   { label: 'Playfair Display',   css: "'Playfair Display', Georgia, serif" },
+  cormorant:  { label: 'Cormorant Garamond', css: "'Cormorant Garamond', Georgia, serif" },
+  abril:      { label: 'Abril Fatface',      css: "'Abril Fatface', serif" },
+  bebas:      { label: 'Bebas Neue',         css: "'Bebas Neue', Impact, sans-serif" },
+  righteous:  { label: 'Righteous',          css: "'Righteous', sans-serif" },
+  fredoka:    { label: 'Fredoka',            css: "'Fredoka', sans-serif" },
+  pacifico:   { label: 'Pacifico',           css: "'Pacifico', cursive" },
+  dancing:    { label: 'Dancing Script',     css: "'Dancing Script', cursive" },
+  caveat:     { label: 'Caveat',             css: "'Caveat', cursive" },
+  elite:      { label: 'Special Elite',      css: "'Special Elite', monospace" },
+  spacemono:  { label: 'Space Mono',         css: "'Space Mono', monospace" },
+}
+
+const FONT_SIZES = {
+  sm:   { label: 'S',  px: 14 },
+  base: { label: 'M',  px: 16 },
+  lg:   { label: 'L',  px: 18 },
+  xl:   { label: 'XL', px: 20 },
+  '2xl':{ label: '2×', px: 24 },
+  '3xl':{ label: '3×', px: 30 },
+  '4xl':{ label: '4×', px: 36 },
+}
+
+// Legacy font keys used by old heading/paragraph/quote blocks
+const LEGACY_FONTS = {
+  sans:    'system-ui, sans-serif',
+  serif:   'Georgia, serif',
+  mono:    'monospace',
+  cursive: 'cursive',
+}
+
+function FontPicker({ value, onChange: onChangeProp }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClick(e) {
+      if (!ref.current?.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  const selected = FONTS[value] ?? FONTS.inter
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className={inputClass + ' flex items-center justify-between gap-2 cursor-pointer w-full'}
+        style={{ fontFamily: selected.css }}
+      >
+        <span className="truncate">{selected.label}</span>
+        <ChevronDown size={14} className={`shrink-0 text-fg-ghost transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-surface border border-overlay rounded-lg shadow-xl overflow-y-auto max-h-56">
+          {Object.entries(FONTS).map(([key, { label, css }]) => (
+            <button
+              key={key}
+              type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => { onChangeProp(key); setOpen(false) }}
+              className={`w-full text-left px-3 py-2 text-sm transition ${
+                key === value
+                  ? 'bg-primary/20 text-primary-dim'
+                  : 'text-fg-secondary hover:bg-overlay'
+              }`}
+              style={{ fontFamily: css }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function TextBlock({ block, isEditing, onChange }) {
-  const { variant, content, align, fontFamily = 'sans', fontSize = 'base', color = '', noteColor = '' } = block
+  const { variant, content, align, fontFamily = 'inter', fontSize = 'base', color = '', noteColor = '' } = block
   const { t } = useT()
-
-  const FONT_FAMILIES = {
-    sans:    { label: t('text.sansSerif'), style: 'system-ui, sans-serif' },
-    serif:   { label: t('text.serif'),     style: 'Georgia, serif' },
-    mono:    { label: t('text.monospace'), style: 'monospace' },
-    cursive: { label: t('text.cursive'),   style: 'cursive' },
-  }
-
-  const FONT_SIZES = {
-    sm:   { label: t('text.small'),   class: 'text-sm',  px: 14 },
-    base: { label: t('text.medium'),  class: 'text-base', px: 16 },
-    lg:   { label: t('text.large'),   class: 'text-lg',  px: 18 },
-    xl:   { label: t('text.xLarge'),  class: 'text-xl',  px: 20 },
-    '2xl':{ label: t('text.2xLarge'), class: 'text-2xl', px: 24 },
-    '3xl':{ label: t('text.3xLarge'), class: 'text-3xl', px: 30 },
-    '4xl':{ label: t('text.4xLarge'), class: 'text-4xl', px: 36 },
-  }
 
   const isPhysical = variant === 'typewriter' || variant === 'postit'
 
   if (isEditing) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
+        {/* Variant selector */}
         <select
           className={inputClass}
           value={variant}
           onChange={e => onChange({ variant: e.target.value })}
         >
-          <option value="heading">{t('text.heading')}</option>
-          <option value="paragraph">{t('text.paragraph')}</option>
-          <option value="quote">{t('text.quote')}</option>
+          <option value="plain">{t('text.plain')}</option>
           <option value="typewriter">{t('text.typewriter')}</option>
           <option value="postit">{t('text.postit')}</option>
         </select>
 
-        {!isPhysical && (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <select
-              className={inputClass + ' flex-1'}
-              value={fontFamily}
-              onChange={e => onChange({ fontFamily: e.target.value })}
-            >
-              {Object.entries(FONT_FAMILIES).map(([key, { label, style }]) => (
-                <option key={key} value={key} style={{ fontFamily: style }}>{label}</option>
-              ))}
-            </select>
-            <select
-              className={inputClass + ' flex-1'}
-              value={fontSize}
-              onChange={e => onChange({ fontSize: e.target.value })}
-            >
+        {/* Plain variant controls */}
+        {variant === 'plain' && (
+          <>
+            {/* Font picker */}
+            <FontPicker value={fontFamily} onChange={v => onChange({ fontFamily: v })} />
+
+            {/* Size */}
+            <div className="flex gap-1">
               {Object.entries(FONT_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>{label}</option>
+                <button
+                  key={key}
+                  onClick={() => onChange({ fontSize: key })}
+                  className={`flex-1 py-1.5 text-xs rounded border transition ${
+                    fontSize === key
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                >
+                  {label}
+                </button>
               ))}
-            </select>
+            </div>
+
+            {/* Style toggles */}
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => onChange({ bold: !block.bold })}
+                className={`w-9 h-9 rounded border text-sm font-bold transition ${
+                  block.bold
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                }`}
+              >
+                B
+              </button>
+              <button
+                onClick={() => onChange({ italic: !block.italic })}
+                className={`w-9 h-9 rounded border text-sm italic transition ${
+                  block.italic
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                }`}
+              >
+                I
+              </button>
+              <button
+                onClick={() => onChange({ outline: !block.outline })}
+                title={t('text.outlineHint')}
+                className={`w-9 h-9 rounded border text-sm font-bold transition ${
+                  block.outline
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                }`}
+                style={block.outline ? {} : {
+                  color: 'transparent',
+                  WebkitTextStroke: `1.5px var(--color-fg-muted, #888)`,
+                }}
+              >
+                O
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Size for physical variants */}
+        {isPhysical && (
+          <div className="flex gap-1">
+            {Object.entries(FONT_SIZES).map(([key, { label }]) => (
+              <button
+                key={key}
+                onClick={() => onChange({ fontSize: key })}
+                className={`flex-1 py-1.5 text-xs rounded border transition ${
+                  fontSize === key
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         )}
 
-        {isPhysical && (
-          <div className="flex flex-col sm:flex-row gap-2">
-            <select
-              className={inputClass + ' flex-1'}
-              value={fontSize}
-              onChange={e => onChange({ fontSize: e.target.value })}
-            >
-              {Object.entries(FONT_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
-            {variant === 'postit' && (
-              <label className="flex items-center gap-2 text-sm text-fg-muted flex-1">
-                <span className="whitespace-nowrap">{t('text.noteColor')}</span>
-                <input
-                  type="color"
-                  value={noteColor || '#fde68a'}
-                  onChange={e => onChange({ noteColor: e.target.value })}
-                  className="w-8 h-7 rounded cursor-pointer border border-subtle bg-transparent"
-                />
-              </label>
-            )}
-          </div>
+        {/* Post-it color */}
+        {variant === 'postit' && (
+          <ColorPicker
+            value={noteColor || '#fde047'}
+            onChange={val => onChange({ noteColor: val })}
+            label={t('text.noteColor')}
+          />
         )}
 
         <textarea
@@ -97,38 +212,40 @@ export default function TextBlock({ block, isEditing, onChange }) {
     )
   }
 
-  // ── Standard variants ────────────────────────────────────────────────────────
-  const alignClass = align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left'
-  const sizeClass = FONT_SIZES[fontSize]?.class ?? 'text-base'
-  const fontStyle = {
-    fontFamily: FONT_FAMILIES[fontFamily]?.style ?? 'system-ui, sans-serif',
-    ...(color ? { color } : {}),
+  // ── Render ────────────────────────────────────────────────────────────────────
+
+  const textAlign = align === 'center' ? 'center' : align === 'right' ? 'right' : 'left'
+  const sizePx = FONT_SIZES[fontSize]?.px ?? 16
+
+  // ── Plain (replaces heading / paragraph / quote) ──────────────────────────────
+  if (variant === 'plain' || variant === 'heading' || variant === 'paragraph' || variant === 'quote') {
+    const fontStack = FONTS[fontFamily]?.css ?? LEGACY_FONTS[fontFamily] ?? FONTS.inter.css
+    const textColor = color || colors.fg
+    // Legacy bold/italic from old variants
+    const isBold   = block.bold   || variant === 'heading'
+    const isItalic = block.italic || variant === 'quote'
+
+    const style = {
+      fontFamily: fontStack,
+      fontSize: sizePx,
+      fontWeight: isBold ? 700 : 400,
+      fontStyle: isItalic ? 'italic' : 'normal',
+      lineHeight: 1.5,
+      whiteSpace: 'pre-wrap',
+      textAlign,
+      ...(block.outline
+        ? { color: 'transparent', WebkitTextStroke: `0.04em ${textColor}` }
+        : { color: textColor }
+      ),
+    }
+
+    return <p style={style}>{content}</p>
   }
 
-  if (variant === 'heading') {
-    return (
-      <h2 className={`font-bold leading-tight ${sizeClass} ${alignClass}`} style={fontStyle}>
-        {content}
-      </h2>
-    )
-  }
-  if (variant === 'quote') {
-    return (
-      <blockquote
-        className={`border-l-4 border-primary-dim pl-4 italic text-fg-tertiary ${sizeClass} ${alignClass}`}
-        style={fontStyle}
-      >
-        {content}
-      </blockquote>
-    )
-  }
-
-  // ── Typewriter note ──────────────────────────────────────────────────────────
-  // Aesthetic: cottagecore — aged paper, red margin, ruled lines, mono ink feel
+  // ── Typewriter note ───────────────────────────────────────────────────────────
   if (variant === 'typewriter') {
     const lineH = 26
     const topPad = 34
-
     return (
       <div style={{
         position: 'relative',
@@ -142,7 +259,6 @@ export default function TextBlock({ block, isEditing, onChange }) {
         ].join(', '),
         overflow: 'hidden',
       }}>
-        {/* Paper grain */}
         <div style={{
           position: 'absolute', inset: 0, borderRadius: 3, pointerEvents: 'none',
           backgroundImage: [
@@ -150,37 +266,28 @@ export default function TextBlock({ block, isEditing, onChange }) {
             'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(100,60,10,0.015) 3px, rgba(100,60,10,0.015) 4px)',
           ].join(', '),
         }} />
-
-        {/* Ruled lines — light blue like vintage notebook paper */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
           backgroundImage: `repeating-linear-gradient(to bottom, transparent 0px, transparent ${lineH - 1}px, rgba(140,175,210,0.30) ${lineH - 1}px, rgba(140,175,210,0.30) ${lineH}px)`,
           backgroundPosition: `0 ${topPad}px`,
         }} />
-
-        {/* Red margin line */}
         <div style={{
           position: 'absolute', left: 42, top: 0, bottom: 0, width: 1.5,
           background: 'rgba(195,55,55,0.45)',
         }} />
-
-        {/* Slight age vignette */}
         <div style={{
           position: 'absolute', inset: 0, borderRadius: 3, pointerEvents: 'none',
           background: 'radial-gradient(ellipse at center, transparent 55%, rgba(120,80,20,0.06) 100%)',
         }} />
-
-        {/* Typed text */}
         <p style={{
           position: 'relative',
           fontFamily: '"Courier New", Courier, monospace',
-          fontSize: FONT_SIZES[fontSize]?.px ?? 16,
+          fontSize: sizePx,
           lineHeight: `${lineH}px`,
           color: '#1c140a',
           whiteSpace: 'pre-wrap',
           letterSpacing: '0.04em',
-          textAlign: align === 'center' ? 'center' : align === 'right' ? 'right' : 'left',
-          // Simulate ink impression — slight shadow adds weight to letters
+          textAlign,
           textShadow: '0.4px 0.4px 0 rgba(0,0,0,0.18), -0.2px 0 0 rgba(0,0,0,0.07)',
           margin: 0,
         }}>
@@ -190,9 +297,7 @@ export default function TextBlock({ block, isEditing, onChange }) {
     )
   }
 
-  // ── Post-it note ─────────────────────────────────────────────────────────────
-  // Aesthetic: playful/bold — square sticky note, scotch tape, Caveat font
-  // Tape technique mirrors the flip clock's LabelTag exactly.
+  // ── Post-it note ──────────────────────────────────────────────────────────────
   if (variant === 'postit') {
     const base = noteColor || '#fde047'
     const hexToRgb = h => {
@@ -205,61 +310,32 @@ export default function TextBlock({ block, isEditing, onChange }) {
     const light    = toHex([r * 1.08, g * 1.08, b * 1.08])
     const dark     = toHex([r * 0.88, g * 0.88, b * 0.88])
     const gradient = `linear-gradient(175deg, ${light} 0%, ${base} 60%, ${dark} 100%)`
-
     return (
       <div style={{ position: 'relative', paddingTop: 14, maxWidth: 220, margin: '0 auto' }}>
-
-        {/* Scotch tape — same layered technique as the flip clock post-it label */}
         <div style={{
-          position: 'absolute',
-          top: 0, left: '50%',
+          position: 'absolute', top: 0, left: '50%',
           transform: 'translateX(-50%) rotate(-1.5deg)',
-          width: 60, height: 22,
-          zIndex: 2, overflow: 'hidden', pointerEvents: 'none',
+          width: 60, height: 22, zIndex: 2, overflow: 'hidden', pointerEvents: 'none',
         }}>
-          {/* Top edge — brightest, where tape catches light */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.75) 80%, transparent)',
-          }} />
-          {/* Tape body — nearly invisible warm film */}
-          <div style={{
-            position: 'absolute', top: 1.5, left: 0, right: 0, bottom: 1.5,
-            background: 'rgba(248,242,218,0.13)',
-          }} />
-          {/* Diagonal glint across the body */}
-          <div style={{
-            position: 'absolute', top: 2, left: '-10%', right: '-10%', bottom: 2,
-            background: 'linear-gradient(108deg, transparent 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.32) 52%, transparent 70%)',
-          }} />
-          {/* Bottom edge — dimmer than top */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(210,200,170,0.5) 20%, rgba(210,200,170,0.6) 50%, rgba(210,200,170,0.5) 80%, transparent)',
-          }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.75) 80%, transparent)' }} />
+          <div style={{ position: 'absolute', top: 1.5, left: 0, right: 0, bottom: 1.5, background: 'rgba(248,242,218,0.13)' }} />
+          <div style={{ position: 'absolute', top: 2, left: '-10%', right: '-10%', bottom: 2, background: 'linear-gradient(108deg, transparent 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.32) 52%, transparent 70%)' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(210,200,170,0.5) 20%, rgba(210,200,170,0.6) 50%, rgba(210,200,170,0.5) 80%, transparent)' }} />
         </div>
-
-        {/* Note body — square, gradient, strong shadow, slight rotation */}
         <div style={{
-          position: 'relative',
-          aspectRatio: '1 / 1',
-          background: gradient,
-          overflow: 'hidden',
+          position: 'relative', aspectRatio: '1 / 1', background: gradient, overflow: 'hidden',
           transform: 'rotate(-2deg)',
           boxShadow: '0 4px 18px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3), 4px 5px 0 rgba(0,0,0,0.1)',
-          zIndex: 1,
-          display: 'flex',
-          alignItems: 'flex-start',
-          padding: '16px',
+          zIndex: 1, display: 'flex', alignItems: 'flex-start', padding: '16px',
         }}>
           <p style={{
             fontFamily: "'Caveat', cursive",
-            fontSize: FONT_SIZES[fontSize]?.px ?? 16,
+            fontSize: sizePx,
             fontWeight: 700,
             lineHeight: 1.4,
             color: '#1c1400',
             whiteSpace: 'pre-wrap',
-            textAlign: align === 'center' ? 'center' : align === 'right' ? 'right' : 'left',
+            textAlign,
             margin: 0,
             width: '100%',
           }}>
@@ -270,9 +346,6 @@ export default function TextBlock({ block, isEditing, onChange }) {
     )
   }
 
-  return (
-    <p className={`leading-relaxed ${sizeClass} ${alignClass}`} style={fontStyle}>
-      {content}
-    </p>
-  )
+  // Fallback
+  return <p style={{ fontSize: sizePx, textAlign, color: color || colors.fg, whiteSpace: 'pre-wrap' }}>{content}</p>
 }

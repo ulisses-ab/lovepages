@@ -3,6 +3,7 @@ import { Upload, ArrowDown } from 'lucide-react'
 import { colors, inputClass } from '../../lib/theme'
 import { supabase } from '../../lib/supabase'
 import { useT } from '../../lib/i18n'
+import ColorPicker from './ColorPicker'
 
 /**
  * Unified background chooser — Color, Image (with fit), or Fade (two-stop blend).
@@ -91,28 +92,13 @@ export default function BackgroundChooser({
 
         {/* Color control */}
         {slotType === 'color' && (
-          <div className="flex items-center gap-2">
-            <label className="relative cursor-pointer shrink-0">
-              <div
-                className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
-                style={{ backgroundColor: colorVal || colors.surface }}
-              />
-              <input
-                type="color"
-                value={colorVal || colors.surface}
-                onChange={e => onChange({ [colorField]: e.target.value })}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              />
-            </label>
-            {colorVal && (
-              <button
-                onClick={() => onChange({ [colorField]: '' })}
-                className="ml-auto text-xs text-fg-ghost hover:text-fg-muted"
-              >
-                {t('style.clear')}
-              </button>
-            )}
-          </div>
+          <ColorPicker
+            value={colorVal}
+            onChange={val => onChange({ [colorField]: val })}
+            label={t('style.color')}
+            clearable
+            onClear={() => onChange({ [colorField]: '' })}
+          />
         )}
 
         {/* Image control */}
@@ -183,29 +169,13 @@ export default function BackgroundChooser({
 
       {/* Color mode */}
       {mode === 'color' && (
-        <div className="flex items-center gap-2">
-          <label className="relative cursor-pointer shrink-0">
-            <div
-              className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
-              style={{ backgroundColor: bgColor || colors.surface }}
-            />
-            <input
-              type="color"
-              value={bgColor || colors.surface}
-              onChange={e => onChange({ bgColor: e.target.value })}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            />
-          </label>
-          <span className="text-xs text-fg-faint">{t('style.color')}</span>
-          {bgColor && (
-            <button
-              onClick={() => onChange({ bgColor: '' })}
-              className="ml-auto text-xs text-fg-ghost hover:text-fg-muted"
-            >
-              {t('style.clear')}
-            </button>
-          )}
-        </div>
+        <ColorPicker
+          value={bgColor}
+          onChange={val => onChange({ bgColor: val })}
+          label={t('style.color')}
+          clearable
+          onClear={() => onChange({ bgColor: '' })}
+        />
       )}
 
       {/* Image mode */}
