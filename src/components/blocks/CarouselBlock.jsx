@@ -318,110 +318,78 @@ function AlbumView({ block }) {
   const coverBg = coverColor || AL.cover
 
   return (
-    <div ref={containerRef} className="w-full py-2">
-      {/* Velvet presentation tray */}
-      <div style={{
-        position: 'relative',
-        backgroundColor: '#0f0c10',
-        backgroundImage: [
-          // Velvet pile — two crossing diagonal repeats
-          'repeating-linear-gradient(62deg, transparent 0px, transparent 3px, rgba(255,255,255,0.011) 3px, rgba(255,255,255,0.011) 4px, transparent 4px, transparent 7px)',
-          'repeating-linear-gradient(118deg, transparent 0px, transparent 5px, rgba(0,0,0,0.048) 5px, rgba(0,0,0,0.048) 6px, transparent 6px, transparent 11px)',
-          // Purple/dark sheen
-          'linear-gradient(135deg, rgba(80,50,100,0.08) 0%, transparent 42%, rgba(20,10,30,0.14) 100%)',
-          // Depth gradient
-          'linear-gradient(160deg, #1a1318 0%, #0f0c10 50%, #14101a 100%)',
-        ].join(', '),
-        borderRadius: 14,
-        padding: '20px 16px 18px',
-        boxShadow: [
-          'inset 0 0 55px rgba(0,0,0,0.48)',
-          'inset 0 2px 0 rgba(255,255,255,0.035)',
-          '0 22px 72px rgba(0,0,0,0.68)',
-          '0 6px 22px rgba(0,0,0,0.48)',
-        ].join(', '),
-      }}>
-        {/* Tray inner rim */}
-        <div style={{
-          position: 'absolute', inset: 8, borderRadius: 8, pointerEvents: 'none',
-          border: '1px solid rgba(180,150,100,0.13)',
-          boxShadow: 'inset 0 0 12px rgba(0,0,0,0.38)',
-        }} />
-
-        {/* Book */}
-        {pageSize && (
-          <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible', margin: '0 auto' } : { margin: '0 auto', width: 'fit-content' }}>
-            <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
-              <div style={{ filter: 'drop-shadow(0 3px 6px rgba(30,15,10,0.5)) drop-shadow(0 14px 38px rgba(30,15,10,0.38)) drop-shadow(0 36px 64px rgba(0,0,0,0.22))' }}>
-                <HTMLFlipBook
-                  key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
-                  ref={bookRef}
-                  width={pageSize.width}
-                  height={pageSize.height}
-                  size="fixed"
-                  showCover
-                  usePortrait={false}
-                  flippingTime={680}
-                  useMouseEvents
-                  mobileScrollSupport
-                  drawShadow
-                  onFlip={onFlip}
-                  startPage={0}
-                >
-                  <AlbumCover title={albumTitle} coverColor={coverColor} coverTitleStyle={coverTitleStyle} />
-                  {paddedImages.map((img, i) => (
-                    <AlbumPage key={i} image={img} index={i} pageHeight={pageSize.height} />
-                  ))}
-                  <AlbumBackCover coverColor={coverColor} />
-                </HTMLFlipBook>
-              </div>
+    <div ref={containerRef} className="w-full py-2 flex flex-col items-center gap-3">
+      {pageSize && (
+        <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible' } : {}}>
+          <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
+            <div style={{ filter: 'drop-shadow(0 3px 6px rgba(30,15,10,0.5)) drop-shadow(0 14px 38px rgba(30,15,10,0.38)) drop-shadow(0 36px 64px rgba(0,0,0,0.22))' }}>
+              <HTMLFlipBook
+                key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
+                ref={bookRef}
+                width={pageSize.width}
+                height={pageSize.height}
+                size="fixed"
+                showCover
+                usePortrait={false}
+                flippingTime={680}
+                useMouseEvents
+                mobileScrollSupport
+                drawShadow
+                onFlip={onFlip}
+                startPage={0}
+              >
+                <AlbumCover title={albumTitle} coverColor={coverColor} coverTitleStyle={coverTitleStyle} />
+                {paddedImages.map((img, i) => (
+                  <AlbumPage key={i} image={img} index={i} pageHeight={pageSize.height} />
+                ))}
+                <AlbumBackCover coverColor={coverColor} />
+              </HTMLFlipBook>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Navigation */}
-        {pageSize && (
-          <div className="flex items-center justify-center gap-4 mt-3">
-            <button
-              onClick={flipPrev}
-              disabled={page === 0}
-              style={{
-                width: 32, height: 28, borderRadius: '4px 4px 6px 6px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                backgroundColor: coverBg,
-                backgroundImage: 'linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-                color: AL.coverTitle, opacity: page === 0 ? 0.3 : 1,
-                transition: 'opacity 0.2s', cursor: page === 0 ? 'default' : 'pointer',
-                border: 'none', outline: 'none',
-              }}
-              aria-label="Previous page"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <span style={{ color: 'rgba(200,170,120,0.65)', fontFamily: 'Georgia, serif', fontSize: 11, letterSpacing: '0.08em', userSelect: 'none' }}>
-              {page + 1} / {totalPages}
-            </span>
-            <button
-              onClick={flipNext}
-              disabled={page >= totalPages - 1}
-              style={{
-                width: 32, height: 28, borderRadius: '4px 4px 6px 6px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                backgroundColor: coverBg,
-                backgroundImage: 'linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-                color: AL.coverTitle, opacity: page >= totalPages - 1 ? 0.3 : 1,
-                transition: 'opacity 0.2s', cursor: page >= totalPages - 1 ? 'default' : 'pointer',
-                border: 'none', outline: 'none',
-              }}
-              aria-label="Next page"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        )}
-      </div>
+      {pageSize && (
+        <div className="flex items-center gap-4">
+          <button
+            onClick={flipPrev}
+            disabled={page === 0}
+            style={{
+              width: 32, height: 28, borderRadius: '4px 4px 6px 6px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: coverBg,
+              backgroundImage: 'linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+              color: AL.coverTitle, opacity: page === 0 ? 0.3 : 1,
+              transition: 'opacity 0.2s', cursor: page === 0 ? 'default' : 'pointer',
+              border: 'none', outline: 'none',
+            }}
+            aria-label="Previous page"
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <span style={{ color: 'rgba(200,170,120,0.65)', fontFamily: 'Georgia, serif', fontSize: 11, letterSpacing: '0.08em', userSelect: 'none' }}>
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            onClick={flipNext}
+            disabled={page >= totalPages - 1}
+            style={{
+              width: 32, height: 28, borderRadius: '4px 4px 6px 6px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: coverBg,
+              backgroundImage: 'linear-gradient(168deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+              color: AL.coverTitle, opacity: page >= totalPages - 1 ? 0.3 : 1,
+              transition: 'opacity 0.2s', cursor: page >= totalPages - 1 ? 'default' : 'pointer',
+              border: 'none', outline: 'none',
+            }}
+            aria-label="Next page"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
