@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { RgbaColorPicker } from 'react-colorful'
+import { RgbaColorPicker, RgbColorPicker } from 'react-colorful'
 import { colors } from '../../lib/theme'
 
 // ── Colour conversion helpers ─────────────────────────────────────────────────
@@ -66,7 +66,7 @@ function toCssRgba({ r, g, b, a }) {
  *   onChange  — called with new CSS color string
  *   label     — optional text shown next to the swatch
  */
-export default function ColorPicker({ value, onChange, label, clearable = false, onClear }) {
+export default function ColorPicker({ value, onChange, label, clearable = false, onClear, alpha = false }) {
   const [open, setOpen] = useState(false)
   const [rgba, setRgba] = useState(() => parseColor(value))
   const popoverRef = useRef(null)
@@ -90,8 +90,10 @@ export default function ColorPicker({ value, onChange, label, clearable = false,
   }, [open])
 
   function handleChange(newRgba) {
-    setRgba(newRgba)
-    onChange(serializeColor(newRgba))
+    // When alpha is disabled, force a=1 so serialization always outputs hex
+    const safe = alpha ? newRgba : { ...newRgba, a: 1 }
+    setRgba(safe)
+    onChange(serializeColor(safe))
   }
 
   const cssColor = toCssRgba(rgba)
@@ -161,7 +163,10 @@ export default function ColorPicker({ value, onChange, label, clearable = false,
             width: 220,
           }}
         >
-          <RgbaColorPicker color={rgba} onChange={handleChange} style={{ width: '100%', height: 160 }} />
+          {alpha
+            ? <RgbaColorPicker color={rgba} onChange={handleChange} style={{ width: '100%', height: 160 }} />
+            : <RgbColorPicker  color={rgba} onChange={handleChange} style={{ width: '100%', height: 160 }} />
+          }
 
           {/* Hex input */}
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -176,7 +181,6 @@ export default function ColorPicker({ value, onChange, label, clearable = false,
               value={serializeColor(rgba)}
               onChange={e => {
                 const parsed = parseColor(e.target.value)
-                // only update if it parses to something non-black (avoid partial typing wiping color)
                 if (e.target.value === '' || e.target.value.match(/^#[0-9a-fA-F]{3,8}$/) || e.target.value.match(/^rgba?\(/)) {
                   handleChange(parsed)
                 }
@@ -190,13 +194,15 @@ export default function ColorPicker({ value, onChange, label, clearable = false,
             />
           </div>
 
-          {/* Alpha slider label */}
-          <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 10, color: colors.fgFaint, letterSpacing: '0.08em' }}>OPACITY</span>
-            <span style={{ fontSize: 11, color: colors.fgMuted, fontFamily: 'monospace' }}>
-              {Math.round(rgba.a * 100)}%
-            </span>
-          </div>
+          {/* Opacity readout — only when alpha is enabled */}
+          {alpha && (
+            <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 10, color: colors.fgFaint, letterSpacing: '0.08em' }}>OPACITY</span>
+              <span style={{ fontSize: 11, color: colors.fgMuted, fontFamily: 'monospace' }}>
+                {Math.round(rgba.a * 100)}%
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

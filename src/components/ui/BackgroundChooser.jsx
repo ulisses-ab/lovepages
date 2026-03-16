@@ -98,6 +98,7 @@ export default function BackgroundChooser({
             label={t('style.color')}
             clearable
             onClear={() => onChange({ [colorField]: '' })}
+            alpha
           />
         )}
 
@@ -175,6 +176,7 @@ export default function BackgroundChooser({
           label={t('style.color')}
           clearable
           onClear={() => onChange({ bgColor: '' })}
+          alpha
         />
       )}
 
