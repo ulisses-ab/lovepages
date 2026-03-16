@@ -1,6 +1,7 @@
 import { colors } from '../../lib/theme'
 import { ALIGN_OPTIONS } from '../../lib/blockDefaults'
 import { useT } from '../../lib/i18n'
+import ImageUpload from '../ui/ImageUpload'
 
 export default function BlockStyleControls({ block, onChange }) {
   const { t } = useT()
@@ -69,8 +70,26 @@ export default function BlockStyleControls({ block, onChange }) {
         )}
       </div>
 
-      {/* Border & Shadow toggles */}
-      <div className="flex gap-2">
+      {/* Background image */}
+      <div>
+        <label className="text-xs text-fg-muted mb-1.5 block">{t('style.bgImage')}</label>
+        <ImageUpload
+          value={block.bgImage || ''}
+          onChange={url => onChange({ bgImage: url })}
+          previewClass="w-full h-12 rounded border border-overlay object-cover mt-1"
+        />
+        {block.bgImage && (
+          <button
+            onClick={() => onChange({ bgImage: '' })}
+            className="text-xs text-fg-faint hover:text-fg-tertiary mt-1"
+          >
+            {t('style.clear')}
+          </button>
+        )}
+      </div>
+
+      {/* Border, Shadow & Full bleed toggles */}
+      <div className="flex flex-wrap gap-2">
         <label className="flex items-center gap-2 text-xs text-fg-muted cursor-pointer">
           <input
             type="checkbox"
@@ -88,6 +107,15 @@ export default function BlockStyleControls({ block, onChange }) {
             className="accent-primary"
           />
           {t('style.shadow')}
+        </label>
+        <label className="flex items-center gap-2 text-xs text-fg-muted cursor-pointer">
+          <input
+            type="checkbox"
+            checked={block.fullBleed || false}
+            onChange={e => onChange({ fullBleed: e.target.checked })}
+            className="accent-primary"
+          />
+          {t('style.fullBleed')}
         </label>
       </div>
     </div>

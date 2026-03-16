@@ -8,7 +8,7 @@ export const translations = {
     'hero.title': 'Make a page for\nsomeone you love',
     'hero.subtitle': 'Build a beautiful, personal mini-site in minutes — with music, photos, messages, and more. No design skills needed.',
     'hero.cta': 'Start creating',
-    'hero.free': 'Free to use \u2022 No credit card required',
+    'hero.free': 'Made with love \u2022 Shared in seconds',
 
     // AuthModal
     'auth.getStarted': 'Get started',
@@ -65,6 +65,8 @@ export const translations = {
     'style.clear': 'clear',
     'style.border': 'Border',
     'style.shadow': 'Shadow',
+    'style.bgImage': 'Background image',
+    'style.fullBleed': 'Full bleed',
 
     // TextBlock
     'text.heading': 'Heading',
@@ -129,8 +131,41 @@ export const translations = {
     'imageUpload.upload': 'Upload image',
     'imageUpload.uploading': 'Uploading\u2026',
 
+    // Dashboard sections
+    'dashboard.paidPages': 'Your pages',
+    'dashboard.draftPages': 'Drafts',
+    'dashboard.live': 'Live',
+    'dashboard.notLive': 'Not live',
+
+    // PublishModal
+    'publish.title': 'Publish page',
+    'publish.chooseAddress': 'Choose your page address',
+    'publish.checking': 'Checking\u2026',
+    'publish.available': 'Available!',
+    'publish.taken': 'Already taken \u2014 try another name',
+    'publish.invalid': 'Only lowercase letters, numbers, and hyphens',
+    'publish.liveAt': 'Your page will be live at:',
+    'publish.oneTimePayment': 'One-time payment \u2014 {price}',
+    'publish.paymentNote': 'Your page stays live for 1 year. You\u2019ll be redirected to complete payment.',
+    'publish.activeUntil': 'Active until {date} \u2014 no new payment needed.',
+    'publish.currentlyLive': 'Currently live',
+    'publish.unpublish': 'Unpublish',
+    'publish.cancel': 'Cancel',
+    'publish.publishing': 'Publishing\u2026',
+    'publish.redirecting': 'Redirecting\u2026',
+    'publish.updateLink': 'Update link',
+    'publish.publish': 'Publish',
+    'publish.payAndPublish': 'Pay {price} & Publish',
+
+    // CarouselBlock label
+    'block.carousel': 'Photos',
+
     // CountdownBlock
     'block.countdown': 'Countdown',
+    'countdown.variantFlip': 'Flip clock',
+    'countdown.variantMinimal': 'Minimal',
+    'countdown.colorDark': 'Dark',
+    'countdown.colorBeige': 'Beige',
     'countdown.label': 'Label (e.g. "Days until the wedding")',
     'countdown.targetDate': 'Target date & time',
     'countdown.expiredMessage': 'Message when date is reached (optional)',
@@ -140,6 +175,11 @@ export const translations = {
     'countdown.hours': 'hrs',
     'countdown.minutes': 'min',
     'countdown.seconds': 'sec',
+
+    // CarouselBlock
+    'carousel.captionPlaceholder': 'Caption (optional)',
+    'carousel.noImages': 'No photos yet',
+    'carousel.albumTitlePlaceholder': 'Album name (e.g. "Our Summer")',
   },
 
   pt: {
@@ -151,7 +191,7 @@ export const translations = {
     'hero.title': 'Crie uma p\u00e1gina para\nalgu\u00e9m que voc\u00ea ama',
     'hero.subtitle': 'Monte um mini-site bonito e pessoal em minutos \u2014 com m\u00fasica, fotos, mensagens e muito mais. Sem conhecimento t\u00e9cnico.',
     'hero.cta': 'Come\u00e7ar a criar',
-    'hero.free': 'Gratuito \u2022 Sem cart\u00e3o de cr\u00e9dito',
+    'hero.free': 'Feito com amor \u2022 Compartilhado em segundos',
 
     // AuthModal
     'auth.getStarted': 'Come\u00e7ar',
@@ -208,6 +248,8 @@ export const translations = {
     'style.clear': 'limpar',
     'style.border': 'Borda',
     'style.shadow': 'Sombra',
+    'style.bgImage': 'Imagem de fundo',
+    'style.fullBleed': 'Borda a borda',
 
     // TextBlock
     'text.heading': 'T\u00edtulo',
@@ -272,8 +314,41 @@ export const translations = {
     'imageUpload.upload': 'Enviar imagem',
     'imageUpload.uploading': 'Enviando\u2026',
 
+    // Dashboard sections
+    'dashboard.paidPages': 'Suas p\u00e1ginas',
+    'dashboard.draftPages': 'Rascunhos',
+    'dashboard.live': 'No ar',
+    'dashboard.notLive': 'Fora do ar',
+
+    // PublishModal
+    'publish.title': 'Publicar p\u00e1gina',
+    'publish.chooseAddress': 'Escolha o endere\u00e7o da sua p\u00e1gina',
+    'publish.checking': 'Verificando\u2026',
+    'publish.available': 'Dispon\u00edvel!',
+    'publish.taken': 'J\u00e1 est\u00e1 em uso \u2014 tente outro nome',
+    'publish.invalid': 'Use apenas letras min\u00fasculas, n\u00fameros e h\u00edfens',
+    'publish.liveAt': 'Sua p\u00e1gina estar\u00e1 dispon\u00edvel em:',
+    'publish.oneTimePayment': 'Pagamento \u00fanico \u2014 {price}',
+    'publish.paymentNote': 'Sua p\u00e1gina fica no ar por 1 ano. Voc\u00ea ser\u00e1 redirecionado para concluir o pagamento.',
+    'publish.activeUntil': 'Ativa at\u00e9 {date} \u2014 nenhum novo pagamento necess\u00e1rio.',
+    'publish.currentlyLive': 'No ar agora',
+    'publish.unpublish': 'Despublicar',
+    'publish.cancel': 'Cancelar',
+    'publish.publishing': 'Publicando\u2026',
+    'publish.redirecting': 'Redirecionando\u2026',
+    'publish.updateLink': 'Atualizar link',
+    'publish.publish': 'Publicar',
+    'publish.payAndPublish': 'Pagar {price} e publicar',
+
+    // CarouselBlock label
+    'block.carousel': 'Fotos',
+
     // CountdownBlock
     'block.countdown': 'Contagem regressiva',
+    'countdown.variantFlip': 'Rel\u00f3gio flip',
+    'countdown.variantMinimal': 'Minimalista',
+    'countdown.colorDark': 'Escuro',
+    'countdown.colorBeige': 'Bege',
     'countdown.label': 'R\u00f3tulo (ex: "Dias at\u00e9 o casamento")',
     'countdown.targetDate': 'Data e hora alvo',
     'countdown.expiredMessage': 'Mensagem ao chegar na data (opcional)',
@@ -283,5 +358,10 @@ export const translations = {
     'countdown.hours': 'hrs',
     'countdown.minutes': 'min',
     'countdown.seconds': 'seg',
+
+    // CarouselBlock
+    'carousel.captionPlaceholder': 'Legenda (opcional)',
+    'carousel.noImages': 'Nenhuma foto ainda',
+    'carousel.albumTitlePlaceholder': 'Nome do álbum (ex: "Nosso Verão")',
   },
 }

@@ -69,16 +69,39 @@ export default function Canvas({ blocks, setBlocks, previewMode, pageSettings, o
   }
 
   if (previewMode) {
+    if (blocks.length === 0) {
+      return (
+        <p className="text-fg-faint text-sm w-full text-center py-20">
+          Nothing to preview yet. Add some blocks!
+        </p>
+      )
+    }
+    // Group consecutive non-fullBleed blocks so fullBleed blocks can stretch edge-to-edge
+    const segments = []
+    let group = []
+    for (const block of blocks) {
+      if (block.fullBleed) {
+        if (group.length) { segments.push({ fullBleed: false, blocks: group }); group = [] }
+        segments.push({ fullBleed: true, block })
+      } else {
+        group.push(block)
+      }
+    }
+    if (group.length) segments.push({ fullBleed: false, blocks: group })
+
     return (
-      <div className="flex flex-wrap gap-4 p-6 max-w-3xl mx-auto">
-        {blocks.length === 0 && (
-          <p className="text-fg-faint text-sm w-full text-center py-20">
-            Nothing to preview yet. Add some blocks!
-          </p>
+      <div className="w-full">
+        {segments.map((seg, i) =>
+          seg.fullBleed ? (
+            <BlockRenderer key={seg.block.id} block={seg.block} />
+          ) : (
+            <div key={i} className="flex flex-wrap gap-4 p-6 max-w-3xl mx-auto">
+              {seg.blocks.map(block => (
+                <BlockRenderer key={block.id} block={block} />
+              ))}
+            </div>
+          )
         )}
-        {blocks.map(block => (
-          <BlockRenderer key={block.id} block={block} />
-        ))}
       </div>
     )
   }

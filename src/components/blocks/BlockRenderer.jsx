@@ -1,18 +1,21 @@
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
-import VideoBlock from './VideoBlock'
 import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
+import CarouselBlock from './CarouselBlock'
 
 export default function BlockRenderer({ block, isEditing = false, onChange }) {
   const wrapperStyle = {
     backgroundColor: block.bgColor || undefined,
+    backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
+    backgroundSize: block.bgImage ? 'cover' : undefined,
+    backgroundPosition: block.bgImage ? 'center' : undefined,
   }
 
   const wrapperClass = [
-    'w-full',
-    'p-4 rounded-lg',
+    'w-full min-w-0',
+    block.fullBleed ? '' : 'p-4 rounded-lg',
     block.border ? 'border border-subtle' : '',
     block.shadow ? 'shadow-md' : '',
   ]
@@ -25,9 +28,9 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
       case 'text':  return <TextBlock {...props} />
       case 'image': return <ImageBlock {...props} />
       case 'song':  return <SongBlock {...props} />
-      case 'video': return <VideoBlock {...props} />
       case 'link':      return <LinkBlock {...props} />
       case 'countdown': return <CountdownBlock {...props} />
+      case 'carousel':  return <CarouselBlock {...props} />
       default:          return <p className="text-fg-muted text-sm">Unknown block</p>
     }
   }

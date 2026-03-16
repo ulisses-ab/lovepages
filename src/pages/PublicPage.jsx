@@ -44,13 +44,33 @@ export default function PublicPage({ slug: slugProp }) {
     )
   }
 
+  // Group consecutive non-fullBleed blocks together so fullBleed blocks can
+  // escape the max-width container and stretch edge-to-edge.
+  const segments = []
+  let group = []
+  for (const block of (page.blocks || [])) {
+    if (block.fullBleed) {
+      if (group.length) { segments.push({ fullBleed: false, blocks: group }); group = [] }
+      segments.push({ fullBleed: true, block })
+    } else {
+      group.push(block)
+    }
+  }
+  if (group.length) segments.push({ fullBleed: false, blocks: group })
+
   return (
-    <div className="min-h-screen" style={getPageBgStyle(page.settings)}>
-      <div className="flex flex-wrap gap-4 p-3 sm:p-6 max-w-3xl mx-auto">
-        {(page.blocks || []).map(block => (
-          <BlockRenderer key={block.id} block={block} />
-        ))}
-      </div>
+    <div className="min-h-screen" style={{ ...getPageBgStyle(page.settings), overflowX: 'hidden' }}>
+      {segments.map((seg, i) =>
+        seg.fullBleed ? (
+          <BlockRenderer key={seg.block.id} block={seg.block} />
+        ) : (
+          <div key={i} className="flex flex-wrap gap-4 p-3 sm:p-6 max-w-3xl mx-auto">
+            {seg.blocks.map(block => (
+              <BlockRenderer key={block.id} block={block} />
+            ))}
+          </div>
+        )
+      )}
       <footer className="text-center py-8">
         <a
           href={window.location.origin}

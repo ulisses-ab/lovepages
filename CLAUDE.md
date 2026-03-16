@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | video | link | countdown | carousel`
+Block types: `text | image | song | link | countdown | carousel`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -75,7 +75,6 @@ src/
 │   │   ├── TextBlock.jsx            ← heading / paragraph / quote variants; font family + size controls
 │   │   ├── ImageBlock.jsx           ← file upload to Supabase Storage or URL
 │   │   ├── SongBlock.jsx            ← YouTube audio player (hidden iframe via YT IFrame API, custom play/pause UI); autoplay mutually exclusive across song blocks
-│   │   ├── VideoBlock.jsx           ← YouTube embed or video upload
 │   │   ├── LinkBlock.jsx            ← styled button with color picker
 │   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
 │   │   └── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
@@ -124,14 +123,17 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 ```json
 {
   "id": "nanoid string",
-  "type": "text | image | song | video | link",
+  "type": "text | image | song | link | countdown | carousel",
   "width": "full | half | third",
   "align": "left | center | right",
   "bgColor": "#hex or empty string",
+  "bgImage": "url or empty string — background image for the block (rendered cover/center; overrides bgColor visually)",
   "border": false,
-  "shadow": false
+  "shadow": false,
+  "fullBleed": false
 }
 ```
+// fullBleed: when true, the block escapes the max-width container and stretches edge-to-edge (no padding or rounded corners applied by BlockRenderer; PublicPage and Canvas preview render it outside the constrained flex-wrap group)
 
 ### Type-specific fields
 
@@ -154,9 +156,6 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "vinyl": large spinning vinyl disc with play button to its left, title and progress bar below; coverUrl appears as the center label
 // coverUrl: used by "cover" and "vinyl" variants; supports Supabase Storage upload or direct URL
 
-// video
-{ "src": "direct url", "embedUrl": "youtube url", "title": "string" }
-
 // link
 { "href": "url", "label": "string", "color": "#hex" }
 
@@ -171,9 +170,10 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "plain": uppercase serif (Georgia) printed directly on the cover, no background
 
 // countdown
-{ "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string" }
-// Single variant: a realistic physical flip clock — dark anodised aluminium housing, mechanical flip panels with 3D card animation, power LED, rubber feet.
-// No variant picker or color overrides; the design is fixed (dark/moody aesthetic, same visual family as the vinyl song variant).
+{ "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string", "variant": "flip | minimal", "clockColor": "dark | beige" }
+// flip (default): a realistic physical flip clock — mechanical flip panels with 3D card animation, rubber feet. Dark/moody aesthetic.
+//   clockColor: "dark" (default) — dark anodised aluminium housing, light digits; "beige" — warm cream housing, dark digits.
+// minimal: large serif numbers, hairline dividers, small uppercase unit labels, dot separators. Clean white-space editorial look. Minimalist aesthetic.
 ```
 
 To add a new block type:
@@ -248,7 +248,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 Currently the mapping looks like this (variants per block type):
 
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable)
-- **Countdown**: single realistic flip clock variant (dark/moody — physical turntable family)
+- **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
 
 As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
