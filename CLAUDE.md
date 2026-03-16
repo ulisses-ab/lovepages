@@ -143,7 +143,10 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 
 ```json
 // text
-{ "variant": "heading | paragraph | quote", "content": "string", "fontFamily": "sans | serif | mono | cursive", "fontSize": "sm | base | lg | xl | 2xl | 3xl | 4xl", "color": "#hex or empty string (empty = theme default)" }
+{ "variant": "heading | paragraph | quote | typewriter | postit", "content": "string", "fontFamily": "sans | serif | mono | cursive", "fontSize": "sm | base | lg | xl | 2xl | 3xl | 4xl", "color": "#hex or empty string (empty = theme default)", "noteColor": "#hex or empty — post-it background color (default: #fde68a)" }
+// fontFamily and color are ignored for typewriter and postit variants (font is fixed by the aesthetic)
+// typewriter: cottagecore — aged cream paper, red margin line, ruled lines, Courier ink-impression effect
+// postit: playful/bold — sticky note with adhesive strip, ruled lines, dog-ear corner, cursive font; noteColor controls paper color
 
 // image
 { "src": "url", "alt": "string", "caption": "string" }
@@ -251,6 +254,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 ### How this maps to blocks
 Currently the mapping looks like this (variants per block type):
 
+- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note)
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)

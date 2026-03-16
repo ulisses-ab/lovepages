@@ -31,7 +31,7 @@ export function createBlock(type) {
 
   switch (type) {
     case BLOCK_TYPES.TEXT:
-      return { ...base, variant: 'paragraph', content: 'Write something...', fontFamily: 'sans', fontSize: 'base', color: '' }
+      return { ...base, variant: 'paragraph', content: 'Write something...', fontFamily: 'sans', fontSize: 'base', color: '', noteColor: '' }
     case BLOCK_TYPES.IMAGE:
       return { ...base, src: '', alt: '', caption: '' }
     case BLOCK_TYPES.SONG:

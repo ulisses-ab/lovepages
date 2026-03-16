@@ -89,6 +89,9 @@ export const translations = {
     'text.3xLarge': '3X-Large',
     'text.4xLarge': '4X-Large',
     'text.writeSomething': 'Write something\u2026',
+    'text.typewriter': 'Typewriter note',
+    'text.postit': 'Post-it note',
+    'text.noteColor': 'Note color',
 
     // ImageBlock
     'image.caption': 'Caption (optional)',
@@ -277,6 +280,9 @@ export const translations = {
     'text.3xLarge': '3\u00d7 grande',
     'text.4xLarge': '4\u00d7 grande',
     'text.writeSomething': 'Escreva algo\u2026',
+    'text.typewriter': 'Nota datilografada',
+    'text.postit': 'Post-it',
+    'text.noteColor': 'Cor do papel',
 
     // ImageBlock
     'image.caption': 'Legenda (opcional)',
