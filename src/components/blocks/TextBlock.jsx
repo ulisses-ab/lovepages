@@ -191,59 +191,73 @@ export default function TextBlock({ block, isEditing, onChange }) {
   }
 
   // ── Post-it note ─────────────────────────────────────────────────────────────
-  // Aesthetic: playful/bold — square sticky note taped to the background
+  // Aesthetic: playful/bold — square sticky note, scotch tape, Caveat font
+  // Tape technique mirrors the flip clock's LabelTag exactly.
   if (variant === 'postit') {
-    const bg = noteColor || '#fde68a'
-
+    const base = noteColor || '#fde047'
+    const hexToRgb = h => {
+      const n = parseInt(h.replace('#', ''), 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+    const toHex = ([r, g, b]) =>
+      '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('')
+    const [r, g, b] = hexToRgb(base)
+    const light    = toHex([r * 1.08, g * 1.08, b * 1.08])
+    const dark     = toHex([r * 0.88, g * 0.88, b * 0.88])
+    const gradient = `linear-gradient(175deg, ${light} 0%, ${base} 60%, ${dark} 100%)`
 
     return (
-      // Outer wrapper: constrain width, center, give space above for tape
       <div style={{ position: 'relative', paddingTop: 14, maxWidth: 220, margin: '0 auto' }}>
 
-        {/* Scotch tape — centered, slightly rotated, overlaps top edge of note */}
+        {/* Scotch tape — same layered technique as the flip clock post-it label */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          left: '50%',
+          top: 0, left: '50%',
           transform: 'translateX(-50%) rotate(-1.5deg)',
           width: 60, height: 22,
-          zIndex: 2,
-          background: 'linear-gradient(to bottom, rgba(245,238,175,0.50) 0%, rgba(255,252,215,0.42) 45%, rgba(245,238,175,0.50) 100%)',
-          boxShadow: [
-            'inset 0 0 0 1px rgba(200,175,60,0.22)',
-            '0 1px 4px rgba(0,0,0,0.13)',
-          ].join(', '),
+          zIndex: 2, overflow: 'hidden', pointerEvents: 'none',
         }}>
-          {/* Center gloss stripe */}
+          {/* Top edge — brightest, where tape catches light */}
           <div style={{
-            position: 'absolute', top: '30%', bottom: '30%', left: '10%', right: '10%',
-            background: 'rgba(255,255,255,0.22)',
-            borderRadius: 1,
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1.5,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.75) 80%, transparent)',
+          }} />
+          {/* Tape body — nearly invisible warm film */}
+          <div style={{
+            position: 'absolute', top: 1.5, left: 0, right: 0, bottom: 1.5,
+            background: 'rgba(248,242,218,0.13)',
+          }} />
+          {/* Diagonal glint across the body */}
+          <div style={{
+            position: 'absolute', top: 2, left: '-10%', right: '-10%', bottom: 2,
+            background: 'linear-gradient(108deg, transparent 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.32) 52%, transparent 70%)',
+          }} />
+          {/* Bottom edge — dimmer than top */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(210,200,170,0.5) 20%, rgba(210,200,170,0.6) 50%, rgba(210,200,170,0.5) 80%, transparent)',
           }} />
         </div>
 
-        {/* The note itself — square, plain, slightly rotated */}
+        {/* Note body — square, gradient, strong shadow, slight rotation */}
         <div style={{
           position: 'relative',
           aspectRatio: '1 / 1',
-          background: bg,
+          background: gradient,
           overflow: 'hidden',
-          transform: 'rotate(-1.2deg)',
-          boxShadow: [
-            '4px 7px 22px rgba(0,0,0,0.24)',
-            '1px 2px 5px rgba(0,0,0,0.14)',
-          ].join(', '),
+          transform: 'rotate(-2deg)',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3), 4px 5px 0 rgba(0,0,0,0.1)',
           zIndex: 1,
           display: 'flex',
           alignItems: 'flex-start',
           padding: '16px',
         }}>
           <p style={{
-            position: 'relative',
-            fontFamily: 'cursive, "Comic Sans MS", sans-serif',
+            fontFamily: "'Caveat', cursive",
             fontSize: FONT_SIZES[fontSize]?.px ?? 16,
-            lineHeight: 1.55,
-            color: '#1a1008',
+            fontWeight: 700,
+            lineHeight: 1.4,
+            color: '#1c1400',
             whiteSpace: 'pre-wrap',
             textAlign: align === 'center' ? 'center' : align === 'right' ? 'right' : 'left',
             margin: 0,
