@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { colors } from './theme'
-import { Type, ImageIcon, Music, Video, Link, Timer } from 'lucide-react'
+import { Type, ImageIcon, Music, Video, Link, Timer, Images } from 'lucide-react'
 
 export const BLOCK_TYPES = {
   TEXT: 'text',
@@ -9,6 +9,7 @@ export const BLOCK_TYPES = {
   VIDEO: 'video',
   LINK: 'link',
   COUNTDOWN: 'countdown',
+  CAROUSEL: 'carousel',
 }
 
 export const ALIGN_OPTIONS = ['left', 'center', 'right']
@@ -30,13 +31,15 @@ export function createBlock(type) {
     case BLOCK_TYPES.IMAGE:
       return { ...base, src: '', alt: '', caption: '' }
     case BLOCK_TYPES.SONG:
-      return { ...base, embedUrl: '', title: '', artist: '', autoplay: true, variant: 'default', coverUrl: '' }
+      return { ...base, embedUrl: '', title: '', artist: '', autoplay: true, variant: 'default', coverUrl: '', accentColor: '', textColor: '', vinylBase: 'wood' }
     case BLOCK_TYPES.VIDEO:
       return { ...base, src: '', embedUrl: '', title: '' }
     case BLOCK_TYPES.LINK:
       return { ...base, href: '', label: 'Click here', color: colors.primary }
     case BLOCK_TYPES.COUNTDOWN:
       return { ...base, targetDate: '', label: '', expiredMessage: '' }
+    case BLOCK_TYPES.CAROUSEL:
+      return { ...base, images: [], mode: 'slider', albumTitle: '', coverColor: '', coverTitleStyle: 'sticker' }
     default:
       return base
   }
@@ -56,6 +59,7 @@ export const BLOCK_LABELS = {
   video: 'Video',
   link: 'Link',
   countdown: 'Countdown',
+  carousel: 'Photos',
 }
 
 export const BLOCK_ICONS = {
@@ -65,4 +69,5 @@ export const BLOCK_ICONS = {
   video: Video,
   link: Link,
   countdown: Timer,
+  carousel: Images,
 }

@@ -40,58 +40,323 @@ function fireConfetti(el) {
   })
 }
 
-function FlipUnit({ value, unit }) {
-  const [displayed, setDisplayed] = useState(value)
-  const [flipping, setFlipping] = useState(false)
-  const prev = useRef(value)
+// ── Flip animation state machine ──────────────────────────────────────────────
+// Phases:
+//   idle      — static display, no animation
+//   fold-top  — old top card folds away (0→-90°); static top shows new value
+//   fold-bot  — new bottom card folds in (90→0°); static bottom still shows old
+//   done      — animation complete, static bottom updates to new value
+function useFlipPanel(value) {
+  const [topVal, setTopVal]     = useState(value)
+  const [botVal, setBotVal]     = useState(value)
+  const [phase, setPhase]       = useState('idle')
+  const [prevTop, setPrevTop]   = useState(value)
+  const [nextBot, setNextBot]   = useState(value)
+  const prevRef  = useRef(value)
+  const timers   = useRef([])
 
   useEffect(() => {
-    if (value !== prev.current) {
-      setFlipping(true)
-      const t = setTimeout(() => {
-        setDisplayed(value)
-        setFlipping(false)
-        prev.current = value
-      }, 200)
-      return () => clearTimeout(t)
-    }
+    if (value === prevRef.current) return
+
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+
+    const old = prevRef.current
+    prevRef.current = value
+
+    setPrevTop(old)
+    setNextBot(value)
+    setTopVal(value)     // static top already shows new value (hidden by animated layer)
+    // botVal stays = old during fold-top
+    setPhase('fold-top')
+
+    timers.current.push(setTimeout(() => setPhase('fold-bot'), 160))
+    timers.current.push(setTimeout(() => {
+      setBotVal(value)
+      setPhase('idle')
+    }, 320))
+
+    return () => timers.current.forEach(clearTimeout)
   }, [value])
 
+  return { topVal, botVal, phase, prevTop, nextBot }
+}
+
+// ── Housing texture (brushed anodised aluminium) ──────────────────────────────
+function HousingTexture() {
   return (
-    <div className="flex flex-col items-center">
-      <div
-        className="relative flex items-center justify-center rounded-xl w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden"
-        style={{
-          background: `linear-gradient(145deg, ${colors.overlay}, ${colors.surface})`,
-          boxShadow: `0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)`,
-        }}
-      >
-        {/* Center divider line */}
-        <div
-          className="absolute inset-x-0 top-1/2 -translate-y-px h-px"
-          style={{ background: `rgba(0,0,0,0.35)` }}
-        />
-        <span
-          className="text-2xl sm:text-3xl md:text-4xl font-bold tabular-nums transition-all duration-200"
-          style={{
-            color: colors.fg,
-            transform: flipping ? 'scaleY(0.6) translateY(-4px)' : 'scaleY(1) translateY(0)',
-            opacity: flipping ? 0.4 : 1,
-          }}
-        >
-          {pad(displayed)}
-        </span>
-      </div>
-      <span
-        className="mt-2 text-xs font-semibold uppercase tracking-widest"
-        style={{ color: colors.fgMuted }}
-      >
-        {unit}
-      </span>
+    <>
+      {/* Fine horizontal brush lines */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 14, pointerEvents: 'none',
+        backgroundImage: [
+          'repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(255,255,255,0.013) 2px, rgba(255,255,255,0.013) 3px)',
+          'repeating-linear-gradient(180deg, transparent 0px, transparent 9px, rgba(0,0,0,0.05) 9px, rgba(0,0,0,0.05) 10px)',
+        ].join(','),
+      }} />
+      {/* Vertical subtle grain */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 14, pointerEvents: 'none',
+        backgroundImage: 'repeating-linear-gradient(90deg, transparent 0px, transparent 14px, rgba(255,255,255,0.008) 14px, rgba(255,255,255,0.008) 15px)',
+      }} />
+      {/* Top specular streak */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
+        borderRadius: '14px 14px 0 0', pointerEvents: 'none',
+        background: 'linear-gradient(to bottom, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.01) 60%, transparent 100%)',
+      }} />
+      {/* Bottom edge shadow */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '25%',
+        borderRadius: '0 0 14px 14px', pointerEvents: 'none',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 100%)',
+      }} />
+    </>
+  )
+}
+
+// ── Single flip panel (one time unit) ─────────────────────────────────────────
+const PANEL_W = 68
+const PANEL_H = 84
+const HALF    = 42
+
+function FlipPanel({ value }) {
+  const { topVal, botVal, phase, prevTop, nextBot } = useFlipPanel(value)
+
+  const numStyle = {
+    position: 'absolute', left: 0, right: 0, top: 0, height: PANEL_H,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontFamily: "'Courier New', Courier, monospace",
+    fontSize: 46, fontWeight: '700',
+    color: '#ddd7c8',
+    letterSpacing: 2,
+    textShadow: '0 1px 8px rgba(0,0,0,0.6)',
+    userSelect: 'none',
+  }
+
+  const topHalf = (val, extra = {}) => (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, height: HALF,
+      overflow: 'hidden',
+      borderRadius: '5px 5px 0 0',
+      background: 'linear-gradient(to bottom, #1e1e1e 0%, #161616 100%)',
+      ...extra,
+    }}>
+      <div style={numStyle}>{pad(val)}</div>
+    </div>
+  )
+
+  const botHalf = (val, extra = {}) => (
+    <div style={{
+      position: 'absolute', top: HALF, left: 0, right: 0, height: HALF,
+      overflow: 'hidden',
+      borderRadius: '0 0 5px 5px',
+      background: 'linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)',
+      ...extra,
+    }}>
+      <div style={{ ...numStyle, top: -HALF }}>{pad(val)}</div>
+    </div>
+  )
+
+  return (
+    <div style={{
+      position: 'relative',
+      width: PANEL_W, height: PANEL_H,
+      borderRadius: 6,
+      flexShrink: 0,
+      boxShadow: [
+        '0 8px 28px rgba(0,0,0,0.85)',
+        'inset 0 1px 0 rgba(255,255,255,0.055)',
+        '0 0 0 1px rgba(0,0,0,0.9)',
+      ].join(', '),
+    }}>
+
+      {/* Static bottom: shows current bottom value */}
+      {botHalf(botVal)}
+
+      {/* Static top: shows current top value (new value during animation) */}
+      {topHalf(topVal)}
+
+      {/* fold-top: old top card folds downward (0 → -90°), perspective via wrapper */}
+      {phase === 'fold-top' && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: HALF,
+          zIndex: 4, perspective: 220,
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            transformOrigin: 'center bottom',
+            animation: 'flip-top 0.16s ease-in forwards',
+            overflow: 'hidden',
+            borderRadius: '5px 5px 0 0',
+            background: 'linear-gradient(to bottom, #1e1e1e 0%, #161616 100%)',
+            backfaceVisibility: 'hidden',
+          }}>
+            <div style={numStyle}>{pad(prevTop)}</div>
+          </div>
+        </div>
+      )}
+
+      {/* fold-bot: new bottom card falls in (90 → 0°) */}
+      {phase === 'fold-bot' && (
+        <div style={{
+          position: 'absolute', top: HALF, left: 0, right: 0, height: HALF,
+          zIndex: 4, perspective: 220,
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0,
+            transformOrigin: 'center top',
+            animation: 'flip-bottom 0.16s ease-out forwards',
+            overflow: 'hidden',
+            borderRadius: '0 0 5px 5px',
+            background: 'linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)',
+            backfaceVisibility: 'hidden',
+          }}>
+            <div style={{ ...numStyle, top: -HALF }}>{pad(nextBot)}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Centre divider crease */}
+      <div style={{
+        position: 'absolute', left: 0, right: 0, top: HALF - 1, height: 2,
+        background: 'rgba(0,0,0,0.95)', zIndex: 5,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.9), 0 -1px 2px rgba(0,0,0,0.5)',
+      }} />
+
+      {/* Panel inner edge glow (top highlight) */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 6, pointerEvents: 'none', zIndex: 6,
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+      }} />
     </div>
   )
 }
 
+// ── Colon separator ────────────────────────────────────────────────────────────
+function ColonSep() {
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', gap: 10,
+      width: 14, height: PANEL_H, flexShrink: 0,
+      paddingBottom: 16,    // offset to align with digit center (clear of unit labels)
+    }}>
+      {[0, 1].map(i => (
+        <div key={i} style={{
+          width: 5, height: 5, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.22)',
+          boxShadow: '0 0 4px rgba(255,255,255,0.08)',
+        }} />
+      ))}
+    </div>
+  )
+}
+
+// ── Full flip clock ────────────────────────────────────────────────────────────
+const CLOCK_BASE_W = 392
+const CLOCK_BASE_H = 152
+
+function FlipClock({ days, hours, minutes, seconds }) {
+  const { t } = useT()
+  const wrapRef  = useRef(null)
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const update = () => {
+      const w = el.offsetWidth
+      if (w > 10) setScale((w / CLOCK_BASE_W) * 0.9)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const units = [
+    { value: days,    label: t('countdown.days') },
+    { value: hours,   label: t('countdown.hours') },
+    { value: minutes, label: t('countdown.minutes') },
+    { value: seconds, label: t('countdown.seconds') },
+  ]
+
+  return (
+    <div className="w-full" ref={wrapRef}>
+      <div style={{ position: 'relative', height: Math.round(CLOCK_BASE_H * scale) }}>
+        <div style={{
+          position: 'absolute', top: 0, left: '50%',
+          marginLeft: -(CLOCK_BASE_W / 2),
+          width: CLOCK_BASE_W,
+          transformOrigin: 'top center',
+          transform: `scale(${scale})`,
+        }}>
+
+          {/* Housing */}
+          <div style={{
+            position: 'relative',
+            background: 'linear-gradient(168deg, #282828 0%, #181818 45%, #212121 75%, #111 100%)',
+            borderRadius: 14,
+            padding: '20px 28px 18px',
+            boxShadow: [
+              '0 18px 60px rgba(0,0,0,0.75)',
+              '0 4px 16px rgba(0,0,0,0.5)',
+              'inset 0 1px 0 rgba(255,255,255,0.07)',
+              'inset 0 0 0 1px rgba(255,255,255,0.04)',
+            ].join(', '),
+          }}>
+            <HousingTexture />
+
+            {/* Rubber feet */}
+            {[{ left: 12, bottom: 6 }, { right: 12, bottom: 6 }, { left: 40, bottom: 6 }, { right: 40, bottom: 6 }].map((pos, i) => (
+              <div key={i} style={{
+                position: 'absolute', ...pos,
+                width: 14, height: 7, borderRadius: '0 0 3px 3px',
+                background: 'linear-gradient(to bottom, #0a0a0a, #1a1a1a)',
+                boxShadow: '0 3px 6px rgba(0,0,0,0.7)',
+              }} />
+            ))}
+
+            {/* Power LED */}
+            <div style={{
+              position: 'absolute', top: 10, right: 12,
+              width: 5, height: 5, borderRadius: '50%',
+              background: 'radial-gradient(circle at 35% 28%, #88ff99, #22cc55 65%)',
+              boxShadow: '0 0 4px rgba(34,204,85,0.5)',
+            }} />
+
+            {/* Panel row */}
+            <div style={{
+              position: 'relative', zIndex: 1,
+              display: 'flex', alignItems: 'flex-start',
+              justifyContent: 'center', gap: 0,
+            }}>
+              {units.map(({ value, label }, i) => (
+                <div key={label} style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <FlipPanel value={value} />
+                    <div style={{
+                      fontSize: 8, letterSpacing: 2.5,
+                      color: 'rgba(255,255,255,0.22)',
+                      fontFamily: 'monospace', textTransform: 'uppercase',
+                    }}>
+                      {label}
+                    </div>
+                  </div>
+                  {i < units.length - 1 && <ColonSep />}
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Public component ──────────────────────────────────────────────────────────
 export default function CountdownBlock({ block, isEditing, onChange }) {
   const { targetDate, label, expiredMessage } = block
   const { t } = useT()
@@ -99,9 +364,7 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
   const confettiFired = useRef(false)
   const rootRef = useRef(null)
 
-  useEffect(() => {
-    confettiFired.current = false
-  }, [targetDate])
+  useEffect(() => { confettiFired.current = false }, [targetDate])
 
   useEffect(() => {
     if (!targetDate) return
@@ -116,7 +379,6 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
     return () => clearInterval(id)
   }, [targetDate])
 
-  // Also fire confetti if block mounts already expired (page re-open)
   useEffect(() => {
     if (timeLeft.expired && !confettiFired.current) {
       confettiFired.current = true
@@ -127,7 +389,7 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
 
   if (isEditing) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         <input
           className={inputClass}
           placeholder={t('countdown.label')}
@@ -159,52 +421,35 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
 
   if (timeLeft.expired) {
     return (
-      <div ref={rootRef} className="text-center py-4">
+      <div ref={rootRef} className="text-center py-6">
         {label && (
-          <p className="text-sm mb-3" style={{ color: colors.fgMuted }}>{label}</p>
+          <p className="text-sm mb-3" style={{ color: colors.fgMuted }}>
+            {label}
+          </p>
         )}
-        <p
-          className="text-2xl font-bold"
-          style={{ color: colors.primaryDim }}
-        >
+        <p className="text-2xl font-bold" style={{ color: colors.fg }}>
           {expiredMessage || t('countdown.defaultExpired')}
         </p>
       </div>
     )
   }
 
-  const units = [
-    { value: timeLeft.days, unit: t('countdown.days') },
-    { value: timeLeft.hours, unit: t('countdown.hours') },
-    { value: timeLeft.minutes, unit: t('countdown.minutes') },
-    { value: timeLeft.seconds, unit: t('countdown.seconds') },
-  ]
-
   return (
-    <div ref={rootRef} className="text-center py-2">
+    <div ref={rootRef} className="py-2">
       {label && (
         <p
-          className="text-sm font-medium mb-5 tracking-wide"
-          style={{ color: colors.fgMuted }}
+          className="text-center text-sm font-medium mb-4 tracking-widest uppercase"
+          style={{ color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace', letterSpacing: 3 }}
         >
           {label}
         </p>
       )}
-      <div className="flex justify-center items-end gap-3 sm:gap-4 flex-wrap">
-        {units.map(({ value, unit }, i) => (
-          <div key={unit} className="flex items-end gap-3 sm:gap-4">
-            <FlipUnit value={value} unit={unit} />
-            {i < units.length - 1 && (
-              <span
-                className="text-2xl font-bold mb-5 sm:mb-7 select-none"
-                style={{ color: colors.fgGhost }}
-              >
-                :
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
+      <FlipClock
+        days={timeLeft.days}
+        hours={timeLeft.hours}
+        minutes={timeLeft.minutes}
+        seconds={timeLeft.seconds}
+      />
     </div>
   )
 }

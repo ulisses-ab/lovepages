@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | video | link | countdown`
+Block types: `text | image | song | video | link | countdown | carousel`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -77,7 +77,8 @@ src/
 │   │   ├── SongBlock.jsx            ← YouTube audio player (hidden iframe via YT IFrame API, custom play/pause UI); autoplay mutually exclusive across song blocks
 │   │   ├── VideoBlock.jsx           ← YouTube embed or video upload
 │   │   ├── LinkBlock.jsx            ← styled button with color picker
-│   │   └── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
+│   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
+│   │   └── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
 │   └── editor/
 │       ├── EditorTopBar.jsx         ← title input, preview toggle, publish button, back arrow (→ /dashboard), sign-out icon; shows subtle "Saving…" indicator during autosave
 │       ├── PublishModal.jsx         ← publish modal: slug input with availability check, publish/unpublish, shows live URL
@@ -95,9 +96,11 @@ supabase/
 ├── schema.sql                       ← run once in Supabase SQL editor
 └── functions/
     ├── create-checkout-session/
-    │   └── index.js                 ← Deno edge function; creates a Stripe Checkout Session; detects country from client IP (ipapi.co) to set BRL R$20 or USD $10; verifies page ownership via user JWT
-    └── stripe-webhook/
-        └── index.js                 ← Deno edge function; handles checkout.session.completed; sets published=true, slug, expires_at=now()+1yr on the page
+    │   └── index.ts                 ← Deno edge function; detects country from client IP (ipapi.co); BR → creates Mercado Pago preference (R$20, returns init_point); others → creates Stripe Checkout Session (USD $10); verifies page ownership via user JWT
+    ├── stripe-webhook/
+    │   └── index.ts                 ← Deno edge function; handles checkout.session.completed; sets published=true, slug, expires_at=now()+1yr on the page
+    └── mp-webhook/
+        └── index.ts                 ← Deno edge function; handles Mercado Pago IPN (type=payment, status=approved); reads external_reference="pageId:slug"; sets published=true, slug, expires_at=now()+1yr on the page
 ```
 
 ## Block data model
@@ -140,7 +143,7 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 { "src": "url", "alt": "string", "caption": "string" }
 
 // song
-{ "embedUrl": "youtube url", "title": "string", "artist": "string", "autoplay": true, "variant": "default | cover | vinyl", "coverUrl": "url or empty string" }
+{ "embedUrl": "youtube url", "title": "string", "artist": "string", "autoplay": true, "variant": "default | cover | vinyl", "coverUrl": "url or empty string", "accentColor": "#hex or empty (default: theme primary — play button, progress bar)", "textColor": "#hex or empty (default: theme fg — title, artist)" }
 // autoplay: only one song block may have this true at a time
 // — toggling via checkbox: enforced in Canvas.handleUpdate
 // — adding a new block: enforced in EditorPage.handleAddBlock
@@ -157,8 +160,20 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // link
 { "href": "url", "label": "string", "color": "#hex" }
 
+// carousel
+{ "images": [{ "src": "url", "caption": "string" }], "mode": "slider | album", "albumTitle": "string", "coverColor": "#hex or empty", "coverTitleStyle": "sticker | postit | plain" }
+// slider (default): manual carousel with prev/next arrows, dot indicators, touch swipe, per-image captions
+// album: react-pageflip two-page spread book — textured cover, beige pages with vignette, each photo as a white-framed print with slight tilt and per-image caption
+// coverColor: user-chosen cover color; defaults to deep plum (#2c1a2e); back cover uses same color at 80% brightness
+// coverTitleStyle controls how the album title appears on the cover:
+// — "sticker" (default): white label with red border, slight rotation, drop shadow
+// — "postit": yellow post-it note with tape strip, slight rotation, drop shadow
+// — "plain": uppercase serif (Georgia) printed directly on the cover, no background
+
 // countdown
 { "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string" }
+// Single variant: a realistic physical flip clock — dark anodised aluminium housing, mechanical flip panels with 3D card animation, power LED, rubber feet.
+// No variant picker or color overrides; the design is fixed (dark/moody aesthetic, same visual family as the vinyl song variant).
 ```
 
 To add a new block type:
@@ -200,14 +215,51 @@ Uploads go to paths: `images/`, `audio/`, `videos/` within the bucket.
 
 These are the logical next steps, in priority order:
 
-1. **Templates** — pre-made block arrays that can be loaded as a starting point.
-2. **Dashboard publish status** — show published/unpublished badge, live URL, and expiry date on each card in DashboardPage.
-3. **Custom domain support** — beyond subdomains (CNAME mapping to a user-owned domain).
-4. **Renewal flow** — notify users before `expires_at` and let them renew for another year.
+1. **More block variants per aesthetic** — most block types only cover 1–2 aesthetics. Priority: add Frutiger Aero, Cyberpunk, and Cottagecore variants to Song, Link, and Text blocks.
+2. **Aesthetic picker in the editor** — a top-level "vibe" selector that applies a consistent aesthetic across all blocks on a page at once (without overriding individually-customized blocks).
+3. **Templates** — pre-made block arrays per aesthetic that can be loaded as a starting point.
+4. **Dashboard publish status** — show published/unpublished badge, live URL, and expiry date on each card in DashboardPage.
+5. **Custom domain support** — beyond subdomains (CNAME mapping to a user-owned domain).
+6. **Renewal flow** — notify users before `expires_at` and let them renew for another year.
+
+## Aesthetics
+
+### Overall site (nav, editor shell, dashboard)
+The app UI uses a **dark purple** palette — deep backgrounds, soft purple accents, muted foreground text. It should feel intimate and a little moody, like late-night texting. Think: dark mode journaling app crossed with a greeting card brand. Avoid anything that looks like a SaaS dashboard or dev tool.
+
+### Core aesthetic system (blocks)
+Each block type offers multiple **visual variants**, and every variant belongs to one of the app's core aesthetics. The goal: a user picks a vibe for their page and every block they add already fits it — without touching any color pickers.
+
+The core aesthetics are:
+
+| Aesthetic | Feeling | Visual signature |
+|---|---|---|
+| **Soft / pastel** | Cute, romantic, gentle | Blush pinks, lavender, cream; rounded corners; soft drop shadows; handwritten or rounded sans fonts |
+| **Frutiger Aero** | Dreamy, fresh, early-2000s digital | Glassy translucency, sky-blue gradients, white glows, soft lens flares, nature-meets-tech vibe |
+| **Minimalist** | Quiet, elegant, editorial | White space, thin serif or grotesque fonts, hairline borders, no decoration; content first |
+| **Dark / moody** | Cinematic, intimate, late-night | Deep navy/charcoal/black backgrounds, gold or rose accents, subtle grain, high contrast |
+| **Cyberpunk** | Electric, loud, futuristic | Neon on black, glitch effects, monospace fonts, scanlines, magenta/cyan/yellow accents |
+| **Playful / bold** | Fun, expressive, bubbly | Bright saturated colors, chunky rounded fonts, sticker-like elements, confetti textures |
+| **Cottagecore** | Warm, handmade, nostalgic | Warm creams and greens, floral or leaf motifs, serif fonts, paper/linen textures, vintage feel |
+
+Each block variant should be consciously designed for one of these aesthetics, not just be a generic color variation. When building a new variant, decide its aesthetic first — it shapes every visual decision.
+
+### How this maps to blocks
+Currently the mapping looks like this (variants per block type):
+
+- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable)
+- **Countdown**: single realistic flip clock variant (dark/moody — physical turntable family)
+- **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
+
+As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
+
+### Tone in copy
+Any UI strings (buttons, placeholders, empty states) should feel warm and encouraging, not clinical. e.g. "Give your page a name" not "Page title". "Share with someone you love" not "Publish URL".
 
 ## Agent instructions
 
 - After making changes that affect the architecture, file map, block data model, conventions, or "What is NOT built yet" sections, update this file (`CLAUDE.md`) to reflect those changes.
+- **Commit frequently** — after completing each logical unit of work (a new block variant, a bug fix, a new feature, a refactor), create a git commit before moving on. Do not batch unrelated changes into one commit. Prefer small, focused commits with clear messages.
 
 ## Key conventions
 
