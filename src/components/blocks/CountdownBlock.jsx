@@ -82,55 +82,44 @@ function useFlipPanel(value) {
   return { topVal, botVal, phase, prevTop, nextBot }
 }
 
-// ── Hanging paper label tag ────────────────────────────────────────────────────
+// ── Post-it label ─────────────────────────────────────────────────────────────
 function LabelTag({ text }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-      <div style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', transform: 'rotate(-1.6deg)' }}>
-
-        {/* Twine above */}
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+      <div style={{
+        position: 'relative',
+        transform: 'rotate(-2deg)',
+        display: 'inline-block',
+      }}>
+        {/* Sticky strip at top (slightly darker band where the adhesive is) */}
         <div style={{
-          width: 1.5, height: 18,
-          background: 'linear-gradient(to bottom, rgba(140,110,65,0.3), rgba(140,110,65,0.75))',
+          position: 'absolute', top: 0, left: 0, right: 0, height: 10,
+          background: 'rgba(0,0,0,0.08)',
+          borderRadius: '2px 2px 0 0',
+          pointerEvents: 'none',
         }} />
 
-        {/* Card */}
+        {/* Post-it body */}
         <div style={{
           position: 'relative',
-          padding: '8px 18px 9px',
-          background: 'linear-gradient(158deg, #f7f1e2 0%, #ece3c6 55%, #e4d9b8 100%)',
-          borderRadius: 3,
-          boxShadow: '0 6px 22px rgba(0,0,0,0.6), 0 2px 5px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.55)',
+          padding: '14px 20px 12px',
+          background: 'linear-gradient(175deg, #fef08a 0%, #fde047 60%, #facc15 100%)',
+          boxShadow: [
+            '0 4px 18px rgba(0,0,0,0.55)',
+            '0 1px 4px rgba(0,0,0,0.3)',
+            '4px 4px 0 rgba(0,0,0,0.08)',
+          ].join(', '),
           minWidth: 52,
           textAlign: 'center',
         }}>
-          {/* Paper grain */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: 3, pointerEvents: 'none', overflow: 'hidden',
-            backgroundImage: [
-              'repeating-linear-gradient(92deg, transparent 0px, transparent 3px, rgba(0,0,0,0.012) 3px, rgba(0,0,0,0.012) 4px)',
-              'repeating-linear-gradient(180deg, transparent 0px, transparent 4px, rgba(0,0,0,0.008) 4px, rgba(0,0,0,0.008) 5px)',
-            ].join(','),
-          }} />
-
-          {/* Punched hole */}
-          <div style={{
-            position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)',
-            width: 7, height: 7, borderRadius: '50%',
-            background: 'rgba(20,14,6,0.88)',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.7), 0 0 0 1.5px rgba(120,90,50,0.35)',
-          }} />
-
           <span style={{
-            position: 'relative',
-            display: 'block',
-            marginTop: 10,
             fontFamily: "'Caveat', cursive",
             fontSize: 20,
             fontWeight: 700,
-            color: '#2a1a07',
+            color: '#1c1400',
             lineHeight: 1.1,
             whiteSpace: 'nowrap',
+            position: 'relative',
           }}>
             {text}
           </span>
