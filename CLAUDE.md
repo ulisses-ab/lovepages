@@ -128,12 +128,16 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "align": "left | center | right",
   "bgColor": "#hex or empty string",
   "bgImage": "url or empty string — background image for the block (rendered cover/center; overrides bgColor visually)",
+  "bgFade": false,
+  "bgColor2": "#hex or empty — second background stop for fade",
+  "bgImage2": "url or empty — second background image for fade",
   "border": false,
   "shadow": false,
   "fullBleed": false
 }
 ```
 // fullBleed: when true, the block escapes the max-width container and stretches edge-to-edge (no padding or rounded corners applied by BlockRenderer; PublicPage and Canvas preview render it outside the constrained flex-wrap group)
+// bgFade: when true, renders two stacked absolute background layers — bgColor2/bgImage2 at bottom, bgColor/bgImage on top with CSS mask-image linear-gradient(to bottom, black, transparent). Works for all combos: color→color, image→color, color→image, image→image.
 
 ### Type-specific fields
 

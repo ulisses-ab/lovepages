@@ -69,6 +69,9 @@ export const translations = {
     'style.fullBleed': 'Full bleed',
     'style.color': 'Color',
     'style.image': 'Image',
+    'style.fade': 'Fade',
+    'style.from': 'From',
+    'style.to': 'To',
 
     // TextBlock
     'text.heading': 'Heading',
@@ -254,6 +257,9 @@ export const translations = {
     'style.fullBleed': 'Borda a borda',
     'style.color': 'Cor',
     'style.image': 'Imagem',
+    'style.fade': 'Degradê',
+    'style.from': 'De',
+    'style.to': 'Para',
 
     // TextBlock
     'text.heading': 'T\u00edtulo',

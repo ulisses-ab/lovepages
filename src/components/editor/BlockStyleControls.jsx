@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlignLeft, AlignCenter, AlignRight, Upload } from 'lucide-react'
+import { AlignLeft, AlignCenter, AlignRight, Upload, ArrowDown } from 'lucide-react'
 import { colors } from '../../lib/theme'
 import { supabase } from '../../lib/supabase'
 import { useT } from '../../lib/i18n'
@@ -8,22 +8,81 @@ const ALIGN_ICONS = { left: AlignLeft, center: AlignCenter, right: AlignRight }
 
 export default function BlockStyleControls({ block, onChange }) {
   const { t } = useT()
-  const [uploadingBg, setUploadingBg] = useState(false)
+  const [uploadingField, setUploadingField] = useState(null)
 
-  async function handleBgImageFile(e) {
+  async function handleBgImageUpload(field, e) {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploadingBg(true)
+    setUploadingField(field)
     try {
       const ext = file.name.split('.').pop()
       const path = `images/${Date.now()}.${ext}`
       const { error } = await supabase.storage.from('lovepages').upload(path, file)
       if (error) throw error
       const { data } = supabase.storage.from('lovepages').getPublicUrl(path)
-      onChange({ bgImage: data.publicUrl })
+      onChange({ [field]: data.publicUrl })
     } finally {
-      setUploadingBg(false)
+      setUploadingField(null)
     }
+  }
+
+  // Reusable background slot: one color swatch + one image upload
+  function BgSlot({ colorField, imageField, label }) {
+    const colorVal = block[colorField]
+    const imageVal = block[imageField]
+    const isUploading = uploadingField === imageField
+    return (
+      <div>
+        {label && <p className="text-xs text-fg-ghost mb-1.5">{label}</p>}
+        <div className="grid grid-cols-2 gap-2">
+          {/* Color swatch */}
+          <div className="flex items-center gap-2 min-w-0">
+            <label className="relative cursor-pointer shrink-0">
+              <div
+                className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
+                style={{ backgroundColor: colorVal || colors.surface }}
+              />
+              <input
+                type="color"
+                value={colorVal || colors.surface}
+                onChange={e => onChange({ [colorField]: e.target.value })}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              />
+            </label>
+            <span className="text-xs text-fg-faint truncate">{t('style.color')}</span>
+            {colorVal && (
+              <button
+                onClick={() => onChange({ [colorField]: '' })}
+                className="ml-auto text-fg-ghost hover:text-fg-muted text-base leading-none shrink-0"
+              >×</button>
+            )}
+          </div>
+
+          {/* Image thumbnail or upload button */}
+          <div className="flex items-center gap-2 min-w-0">
+            {imageVal ? (
+              <div className="relative shrink-0">
+                <img src={imageVal} className="w-8 h-8 rounded-lg object-cover border-2 border-overlay" />
+                <button
+                  onClick={() => onChange({ [imageField]: '' })}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-base border border-subtle text-fg-muted hover:text-fg text-xs flex items-center justify-center leading-none"
+                >×</button>
+              </div>
+            ) : (
+              <label className={`cursor-pointer shrink-0 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className="w-8 h-8 rounded-lg border-2 border-dashed border-overlay hover:border-subtle transition flex items-center justify-center text-fg-ghost hover:text-fg-muted">
+                  <Upload size={12} />
+                </div>
+                <input type="file" accept="image/*" onChange={e => handleBgImageUpload(imageField, e)} className="hidden" />
+              </label>
+            )}
+            <span className="text-xs text-fg-faint truncate">
+              {isUploading ? t('imageUpload.uploading') : t('style.image')}
+            </span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -51,64 +110,26 @@ export default function BlockStyleControls({ block, onChange }) {
         })}
       </div>
 
-      {/* Background — color swatch + image upload side by side */}
+      {/* Background */}
       <div>
         <p className="text-xs text-fg-muted mb-2">{t('style.background')}</p>
-        <div className="grid grid-cols-2 gap-2">
-
-          {/* Color swatch */}
-          <div className="flex items-center gap-2 min-w-0">
-            <label className="relative cursor-pointer shrink-0">
-              <div
-                className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
-                style={{ backgroundColor: block.bgColor || colors.surface }}
-              />
-              <input
-                type="color"
-                value={block.bgColor || colors.surface}
-                onChange={e => onChange({ bgColor: e.target.value })}
-                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-              />
-            </label>
-            <span className="text-xs text-fg-faint truncate">{t('style.color')}</span>
-            {block.bgColor && (
-              <button
-                onClick={() => onChange({ bgColor: '' })}
-                className="ml-auto text-fg-ghost hover:text-fg-muted text-base leading-none shrink-0"
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          {/* Image thumbnail or upload button */}
-          <div className="flex items-center gap-2 min-w-0">
-            {block.bgImage ? (
-              <div className="relative shrink-0">
-                <img
-                  src={block.bgImage}
-                  className="w-8 h-8 rounded-lg object-cover border-2 border-overlay"
-                />
-                <button
-                  onClick={() => onChange({ bgImage: '' })}
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-base border border-subtle text-fg-muted hover:text-fg text-xs flex items-center justify-center leading-none"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <label className={`cursor-pointer shrink-0 ${uploadingBg ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div className="w-8 h-8 rounded-lg border-2 border-dashed border-overlay hover:border-subtle transition flex items-center justify-center text-fg-ghost hover:text-fg-muted">
-                  <Upload size={12} />
-                </div>
-                <input type="file" accept="image/*" onChange={handleBgImageFile} className="hidden" />
-              </label>
-            )}
-            <span className="text-xs text-fg-faint truncate">
-              {uploadingBg ? t('imageUpload.uploading') : t('style.image')}
-            </span>
-          </div>
-        </div>
+        <BgSlot
+          colorField="bgColor"
+          imageField="bgImage"
+          label={block.bgFade ? t('style.from') : null}
+        />
+        {block.bgFade && (
+          <>
+            <div className="flex items-center justify-center py-1.5">
+              <ArrowDown size={12} className="text-fg-ghost" />
+            </div>
+            <BgSlot
+              colorField="bgColor2"
+              imageField="bgImage2"
+              label={t('style.to')}
+            />
+          </>
+        )}
       </div>
 
       {/* Text color — text blocks only */}
@@ -131,19 +152,18 @@ export default function BlockStyleControls({ block, onChange }) {
             <button
               onClick={() => onChange({ color: '' })}
               className="ml-auto text-fg-ghost hover:text-fg-muted text-base leading-none"
-            >
-              ×
-            </button>
+            >×</button>
           )}
         </div>
       )}
 
-      {/* Border / Shadow / Full bleed — pill toggles */}
+      {/* Border / Shadow / Full bleed / Fade — pill toggles */}
       <div className="flex flex-wrap gap-1.5">
         {[
           { key: 'border',    label: t('style.border') },
           { key: 'shadow',    label: t('style.shadow') },
           { key: 'fullBleed', label: t('style.fullBleed') },
+          { key: 'bgFade',    label: t('style.fade') },
         ].map(({ key, label }) => (
           <button
             key={key}
