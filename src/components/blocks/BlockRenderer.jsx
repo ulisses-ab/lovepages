@@ -33,22 +33,27 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
       decorationClass,
     ].filter(Boolean).join(' ')
 
+    const fit1 = block.bgImageFit  || 'cover'
+    const fit2 = block.bgImageFit2 || 'cover'
+
     const layer2 = {
       position: 'absolute', inset: 0,
       backgroundColor: block.bgColor2 || undefined,
       backgroundImage: block.bgImage2 ? `url(${block.bgImage2})` : undefined,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
+      backgroundSize: block.bgImage2 ? (fit2 === 'tile' ? '200px' : fit2) : undefined,
+      backgroundRepeat: block.bgImage2 ? (fit2 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
+      backgroundPosition: block.bgImage2 ? 'center' : undefined,
     }
 
     const layer1 = {
       position: 'absolute', inset: 0,
       backgroundColor: block.bgColor || undefined,
       backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
-      WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
+      backgroundSize: block.bgImage ? (fit1 === 'tile' ? '200px' : fit1) : undefined,
+      backgroundRepeat: block.bgImage ? (fit1 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
+      backgroundPosition: block.bgImage ? 'center' : undefined,
+      maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+      WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
     }
 
     return (
@@ -66,10 +71,12 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   }
 
   // Normal (no fade)
+  const fit = block.bgImageFit || 'cover'
   const wrapperStyle = {
     backgroundColor: block.bgColor || undefined,
     backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-    backgroundSize: block.bgImage ? 'cover' : undefined,
+    backgroundSize: block.bgImage ? (fit === 'tile' ? '200px' : fit) : undefined,
+    backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
     backgroundPosition: block.bgImage ? 'center' : undefined,
   }
 
