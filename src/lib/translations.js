@@ -67,6 +67,8 @@ export const translations = {
     'style.shadow': 'Shadow',
     'style.bgImage': 'Background image',
     'style.fullBleed': 'Full bleed',
+    'style.color': 'Color',
+    'style.image': 'Image',
 
     // TextBlock
     'text.heading': 'Heading',
@@ -250,6 +252,8 @@ export const translations = {
     'style.shadow': 'Sombra',
     'style.bgImage': 'Imagem de fundo',
     'style.fullBleed': 'Borda a borda',
+    'style.color': 'Cor',
+    'style.image': 'Imagem',
 
     // TextBlock
     'text.heading': 'T\u00edtulo',
