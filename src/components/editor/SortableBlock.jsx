@@ -6,7 +6,7 @@ import BlockStyleControls from './BlockStyleControls'
 import { BLOCK_ICONS } from '../../lib/blockDefaults'
 import { useT } from '../../lib/i18n'
 
-export default function SortableBlock({ block, onUpdate, onDelete }) {
+export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget }) {
   const [expanded, setExpanded] = useState(false)
   const { t } = useT()
 
@@ -38,12 +38,15 @@ export default function SortableBlock({ block, onUpdate, onDelete }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-surface rounded-xl border transition ${
+      className={`relative bg-surface rounded-xl border transition ${
         expanded
           ? 'border-primary shadow-md shadow-primary-subtle/30'
           : 'border-overlay hover:border-subtle'
       }`}
     >
+      {isDropTarget && (
+        <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
       {/* Block header — draggable from anywhere */}
       <div
         {...attributes}

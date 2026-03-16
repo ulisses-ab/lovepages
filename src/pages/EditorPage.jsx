@@ -1,5 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
+import { restrictToWindowEdges } from '@dnd-kit/modifiers'
 import { usePage } from '../hooks/usePage'
 import { useAuth } from '../hooks/useAuth'
 import EditorTopBar from '../components/editor/EditorTopBar'
@@ -8,12 +19,15 @@ import Canvas from '../components/editor/Canvas'
 import { useT } from '../lib/i18n'
 import { getPageBgStyle } from '../lib/pageUtils'
 import { supabase } from '../lib/supabase'
+import { BLOCK_ICONS, createBlock } from '../lib/blockDefaults'
 
 export default function EditorPage() {
   const { pageId } = useParams()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [previewMode, setPreviewMode] = useState(false)
+  const [activeId, setActiveId] = useState(null)
+  const [overId, setOverId] = useState(null)
   const loaded = useRef(false)
   const autoSaveTimer = useRef(null)
   const savePageRef = useRef(null)
@@ -63,6 +77,60 @@ export default function EditorPage() {
     }, 1500)
     return () => clearTimeout(autoSaveTimer.current)
   }, [blocks, pageTitle, pageSettings, pageId, navigate])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+  )
+
+  const isDraggingFromPanel = typeof activeId === 'string' && activeId.startsWith('panel::')
+  const activeDragType = isDraggingFromPanel ? activeId.replace('panel::', '') : null
+  const activeBlock = blocks.find(b => b.id === activeId)
+
+  function handleDragStart(event) {
+    setActiveId(event.active.id)
+    setOverId(null)
+  }
+
+  function handleDragOver(event) {
+    setOverId(event.over?.id ?? null)
+  }
+
+  function handleDragEnd(event) {
+    const { active, over } = event
+    setActiveId(null)
+    setOverId(null)
+
+    if (active.data.current?.fromPanel) {
+      // Dropping from the block panel — insert at position
+      const newBlock = createBlock(active.data.current.blockType)
+      setBlocks(prev => {
+        // Enforce autoplay exclusivity for song blocks
+        const base = newBlock.type === 'song' && newBlock.autoplay
+          ? prev.map(b => b.type === 'song' ? { ...b, autoplay: false } : b)
+          : prev
+        const idx = over ? base.findIndex(b => b.id === over.id) : -1
+        const insertAt = idx === -1 ? base.length : idx
+        const result = [...base]
+        result.splice(insertAt, 0, newBlock)
+        return result
+      })
+      return
+    }
+
+    // Reordering existing blocks
+    if (!over || active.id === over.id) return
+    setBlocks(prev => {
+      const oldIndex = prev.findIndex(b => b.id === active.id)
+      const newIndex = prev.findIndex(b => b.id === over.id)
+      return arrayMove(prev, oldIndex, newIndex)
+    })
+  }
+
+  function handleDragCancel() {
+    setActiveId(null)
+    setOverId(null)
+  }
 
   function handleAddBlock(block) {
     setBlocks(prev => {
@@ -141,7 +209,15 @@ export default function EditorPage() {
             <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
           </main>
         ) : (
-          <>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToWindowEdges]}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
+          >
             {/* Desktop sidebar — hidden on mobile */}
             <aside className="hidden md:flex flex-col w-56 bg-surface border-r border-overlay overflow-y-auto shrink-0">
               <BlockPanel onAddBlock={handleAddBlock} />
@@ -156,6 +232,8 @@ export default function EditorPage() {
                 pageSettings={pageSettings}
                 onChangeSettings={patch => setPageSettings(prev => ({ ...prev, ...patch }))}
                 onAddBlock={handleAddBlock}
+                panelDragOverId={isDraggingFromPanel ? overId : null}
+                isDraggingFromPanel={isDraggingFromPanel}
               />
             </main>
 
@@ -168,7 +246,23 @@ export default function EditorPage() {
                 <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
               </div>
             </div>
-          </>
+
+            {/* Ghost overlay that follows the cursor while dragging */}
+            <DragOverlay dropAnimation={{ duration: 150, easing: 'ease' }}>
+              {isDraggingFromPanel && activeDragType ? (
+                <div className="bg-surface rounded-xl border border-primary shadow-xl px-3 py-2 flex items-center gap-2 opacity-95 h-10">
+                  {(() => { const Icon = BLOCK_ICONS[activeDragType]; return <Icon size={15} className="text-fg-secondary shrink-0" /> })()}
+                  <span className="text-sm font-medium text-fg-secondary">{t(`block.${activeDragType}`)}</span>
+                </div>
+              ) : activeBlock ? (
+                <div className="bg-surface rounded-xl border h-12 border-primary shadow-xl px-3 py-2 flex items-center gap-2 opacity-95">
+                  <span className="text-fg-ghost">⠿</span>
+                  {(() => { const Icon = BLOCK_ICONS[activeBlock.type]; return <Icon size={15} className="text-fg-secondary shrink-0" /> })()}
+                  <span className="text-sm font-medium text-fg-secondary">{t(`block.${activeBlock.type}`)}</span>
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
       </div>
 

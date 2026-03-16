@@ -1,5 +1,27 @@
+import { useDraggable } from '@dnd-kit/core'
 import { BLOCK_TYPES, BLOCK_ICONS, createBlock } from '../../lib/blockDefaults'
 import { useT } from '../../lib/i18n'
+
+function DraggableBlockItem({ type, onAddBlock, t }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `panel::${type}`,
+    data: { fromPanel: true, blockType: type },
+  })
+  const Icon = BLOCK_ICONS[type]
+
+  return (
+    <button
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={() => onAddBlock(createBlock(type))}
+      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-fg-tertiary hover:bg-primary-subtle/50 hover:text-primary-dim transition text-left cursor-grab active:cursor-grabbing select-none ${isDragging ? 'opacity-40' : ''}`}
+    >
+      <Icon size={15} className="shrink-0" />
+      <span>{t(`block.${type}`)}</span>
+    </button>
+  )
+}
 
 export default function BlockPanel({ onAddBlock }) {
   const { t } = useT()
@@ -9,14 +31,7 @@ export default function BlockPanel({ onAddBlock }) {
       <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-3">{t('blockpanel.addBlock')}</p>
       <div className="space-y-1">
         {Object.values(BLOCK_TYPES).map(type => (
-          <button
-            key={type}
-            onClick={() => onAddBlock(createBlock(type))}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-fg-tertiary hover:bg-primary-subtle/50 hover:text-primary-dim transition text-left"
-          >
-            {(() => { const Icon = BLOCK_ICONS[type]; return <Icon size={15} className="shrink-0" /> })()}
-            <span>{t(`block.${type}`)}</span>
-          </button>
+          <DraggableBlockItem key={type} type={type} onAddBlock={onAddBlock} t={t} />
         ))}
       </div>
     </div>
