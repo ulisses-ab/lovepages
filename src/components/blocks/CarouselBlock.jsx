@@ -322,7 +322,7 @@ function AlbumView({ block }) {
       {pageSize && (
         <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible' } : {}}>
           <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
-            <div style={{ filter: 'drop-shadow(0 3px 6px rgba(30,15,10,0.5)) drop-shadow(0 14px 38px rgba(30,15,10,0.38)) drop-shadow(0 36px 64px rgba(0,0,0,0.22))' }}>
+            <div style={{ boxShadow: '0 4px 12px rgba(20,10,5,0.45), 0 16px 40px rgba(20,10,5,0.35), 0 32px 64px rgba(0,0,0,0.2)' }}>
               <HTMLFlipBook
                 key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
                 ref={bookRef}
