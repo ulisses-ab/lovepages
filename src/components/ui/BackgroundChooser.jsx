@@ -31,6 +31,10 @@ export default function BackgroundChooser({
     return 'color'
   })
 
+  // Per-slot type for fade mode: 'color' | 'image'
+  const [slot1Type, setSlot1Type] = useState(() => bgImage  ? 'image' : 'color')
+  const [slot2Type, setSlot2Type] = useState(() => bgImage2 ? 'image' : 'color')
+
   function switchMode(m) {
     setMode(m)
     if (m === 'color') {
@@ -38,7 +42,6 @@ export default function BackgroundChooser({
     } else if (m === 'image') {
       onChange({ bgColor: '', bgFade: false, bgColor2: '', bgImage2: '', bgImageFit2: '' })
     } else {
-      // fade — keep existing primary color/image as "from" layer
       onChange({ bgFade: true })
     }
   }
@@ -57,74 +60,98 @@ export default function BackgroundChooser({
     }
   }
 
-  // Renders the full color + image + fit controls for one background layer.
-  // Mirrors the "image" mode UI exactly, with an additional color picker on top.
-  function LayerSlot({ label, colorField, imageField, fitField, colorVal, imageVal, fitVal }) {
+  // One fade slot: color/image toggle + the relevant control
+  function FadeSlot({ label, slotType, setSlotType, colorField, colorVal, imageField, imageVal, fitField, fitVal }) {
     const isUploading = uploading === imageField
     return (
       <div className="space-y-2">
-        {label && <p className="text-xs text-fg-ghost">{label}</p>}
-
-        {/* Color */}
-        <div className="flex items-center gap-2">
-          <label className="relative cursor-pointer shrink-0">
-            <div
-              className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
-              style={{ backgroundColor: colorVal || colors.surface }}
-            />
-            <input
-              type="color"
-              value={colorVal || colors.surface}
-              onChange={e => onChange({ [colorField]: e.target.value })}
-              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
-            />
-          </label>
-          <span className="text-xs text-fg-faint">{t('style.color')}</span>
-          {colorVal && (
-            <button
-              onClick={() => onChange({ [colorField]: '' })}
-              className="ml-auto text-xs text-fg-ghost hover:text-fg-muted"
-            >
-              {t('style.clear')}
-            </button>
-          )}
+        {/* Label + type toggle */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-fg-ghost">{label}</p>
+          <div className="flex rounded overflow-hidden border border-overlay text-xs">
+            {['color', 'image'].map(type => (
+              <button
+                key={type}
+                onClick={() => {
+                  setSlotType(type)
+                  if (type === 'color') onChange({ [imageField]: '', [fitField]: '' })
+                  else onChange({ [colorField]: '' })
+                }}
+                className={`px-2.5 py-1 transition ${
+                  slotType === type
+                    ? 'bg-primary text-white'
+                    : 'bg-overlay text-fg-muted hover:text-fg-secondary'
+                }`}
+              >
+                {type === 'color' ? t('style.color') : t('style.image')}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Image */}
-        {imageVal ? (
-          <div className="relative">
-            <img src={imageVal} className="w-full h-16 rounded-lg object-cover border border-overlay" />
-            <button
-              onClick={() => onChange({ [imageField]: '', [fitField]: '' })}
-              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-base/80 border border-subtle text-fg-muted hover:text-fg text-xs flex items-center justify-center"
-            >×</button>
+        {/* Color control */}
+        {slotType === 'color' && (
+          <div className="flex items-center gap-2">
+            <label className="relative cursor-pointer shrink-0">
+              <div
+                className="w-8 h-8 rounded-lg border-2 border-overlay hover:border-subtle transition"
+                style={{ backgroundColor: colorVal || colors.surface }}
+              />
+              <input
+                type="color"
+                value={colorVal || colors.surface}
+                onChange={e => onChange({ [colorField]: e.target.value })}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+              />
+            </label>
+            {colorVal && (
+              <button
+                onClick={() => onChange({ [colorField]: '' })}
+                className="ml-auto text-xs text-fg-ghost hover:text-fg-muted"
+              >
+                {t('style.clear')}
+              </button>
+            )}
           </div>
-        ) : (
-          <label className={`flex items-center gap-2 px-3 py-2.5 rounded bg-overlay border border-dashed border-subtle text-sm text-fg-muted cursor-pointer hover:bg-subtle hover:text-fg-secondary transition select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-            <Upload size={12} />
-            {isUploading ? t('imageUpload.uploading') : t('imageUpload.upload')}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(imageField, f) }}
-              className="hidden"
-            />
-          </label>
         )}
 
-        {/* Fit — only shown when an image is set */}
-        {imageVal && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-fg-muted shrink-0">{t('pageOptions.bgFit')}</span>
-            <select
-              value={fitVal || 'cover'}
-              onChange={e => onChange({ [fitField]: e.target.value })}
-              className={inputClass + ' flex-1 py-1'}
-            >
-              <option value="cover">{t('pageOptions.bgFitCover')}</option>
-              <option value="contain">{t('pageOptions.bgFitContain')}</option>
-              <option value="tile">{t('pageOptions.bgFitTile')}</option>
-            </select>
+        {/* Image control */}
+        {slotType === 'image' && (
+          <div className="space-y-2">
+            {imageVal ? (
+              <div className="relative">
+                <img src={imageVal} className="w-full h-16 rounded-lg object-cover border border-overlay" />
+                <button
+                  onClick={() => onChange({ [imageField]: '', [fitField]: '' })}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-base/80 border border-subtle text-fg-muted hover:text-fg text-xs flex items-center justify-center"
+                >×</button>
+              </div>
+            ) : (
+              <label className={`flex items-center gap-2 px-3 py-2.5 rounded bg-overlay border border-dashed border-subtle text-sm text-fg-muted cursor-pointer hover:bg-subtle hover:text-fg-secondary transition select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <Upload size={12} />
+                {isUploading ? t('imageUpload.uploading') : t('imageUpload.upload')}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(imageField, f) }}
+                  className="hidden"
+                />
+              </label>
+            )}
+            {imageVal && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-fg-muted shrink-0">{t('pageOptions.bgFit')}</span>
+                <select
+                  value={fitVal || 'cover'}
+                  onChange={e => onChange({ [fitField]: e.target.value })}
+                  className={inputClass + ' flex-1 py-1'}
+                >
+                  <option value="cover">{t('pageOptions.bgFitCover')}</option>
+                  <option value="contain">{t('pageOptions.bgFitContain')}</option>
+                  <option value="tile">{t('pageOptions.bgFitTile')}</option>
+                </select>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -221,23 +248,25 @@ export default function BackgroundChooser({
         </div>
       )}
 
-      {/* Fade mode — two full layer slots */}
+      {/* Fade mode — two slots, each with color/image toggle */}
       {mode === 'fade' && (
         <div className="space-y-3">
-          <LayerSlot
+          <FadeSlot
             label={t('style.from')}
-            colorField="bgColor"   colorVal={bgColor}
-            imageField="bgImage"   imageVal={bgImage}
-            fitField="bgImageFit"  fitVal={bgImageFit}
+            slotType={slot1Type}      setSlotType={setSlot1Type}
+            colorField="bgColor"     colorVal={bgColor}
+            imageField="bgImage"     imageVal={bgImage}
+            fitField="bgImageFit"    fitVal={bgImageFit}
           />
-          <div className="flex items-center justify-center py-0.5">
+          <div className="flex items-center justify-center">
             <ArrowDown size={12} className="text-fg-ghost" />
           </div>
-          <LayerSlot
+          <FadeSlot
             label={t('style.to')}
-            colorField="bgColor2"   colorVal={bgColor2}
-            imageField="bgImage2"   imageVal={bgImage2}
-            fitField="bgImageFit2"  fitVal={bgImageFit2}
+            slotType={slot2Type}      setSlotType={setSlot2Type}
+            colorField="bgColor2"    colorVal={bgColor2}
+            imageField="bgImage2"    imageVal={bgImage2}
+            fitField="bgImageFit2"   fitVal={bgImageFit2}
           />
         </div>
       )}
