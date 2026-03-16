@@ -195,16 +195,10 @@ export default function TextBlock({ block, isEditing, onChange }) {
   if (variant === 'postit') {
     const bg = noteColor || '#fde68a'
 
-    const hexToRgb = h => {
-      const n = parseInt(h.replace('#', ''), 16)
-      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-    }
-    const [r, g, b] = hexToRgb(bg)
-    const darkRgb = `rgba(${Math.round(r * 0.68)}, ${Math.round(g * 0.68)}, ${Math.round(b * 0.68)}, 0.55)`
 
     return (
-      // Outer wrapper: gives space above for the tape to peek out
-      <div style={{ position: 'relative', paddingTop: 14 }}>
+      // Outer wrapper: constrain width, center, give space above for tape
+      <div style={{ position: 'relative', paddingTop: 14, maxWidth: 220, margin: '0 auto' }}>
 
         {/* Scotch tape — centered, slightly rotated, overlaps top edge of note */}
         <div style={{
@@ -214,10 +208,9 @@ export default function TextBlock({ block, isEditing, onChange }) {
           transform: 'translateX(-50%) rotate(-1.5deg)',
           width: 60, height: 22,
           zIndex: 2,
-          // Tape body: semi-transparent, slightly yellowish like real scotch tape
           background: 'linear-gradient(to bottom, rgba(245,238,175,0.50) 0%, rgba(255,252,215,0.42) 45%, rgba(245,238,175,0.50) 100%)',
           boxShadow: [
-            'inset 0 0 0 1px rgba(200,175,60,0.22)',  // tape edge tint
+            'inset 0 0 0 1px rgba(200,175,60,0.22)',
             '0 1px 4px rgba(0,0,0,0.13)',
           ].join(', '),
         }}>
@@ -243,15 +236,8 @@ export default function TextBlock({ block, isEditing, onChange }) {
           zIndex: 1,
           display: 'flex',
           alignItems: 'flex-start',
-          padding: '20px 20px 32px 20px',
+          padding: '16px',
         }}>
-          {/* Dog-ear fold — bottom right corner */}
-          <div style={{
-            position: 'absolute', bottom: 0, right: 0,
-            width: 30, height: 30,
-            background: `linear-gradient(225deg, rgba(255,255,255,0.78) 50%, ${darkRgb} 50%)`,
-          }} />
-
           <p style={{
             position: 'relative',
             fontFamily: 'cursive, "Comic Sans MS", sans-serif',
