@@ -170,6 +170,12 @@ export default function TextBlock({ block, isEditing, onChange }) {
               >
                 O
               </button>
+              {block.outline && (
+                <ColorPicker
+                  value={block.outlineColor || colors.fg}
+                  onChange={val => onChange({ outlineColor: val })}
+                />
+              )}
             </div>
           </>
         )}
@@ -234,7 +240,7 @@ export default function TextBlock({ block, isEditing, onChange }) {
       whiteSpace: 'pre-wrap',
       textAlign,
       ...(block.outline
-        ? { color: 'transparent', WebkitTextStroke: `0.04em ${textColor}` }
+        ? { color: 'transparent', WebkitTextStroke: `0.04em ${block.outlineColor || textColor}` }
         : { color: textColor }
       ),
     }
