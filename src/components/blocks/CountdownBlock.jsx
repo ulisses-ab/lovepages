@@ -91,30 +91,22 @@ function LabelTag({ text }) {
         transform: 'rotate(-2deg)',
         display: 'inline-block',
       }}>
-        {/* Sticky strip at top (slightly darker band where the adhesive is) */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 10,
-          background: 'rgba(0,0,0,0.08)',
-          borderRadius: '2px 2px 0 0',
-          pointerEvents: 'none',
-        }} />
-
         {/* Post-it body */}
         <div style={{
           position: 'relative',
-          padding: '14px 20px 12px',
+          padding: '14px 22px 13px',
           background: 'linear-gradient(175deg, #fef08a 0%, #fde047 60%, #facc15 100%)',
           boxShadow: [
             '0 4px 18px rgba(0,0,0,0.55)',
             '0 1px 4px rgba(0,0,0,0.3)',
-            '4px 4px 0 rgba(0,0,0,0.08)',
+            '4px 5px 0 rgba(0,0,0,0.1)',
           ].join(', '),
           minWidth: 52,
           textAlign: 'center',
         }}>
           <span style={{
             fontFamily: "'Caveat', cursive",
-            fontSize: 20,
+            fontSize: 28,
             fontWeight: 700,
             color: '#1c1400',
             lineHeight: 1.1,
@@ -123,6 +115,24 @@ function LabelTag({ text }) {
           }}>
             {text}
           </span>
+        </div>
+
+        {/* Clear tape strip */}
+        <div style={{
+          position: 'absolute',
+          top: -9, left: '50%', transform: 'translateX(-50%)',
+          width: 52, height: 18,
+          background: 'linear-gradient(180deg, rgba(210,230,255,0.18) 0%, rgba(255,255,255,0.22) 45%, rgba(200,220,255,0.14) 100%)',
+          boxShadow: '0 0 0 0.5px rgba(180,200,240,0.35), inset 0 1px 0 rgba(255,255,255,0.4)',
+          borderRadius: 1,
+          pointerEvents: 'none',
+        }}>
+          {/* Tape sheen */}
+          <div style={{
+            position: 'absolute', top: '20%', left: '8%', right: '8%', height: '25%',
+            background: 'rgba(255,255,255,0.28)',
+            borderRadius: 1,
+          }} />
         </div>
       </div>
     </div>
