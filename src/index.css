@@ -1,6 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
-@import 'react-colorful/dist/index.css';
-
 /* react-colorful skin — match app dark theme */
 .react-colorful { gap: 10px; }
 .react-colorful__saturation { border-radius: 6px; border-bottom: none; }
