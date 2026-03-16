@@ -88,8 +88,8 @@ function LabelTag({ text }) {
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
       <div style={{
         position: 'relative',
-        transform: 'rotate(-2deg)',
         display: 'inline-block',
+        transform: 'rotate(-2deg)',
       }}>
         {/* Post-it body */}
         <div style={{
@@ -151,34 +151,73 @@ function LabelTag({ text }) {
   )
 }
 
-// ── Housing texture (brushed anodised aluminium) ──────────────────────────────
-function HousingTexture() {
+// ── Clock themes ──────────────────────────────────────────────────────────────
+const CLOCK_THEMES = {
+  dark: {
+    housing: 'linear-gradient(168deg, #282828 0%, #181818 45%, #212121 75%, #111 100%)',
+    housingTexture: [
+      'repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(255,255,255,0.013) 2px, rgba(255,255,255,0.013) 3px)',
+      'repeating-linear-gradient(180deg, transparent 0px, transparent 9px, rgba(0,0,0,0.05) 9px, rgba(0,0,0,0.05) 10px)',
+      'repeating-linear-gradient(90deg, transparent 0px, transparent 14px, rgba(255,255,255,0.008) 14px, rgba(255,255,255,0.008) 15px)',
+    ].join(','),
+    housingTopGlow: 'linear-gradient(to bottom, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.01) 60%, transparent 100%)',
+    housingBotShadow: 'linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 100%)',
+    housingBoxShadow: '0 18px 60px rgba(0,0,0,0.75), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 0 0 1px rgba(255,255,255,0.04)',
+    panelTop: 'linear-gradient(to bottom, #1e1e1e 0%, #161616 100%)',
+    panelBot: 'linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)',
+    panelBoxShadow: '0 8px 28px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.055), 0 0 0 1px rgba(0,0,0,0.9)',
+    numColor: '#ddd7c8',
+    divider: 'rgba(0,0,0,0.95)',
+    dividerGlow: '0 1px 4px rgba(0,0,0,0.9), 0 -1px 2px rgba(0,0,0,0.5)',
+    panelInnerGlow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+    colonDot: 'rgba(255,255,255,0.22)',
+    colonGlow: '0 0 4px rgba(255,255,255,0.08)',
+    unitLabel: 'rgba(255,255,255,0.22)',
+    feet: 'linear-gradient(to bottom, #0a0a0a, #1a1a1a)',
+    feetShadow: '0 3px 6px rgba(0,0,0,0.7)',
+  },
+  beige: {
+    housing: 'linear-gradient(168deg, #ede4d0 0%, #ddd3b8 45%, #e4dac4 75%, #cfc4a8 100%)',
+    housingTexture: [
+      'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(160,130,80,0.04) 3px, rgba(160,130,80,0.04) 4px)',
+      'repeating-linear-gradient(90deg, transparent 0px, transparent 11px, rgba(0,0,0,0.03) 11px, rgba(0,0,0,0.03) 12px)',
+      'repeating-linear-gradient(180deg, transparent 0px, transparent 6px, rgba(255,255,255,0.06) 6px, rgba(255,255,255,0.06) 7px)',
+    ].join(','),
+    housingTopGlow: 'linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 60%, transparent 100%)',
+    housingBotShadow: 'linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 100%)',
+    housingBoxShadow: '0 18px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 0 0 1px rgba(0,0,0,0.06)',
+    panelTop: 'linear-gradient(to bottom, #f5ede0 0%, #ece3d0 100%)',
+    panelBot: 'linear-gradient(to bottom, #e4dac8 0%, #eee5d4 100%)',
+    panelBoxShadow: '0 4px 14px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.7), 0 0 0 1px rgba(0,0,0,0.08)',
+    numColor: '#2a1f0e',
+    divider: 'rgba(0,0,0,0.12)',
+    dividerGlow: '0 1px 2px rgba(0,0,0,0.08)',
+    panelInnerGlow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+    colonDot: 'rgba(100,80,40,0.38)',
+    colonGlow: 'none',
+    unitLabel: 'rgba(100,80,40,0.45)',
+    feet: 'linear-gradient(to bottom, #9a8060, #7a6040)',
+    feetShadow: '0 3px 6px rgba(0,0,0,0.2)',
+  },
+}
+
+// ── Housing texture ────────────────────────────────────────────────────────────
+function HousingTexture({ theme }) {
   return (
     <>
-      {/* Fine horizontal brush lines */}
       <div style={{
         position: 'absolute', inset: 0, borderRadius: 14, pointerEvents: 'none',
-        backgroundImage: [
-          'repeating-linear-gradient(180deg, transparent 0px, transparent 2px, rgba(255,255,255,0.013) 2px, rgba(255,255,255,0.013) 3px)',
-          'repeating-linear-gradient(180deg, transparent 0px, transparent 9px, rgba(0,0,0,0.05) 9px, rgba(0,0,0,0.05) 10px)',
-        ].join(','),
+        backgroundImage: theme.housingTexture,
       }} />
-      {/* Vertical subtle grain */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 14, pointerEvents: 'none',
-        backgroundImage: 'repeating-linear-gradient(90deg, transparent 0px, transparent 14px, rgba(255,255,255,0.008) 14px, rgba(255,255,255,0.008) 15px)',
-      }} />
-      {/* Top specular streak */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, height: '40%',
         borderRadius: '14px 14px 0 0', pointerEvents: 'none',
-        background: 'linear-gradient(to bottom, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.01) 60%, transparent 100%)',
+        background: theme.housingTopGlow,
       }} />
-      {/* Bottom edge shadow */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '25%',
         borderRadius: '0 0 14px 14px', pointerEvents: 'none',
-        background: 'linear-gradient(to top, rgba(0,0,0,0.25) 0%, transparent 100%)',
+        background: theme.housingBotShadow,
       }} />
     </>
   )
@@ -189,7 +228,7 @@ const PANEL_W = 58
 const PANEL_H = 70
 const HALF    = 35
 
-function FlipPanel({ value }) {
+function FlipPanel({ value, theme }) {
   const { topVal, botVal, phase, prevTop, nextBot } = useFlipPanel(value)
 
   const numStyle = {
@@ -197,9 +236,9 @@ function FlipPanel({ value }) {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: "'Courier New', Courier, monospace",
     fontSize: 38, fontWeight: '700',
-    color: '#ddd7c8',
+    color: theme.numColor,
     letterSpacing: 2,
-    textShadow: '0 1px 8px rgba(0,0,0,0.6)',
+    textShadow: theme === CLOCK_THEMES.dark ? '0 1px 8px rgba(0,0,0,0.6)' : 'none',
     userSelect: 'none',
   }
 
@@ -208,7 +247,7 @@ function FlipPanel({ value }) {
       position: 'absolute', top: 0, left: 0, right: 0, height: HALF,
       overflow: 'hidden',
       borderRadius: '5px 5px 0 0',
-      background: 'linear-gradient(to bottom, #1e1e1e 0%, #161616 100%)',
+      background: theme.panelTop,
       ...extra,
     }}>
       <div style={numStyle}>{pad(val)}</div>
@@ -220,7 +259,7 @@ function FlipPanel({ value }) {
       position: 'absolute', top: HALF, left: 0, right: 0, height: HALF,
       overflow: 'hidden',
       borderRadius: '0 0 5px 5px',
-      background: 'linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)',
+      background: theme.panelBot,
       ...extra,
     }}>
       <div style={{ ...numStyle, top: -HALF }}>{pad(val)}</div>
@@ -233,11 +272,7 @@ function FlipPanel({ value }) {
       width: PANEL_W, height: PANEL_H,
       borderRadius: 6,
       flexShrink: 0,
-      boxShadow: [
-        '0 8px 28px rgba(0,0,0,0.85)',
-        'inset 0 1px 0 rgba(255,255,255,0.055)',
-        '0 0 0 1px rgba(0,0,0,0.9)',
-      ].join(', '),
+      boxShadow: theme.panelBoxShadow,
     }}>
 
       {/* Static bottom: shows current bottom value */}
@@ -258,7 +293,7 @@ function FlipPanel({ value }) {
             animation: 'flip-top 0.16s ease-in forwards',
             overflow: 'hidden',
             borderRadius: '5px 5px 0 0',
-            background: 'linear-gradient(to bottom, #1e1e1e 0%, #161616 100%)',
+            background: theme.panelTop,
             backfaceVisibility: 'hidden',
           }}>
             <div style={numStyle}>{pad(prevTop)}</div>
@@ -278,7 +313,7 @@ function FlipPanel({ value }) {
             animation: 'flip-bottom 0.16s ease-out forwards',
             overflow: 'hidden',
             borderRadius: '0 0 5px 5px',
-            background: 'linear-gradient(to bottom, #131313 0%, #1a1a1a 100%)',
+            background: theme.panelBot,
             backfaceVisibility: 'hidden',
           }}>
             <div style={{ ...numStyle, top: -HALF }}>{pad(nextBot)}</div>
@@ -289,33 +324,33 @@ function FlipPanel({ value }) {
       {/* Centre divider crease */}
       <div style={{
         position: 'absolute', left: 0, right: 0, top: HALF - 1, height: 2,
-        background: 'rgba(0,0,0,0.95)', zIndex: 5,
-        boxShadow: '0 1px 4px rgba(0,0,0,0.9), 0 -1px 2px rgba(0,0,0,0.5)',
+        background: theme.divider, zIndex: 5,
+        boxShadow: theme.dividerGlow,
       }} />
 
-      {/* Panel inner edge glow (top highlight) */}
+      {/* Panel inner edge */}
       <div style={{
         position: 'absolute', inset: 0, borderRadius: 6, pointerEvents: 'none', zIndex: 6,
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+        boxShadow: theme.panelInnerGlow,
       }} />
     </div>
   )
 }
 
 // ── Colon separator ────────────────────────────────────────────────────────────
-function ColonSep() {
+function ColonSep({ theme }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', gap: 10,
       width: 14, height: PANEL_H, flexShrink: 0,
-      paddingBottom: 16,    // offset to align with digit center (clear of unit labels)
+      paddingBottom: 16,
     }}>
       {[0, 1].map(i => (
         <div key={i} style={{
           width: 5, height: 5, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.22)',
-          boxShadow: '0 0 4px rgba(255,255,255,0.08)',
+          background: theme.colonDot,
+          boxShadow: theme.colonGlow,
         }} />
       ))}
     </div>
@@ -323,20 +358,28 @@ function ColonSep() {
 }
 
 // ── Full flip clock ────────────────────────────────────────────────────────────
-const CLOCK_BASE_W = 360
+const CLOCK_BASE_W = 310
 const CLOCK_BASE_H = 122
 
-function FlipClock({ days, hours, minutes, seconds }) {
+function FlipClock({ days, hours, minutes, seconds, clockColor = 'dark' }) {
   const { t } = useT()
+  const theme = CLOCK_THEMES[clockColor] || CLOCK_THEMES.dark
   const wrapRef  = useRef(null)
   const [scale, setScale] = useState(1)
+  const [containerW, setContainerW] = useState(CLOCK_BASE_W)
 
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
     const update = () => {
       const w = el.offsetWidth
-      if (w > 10) setScale((w / CLOCK_BASE_W) * 0.9)
+      if (w > 10) {
+        setContainerW(w)
+        const raw = w < 500
+          ? (w / CLOCK_BASE_W) * 1.4
+          : (w / CLOCK_BASE_W) * 0.9
+        setScale(Math.min(raw, (w * 0.9) / CLOCK_BASE_W))
+      }
     }
     update()
     const ro = new ResizeObserver(update)
@@ -365,25 +408,20 @@ function FlipClock({ days, hours, minutes, seconds }) {
           {/* Housing */}
           <div style={{
             position: 'relative',
-            background: 'linear-gradient(168deg, #282828 0%, #181818 45%, #212121 75%, #111 100%)',
+            background: theme.housing,
             borderRadius: 12,
-            padding: '14px 22px 12px',
-            boxShadow: [
-              '0 18px 60px rgba(0,0,0,0.75)',
-              '0 4px 16px rgba(0,0,0,0.5)',
-              'inset 0 1px 0 rgba(255,255,255,0.07)',
-              'inset 0 0 0 1px rgba(255,255,255,0.04)',
-            ].join(', '),
+            padding: '14px 18px 12px',
+            boxShadow: theme.housingBoxShadow,
           }}>
-            <HousingTexture />
+            <HousingTexture theme={theme} />
 
             {/* Rubber feet */}
             {[{ left: 12, bottom: 6 }, { right: 12, bottom: 6 }, { left: 40, bottom: 6 }, { right: 40, bottom: 6 }].map((pos, i) => (
               <div key={i} style={{
                 position: 'absolute', ...pos,
                 width: 14, height: 7, borderRadius: '0 0 3px 3px',
-                background: 'linear-gradient(to bottom, #0a0a0a, #1a1a1a)',
-                boxShadow: '0 3px 6px rgba(0,0,0,0.7)',
+                background: theme.feet,
+                boxShadow: theme.feetShadow,
               }} />
             ))}
 
@@ -396,16 +434,16 @@ function FlipClock({ days, hours, minutes, seconds }) {
               {units.map(({ value, label }, i) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'flex-start' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    <FlipPanel value={value} />
+                    <FlipPanel value={value} theme={theme} />
                     <div style={{
                       fontSize: 8, letterSpacing: 2.5,
-                      color: 'rgba(255,255,255,0.22)',
+                      color: theme.unitLabel,
                       fontFamily: 'monospace', textTransform: 'uppercase',
                     }}>
                       {label}
                     </div>
                   </div>
-                  {i < units.length - 1 && <ColonSep />}
+                  {i < units.length - 1 && <ColonSep theme={theme} />}
                 </div>
               ))}
             </div>
@@ -417,9 +455,82 @@ function FlipClock({ days, hours, minutes, seconds }) {
   )
 }
 
+// ── Minimal variant ────────────────────────────────────────────────────────────
+function MinimalCountdown({ days, hours, minutes, seconds, label }) {
+  const { t } = useT()
+  const units = [
+    { value: days,    label: t('countdown.days') },
+    { value: hours,   label: t('countdown.hours') },
+    { value: minutes, label: t('countdown.minutes') },
+    { value: seconds, label: t('countdown.seconds') },
+  ]
+
+  return (
+    <div className="w-full py-2 text-center">
+      {label && (
+        <p style={{
+          fontFamily: 'Georgia, serif',
+          fontSize: 11,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: colors.fgMuted,
+          marginBottom: 20,
+        }}>
+          {label}
+        </p>
+      )}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 0 }}>
+        {units.map(({ value, label: unitLabel }, i) => (
+          <div key={unitLabel} style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 56 }}>
+              <span style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: 48,
+                fontWeight: 400,
+                lineHeight: 1,
+                color: colors.fg,
+                letterSpacing: '-0.02em',
+              }}>
+                {pad(value)}
+              </span>
+              <div style={{
+                width: 24, height: 1,
+                background: colors.fgMuted,
+                opacity: 0.3,
+                margin: '8px auto 6px',
+              }} />
+              <span style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: 9,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                color: colors.fgMuted,
+              }}>
+                {unitLabel}
+              </span>
+            </div>
+            {i < units.length - 1 && (
+              <span style={{
+                fontFamily: 'Georgia, serif',
+                fontSize: 36,
+                fontWeight: 300,
+                color: colors.fgMuted,
+                opacity: 0.35,
+                lineHeight: 1,
+                padding: '0 2px',
+                marginTop: 4,
+              }}>·</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Public component ──────────────────────────────────────────────────────────
 export default function CountdownBlock({ block, isEditing, onChange }) {
-  const { targetDate, label, expiredMessage } = block
+  const { targetDate, label, expiredMessage, variant = 'flip', clockColor = 'dark' } = block
   const { t } = useT()
   const [timeLeft, setTimeLeft] = useState(() => getTimeLeft(targetDate))
   const confettiFired = useRef(false)
@@ -449,8 +560,44 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
   }, [])
 
   if (isEditing) {
+    const VARIANTS = [
+      { value: 'flip',    label: t('countdown.variantFlip') },
+      { value: 'minimal', label: t('countdown.variantMinimal') },
+    ]
     return (
       <div className="space-y-3">
+        <div className="flex gap-1">
+          {VARIANTS.map(v => (
+            <button
+              key={v.value}
+              onClick={() => onChange({ variant: v.value })}
+              className={`flex-1 py-1 rounded text-xs transition ${
+                variant === v.value
+                  ? 'bg-primary text-white'
+                  : 'bg-overlay text-fg-muted hover:bg-subtle'
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+        {variant === 'flip' && (
+          <div className="flex gap-1">
+            {[{ value: 'dark', label: t('countdown.colorDark') }, { value: 'beige', label: t('countdown.colorBeige') }].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onChange({ clockColor: opt.value })}
+                className={`flex-1 py-1 rounded text-xs transition ${
+                  clockColor === opt.value
+                    ? 'bg-primary text-white'
+                    : 'bg-overlay text-fg-muted hover:bg-subtle'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
         <input
           className={inputClass}
           placeholder={t('countdown.label')}
@@ -495,6 +642,20 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
     )
   }
 
+  if (variant === 'minimal') {
+    return (
+      <div ref={rootRef} className="py-2">
+        <MinimalCountdown
+          days={timeLeft.days}
+          hours={timeLeft.hours}
+          minutes={timeLeft.minutes}
+          seconds={timeLeft.seconds}
+          label={label}
+        />
+      </div>
+    )
+  }
+
   return (
     <div ref={rootRef} className="py-2">
       {label && <LabelTag text={label} />}
@@ -503,6 +664,7 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
         hours={timeLeft.hours}
         minutes={timeLeft.minutes}
         seconds={timeLeft.seconds}
+        clockColor={clockColor}
       />
     </div>
   )
