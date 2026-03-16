@@ -191,69 +191,81 @@ export default function TextBlock({ block, isEditing, onChange }) {
   }
 
   // ── Post-it note ─────────────────────────────────────────────────────────────
-  // Aesthetic: playful/bold — sticky note, ruled lines, handwritten feel, dog-ear corner
+  // Aesthetic: playful/bold — square sticky note taped to the background
   if (variant === 'postit') {
     const bg = noteColor || '#fde68a'
-    const lineH = 28
-    const topPad = 18
 
-    // Darken the bg color by ~18% for shadow/fold detail
     const hexToRgb = h => {
       const n = parseInt(h.replace('#', ''), 16)
       return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
     }
     const [r, g, b] = hexToRgb(bg)
-    const shadowRgb = `rgba(${Math.round(r * 0.72)}, ${Math.round(g * 0.72)}, ${Math.round(b * 0.72)}, 0.6)`
+    const darkRgb = `rgba(${Math.round(r * 0.68)}, ${Math.round(g * 0.68)}, ${Math.round(b * 0.68)}, 0.55)`
 
     return (
-      <div style={{
-        position: 'relative',
-        background: `linear-gradient(175deg, ${bg} 0%, ${bg}ee 100%)`,
-        padding: `${topPad}px 22px 36px 22px`,
-        // Asymmetric shadow — heavier bottom-right, lighter top-left, like stuck on something
-        boxShadow: [
-          '4px 6px 20px rgba(0,0,0,0.22)',
-          '1px 2px 5px rgba(0,0,0,0.14)',
-          '-1px -1px 4px rgba(0,0,0,0.06)',
-        ].join(', '),
-        transform: 'rotate(-0.7deg)',
-        overflow: 'hidden',
-      }}>
-        {/* Adhesive strip at top — slightly darker band */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 8,
-          background: `rgba(${r}, ${g}, ${b}, 0.6)`,
-          borderBottom: `1px solid rgba(0,0,0,0.07)`,
-        }} />
+      // Outer wrapper: gives space above for the tape to peek out
+      <div style={{ position: 'relative', paddingTop: 14 }}>
 
-        {/* Ruled lines */}
+        {/* Scotch tape — centered, slightly rotated, overlaps top edge of note */}
         <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: `repeating-linear-gradient(to bottom, transparent 0px, transparent ${lineH - 1}px, rgba(0,0,0,0.09) ${lineH - 1}px, rgba(0,0,0,0.09) ${lineH}px)`,
-          backgroundPosition: `0 ${topPad + lineH}px`,
-        }} />
-
-        {/* Dog-ear corner — bottom right */}
-        {/* Dark triangle shadow of the fold */}
-        <div style={{
-          position: 'absolute', bottom: 0, right: 0,
-          width: 28, height: 28,
-          background: `linear-gradient(225deg, rgba(255,255,255,0.82) 50%, ${shadowRgb} 50%)`,
-        }} />
-
-        {/* Written text */}
-        <p style={{
-          position: 'relative',
-          fontFamily: 'cursive, "Comic Sans MS", sans-serif',
-          fontSize: FONT_SIZES[fontSize]?.px ?? 16,
-          lineHeight: `${lineH}px`,
-          color: '#1a1008',
-          whiteSpace: 'pre-wrap',
-          textAlign: align === 'center' ? 'center' : align === 'right' ? 'right' : 'left',
-          margin: 0,
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%) rotate(-1.5deg)',
+          width: 60, height: 22,
+          zIndex: 2,
+          // Tape body: semi-transparent, slightly yellowish like real scotch tape
+          background: 'linear-gradient(to bottom, rgba(245,238,175,0.50) 0%, rgba(255,252,215,0.42) 45%, rgba(245,238,175,0.50) 100%)',
+          boxShadow: [
+            'inset 0 0 0 1px rgba(200,175,60,0.22)',  // tape edge tint
+            '0 1px 4px rgba(0,0,0,0.13)',
+          ].join(', '),
         }}>
-          {content}
-        </p>
+          {/* Center gloss stripe */}
+          <div style={{
+            position: 'absolute', top: '30%', bottom: '30%', left: '10%', right: '10%',
+            background: 'rgba(255,255,255,0.22)',
+            borderRadius: 1,
+          }} />
+        </div>
+
+        {/* The note itself — square, plain, slightly rotated */}
+        <div style={{
+          position: 'relative',
+          aspectRatio: '1 / 1',
+          background: bg,
+          overflow: 'hidden',
+          transform: 'rotate(-1.2deg)',
+          boxShadow: [
+            '4px 7px 22px rgba(0,0,0,0.24)',
+            '1px 2px 5px rgba(0,0,0,0.14)',
+          ].join(', '),
+          zIndex: 1,
+          display: 'flex',
+          alignItems: 'flex-start',
+          padding: '20px 20px 32px 20px',
+        }}>
+          {/* Dog-ear fold — bottom right corner */}
+          <div style={{
+            position: 'absolute', bottom: 0, right: 0,
+            width: 30, height: 30,
+            background: `linear-gradient(225deg, rgba(255,255,255,0.78) 50%, ${darkRgb} 50%)`,
+          }} />
+
+          <p style={{
+            position: 'relative',
+            fontFamily: 'cursive, "Comic Sans MS", sans-serif',
+            fontSize: FONT_SIZES[fontSize]?.px ?? 16,
+            lineHeight: 1.55,
+            color: '#1a1008',
+            whiteSpace: 'pre-wrap',
+            textAlign: align === 'center' ? 'center' : align === 'right' ? 'right' : 'left',
+            margin: 0,
+            width: '100%',
+          }}>
+            {content}
+          </p>
+        </div>
       </div>
     )
   }
