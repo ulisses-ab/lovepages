@@ -254,8 +254,8 @@ function ColonSep() {
 }
 
 // ── Full flip clock ────────────────────────────────────────────────────────────
-const CLOCK_BASE_W = 370
-const CLOCK_BASE_H = 124
+const CLOCK_BASE_W = 360
+const CLOCK_BASE_H = 122
 
 function FlipClock({ days, hours, minutes, seconds }) {
   const { t } = useT()
@@ -297,7 +297,7 @@ function FlipClock({ days, hours, minutes, seconds }) {
           <div style={{
             position: 'relative',
             background: 'linear-gradient(168deg, #282828 0%, #181818 45%, #212121 75%, #111 100%)',
-            borderRadius: 14,
+            borderRadius: 12,
             padding: '14px 22px 12px',
             boxShadow: [
               '0 18px 60px rgba(0,0,0,0.75)',
