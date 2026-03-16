@@ -239,10 +239,11 @@ export default function TextBlock({ block, isEditing, onChange }) {
       lineHeight: 1.5,
       whiteSpace: 'pre-wrap',
       textAlign,
-      ...(block.outline
-        ? { color: 'transparent', WebkitTextStroke: `0.04em ${block.outlineColor || textColor}` }
-        : { color: textColor }
-      ),
+      color: textColor,
+      ...(block.outline && {
+        WebkitTextStroke: `0.04em ${block.outlineColor || textColor}`,
+        paintOrder: 'stroke fill',
+      }),
     }
 
     return <p style={style}>{content}</p>
