@@ -117,20 +117,16 @@ export default function TextBlock({ block, isEditing, onChange }) {
             <FontPicker value={fontFamily} onChange={v => onChange({ fontFamily: v })} />
 
             {/* Size */}
-            <div className="flex gap-1">
-              {Object.entries(FONT_SIZES).map(([key, { label }]) => (
-                <button
-                  key={key}
-                  onClick={() => onChange({ fontSize: key })}
-                  className={`flex-1 py-1.5 text-xs rounded border transition ${
-                    fontSize === key
-                      ? 'bg-primary border-primary text-white'
-                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-fg-muted shrink-0">Size</span>
+              <input
+                type="number"
+                min={8} max={200}
+                value={typeof fontSize === 'number' ? fontSize : (FONT_SIZES[fontSize]?.px ?? 16)}
+                onChange={e => onChange({ fontSize: Math.max(8, Math.min(200, Number(e.target.value))) })}
+                className={inputClass + ' w-20 py-1'}
+              />
+              <span className="text-xs text-fg-ghost">px</span>
             </div>
 
             {/* Style toggles */}
@@ -182,20 +178,16 @@ export default function TextBlock({ block, isEditing, onChange }) {
 
         {/* Size for physical variants */}
         {isPhysical && (
-          <div className="flex gap-1">
-            {Object.entries(FONT_SIZES).map(([key, { label }]) => (
-              <button
-                key={key}
-                onClick={() => onChange({ fontSize: key })}
-                className={`flex-1 py-1.5 text-xs rounded border transition ${
-                  fontSize === key
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-fg-muted shrink-0">Size</span>
+            <input
+              type="number"
+              min={8} max={200}
+              value={typeof fontSize === 'number' ? fontSize : (FONT_SIZES[fontSize]?.px ?? 16)}
+              onChange={e => onChange({ fontSize: Math.max(8, Math.min(200, Number(e.target.value))) })}
+              className={inputClass + ' w-20 py-1'}
+            />
+            <span className="text-xs text-fg-ghost">px</span>
           </div>
         )}
 
@@ -221,7 +213,7 @@ export default function TextBlock({ block, isEditing, onChange }) {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   const textAlign = align === 'center' ? 'center' : align === 'right' ? 'right' : 'left'
-  const sizePx = FONT_SIZES[fontSize]?.px ?? 16
+  const sizePx = typeof fontSize === 'number' ? fontSize : (FONT_SIZES[fontSize]?.px ?? 16)
 
   // ── Plain (replaces heading / paragraph / quote) ──────────────────────────────
   if (variant === 'plain' || variant === 'heading' || variant === 'paragraph' || variant === 'quote') {
