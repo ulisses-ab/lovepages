@@ -43,7 +43,7 @@
 }
 
 @keyframes aero-eq {
-  0%, 100% { transform: scaleY(0.3); }
-  50%       { transform: scaleY(1); }
+  0%, 100% { transform: scaleX(0.35); opacity: 0.5; }
+  50%       { transform: scaleX(1);    opacity: 1;   }
 }
 
