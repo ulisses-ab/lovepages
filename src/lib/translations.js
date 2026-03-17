@@ -105,7 +105,6 @@ export const translations = {
     'song.variantBar': 'Bar',
     'song.variantCover': 'Cover',
     'song.variantVinyl': 'Vinyl',
-    'song.variantAero': 'Aero',
 
     // VideoBlock
     'video.youtubeUrl': 'YouTube URL',
@@ -168,6 +167,7 @@ export const translations = {
     'block.countdown': 'Countdown',
     'countdown.variantFlip': 'Flip clock',
     'countdown.variantMinimal': 'Minimal',
+    'countdown.variantGlass': 'Glass',
     'countdown.colorDark': 'Dark',
     'countdown.colorBeige': 'Beige',
     'countdown.label': 'Label (e.g. "Days until the wedding")',
@@ -292,7 +292,6 @@ export const translations = {
     'song.variantBar': 'Barra',
     'song.variantCover': 'Capa',
     'song.variantVinyl': 'Vinil',
-    'song.variantAero': 'Aero',
 
     // VideoBlock
     'video.youtubeUrl': 'URL do YouTube',
@@ -355,6 +354,7 @@ export const translations = {
     'block.countdown': 'Contagem regressiva',
     'countdown.variantFlip': 'Rel\u00f3gio flip',
     'countdown.variantMinimal': 'Minimalista',
+    'countdown.variantGlass': 'Vidro',
     'countdown.colorDark': 'Escuro',
     'countdown.colorBeige': 'Bege',
     'countdown.label': 'R\u00f3tulo (ex: "Dias at\u00e9 o casamento")',

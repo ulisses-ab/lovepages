@@ -528,6 +528,136 @@ function MinimalCountdown({ days, hours, minutes, seconds, label }) {
   )
 }
 
+// ── Glass / Glassmorphism variant ─────────────────────────────────────────────
+function GlassCountdown({ days, hours, minutes, seconds, label }) {
+  const { t } = useT()
+  const containerRef = useRef(null)
+  const [fs, setFs] = useState(48)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const update = () => {
+      const w = el.offsetWidth
+      setFs(Math.max(26, Math.min(58, Math.floor(w / 6.6))))
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const units = [
+    { value: days,    label: t('countdown.days') },
+    { value: hours,   label: t('countdown.hours') },
+    { value: minutes, label: t('countdown.minutes') },
+    { value: seconds, label: t('countdown.seconds') },
+  ]
+
+  return (
+    <div ref={containerRef} style={{
+      background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 75%, #6d28d9 100%)',
+      borderRadius: 20,
+      padding: '28px 20px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Ambient glow blobs */}
+      <div style={{
+        position: 'absolute', top: '-20%', left: '-10%',
+        width: '55%', height: '75%',
+        background: 'radial-gradient(circle, rgba(167,139,250,0.30) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-15%', right: '-5%',
+        width: '45%', height: '65%',
+        background: 'radial-gradient(circle, rgba(109,40,217,0.45) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Frosted glass card */}
+      <div style={{
+        position: 'relative',
+        background: 'rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(18px)',
+        WebkitBackdropFilter: 'blur(18px)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        borderRadius: 16,
+        padding: `${Math.round(fs * 0.5)}px ${Math.round(fs * 0.4)}px ${Math.round(fs * 0.45)}px`,
+        boxShadow: '0 8px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)',
+        textAlign: 'center',
+      }}>
+        {/* Top glint line */}
+        <div style={{
+          position: 'absolute', top: 0, left: '8%', right: '8%', height: 1,
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.65) 50%, rgba(255,255,255,0.5) 70%, transparent)',
+          pointerEvents: 'none',
+        }} />
+
+        {label && (
+          <p style={{
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: Math.max(10, Math.round(fs * 0.22)),
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.55)',
+            marginBottom: Math.round(fs * 0.38),
+            marginTop: 0,
+          }}>
+            {label}
+          </p>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+          {units.map(({ value, label: unitLabel }, i) => (
+            <div key={unitLabel} style={{ display: 'flex', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: Math.round(fs * 1.2) }}>
+                <span style={{
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: fs,
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  color: 'rgba(255,255,255,0.95)',
+                  letterSpacing: '-2px',
+                  textShadow: '0 0 24px rgba(167,139,250,0.85), 0 2px 8px rgba(0,0,0,0.5)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {pad(value)}
+                </span>
+                <span style={{
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: Math.max(8, Math.round(fs * 0.18)),
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(255,255,255,0.38)',
+                  marginTop: Math.round(fs * 0.15),
+                }}>
+                  {unitLabel}
+                </span>
+              </div>
+              {i < units.length - 1 && (
+                <span style={{
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: Math.round(fs * 0.72),
+                  fontWeight: 300,
+                  color: 'rgba(255,255,255,0.28)',
+                  lineHeight: 1,
+                  padding: `0 ${Math.round(fs * 0.07)}px`,
+                  marginTop: Math.round(fs * 0.05),
+                  textShadow: '0 0 12px rgba(167,139,250,0.5)',
+                }}>
+                  :
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Public component ──────────────────────────────────────────────────────────
 export default function CountdownBlock({ block, isEditing, onChange }) {
   const { targetDate, label, expiredMessage, variant = 'flip', clockColor = 'dark' } = block
@@ -563,6 +693,7 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
     const VARIANTS = [
       { value: 'flip',    label: t('countdown.variantFlip') },
       { value: 'minimal', label: t('countdown.variantMinimal') },
+      { value: 'glass',   label: t('countdown.variantGlass') },
     ]
     return (
       <div className="space-y-3">
@@ -646,6 +777,20 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
     return (
       <div ref={rootRef} className="py-2">
         <MinimalCountdown
+          days={timeLeft.days}
+          hours={timeLeft.hours}
+          minutes={timeLeft.minutes}
+          seconds={timeLeft.seconds}
+          label={label}
+        />
+      </div>
+    )
+  }
+
+  if (variant === 'glass') {
+    return (
+      <div ref={rootRef}>
+        <GlassCountdown
           days={timeLeft.days}
           hours={timeLeft.hours}
           minutes={timeLeft.minutes}
