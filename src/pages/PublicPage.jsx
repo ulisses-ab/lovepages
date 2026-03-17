@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BlockRenderer from '../components/blocks/BlockRenderer'
-import { getPageBgStyle } from '../lib/pageUtils'
+import PageBgWrapper from '../components/ui/PageBgWrapper'
 
 export default function PublicPage({ slug: slugProp }) {
   const { slug: slugParam } = useParams()
@@ -59,7 +59,7 @@ export default function PublicPage({ slug: slugProp }) {
   if (group.length) segments.push({ fullBleed: false, blocks: group })
 
   return (
-    <div className="min-h-screen" style={{ ...getPageBgStyle(page.settings), overflowX: 'hidden' }}>
+    <PageBgWrapper settings={page.settings} className="min-h-screen" style={{ overflowX: 'hidden' }} viewportFixed>
       {segments.map((seg, i) =>
         seg.fullBleed ? (
           <BlockRenderer key={seg.block.id} block={seg.block} />
@@ -79,6 +79,6 @@ export default function PublicPage({ slug: slugProp }) {
           Made with 💌 lovepages
         </a>
       </footer>
-    </div>
+    </PageBgWrapper>
   )
 }
