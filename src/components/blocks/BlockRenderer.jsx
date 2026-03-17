@@ -37,16 +37,21 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   // content sits above both as position:relative.
   if (block.bgFade) {
     const outerClass = [
-      'w-full min-w-0 relative overflow-hidden',
+      'w-full min-w-0 relative',
       block.fullBleed ? '' : 'rounded-lg',
       decorationClass,
     ].filter(Boolean).join(' ')
+
+    // Border-radius is applied directly to the layer divs so their backgrounds
+    // are clipped correctly without needing overflow-hidden on the outer wrapper
+    // (which would clip block content like rotated text).
+    const layerRadius = block.fullBleed ? undefined : 'inherit'
 
     const fit1 = block.bgImageFit  || 'cover'
     const fit2 = block.bgImageFit2 || 'cover'
 
     const layer2 = {
-      position: 'absolute', inset: 0,
+      position: 'absolute', inset: 0, borderRadius: layerRadius,
       backgroundColor: block.bgColor2 || undefined,
       backgroundImage: block.bgImage2 ? `url(${block.bgImage2})` : undefined,
       backgroundSize: block.bgImage2 ? (fit2 === 'tile' ? 'var(--bg-tile-size)' : fit2) : undefined,
@@ -55,7 +60,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
 
     const layer1 = {
-      position: 'absolute', inset: 0,
+      position: 'absolute', inset: 0, borderRadius: layerRadius,
       backgroundColor: block.bgColor || undefined,
       backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
       backgroundSize: block.bgImage ? (fit1 === 'tile' ? 'var(--bg-tile-size)' : fit1) : undefined,
