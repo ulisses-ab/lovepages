@@ -1,21 +1,21 @@
-// Windows XP "Start" button — green glossy pill with Windows flag logo
-
 function WindowsFlag({ size = 20 }) {
-  // Classic XP waving-flag: four parallelogram quadrants with perspective skew
   return (
-    <svg width={size} height={size} viewBox="0 0 20 20" style={{ flexShrink: 0, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }}>
-      {/* Top-left: red */}
-      <path d="M0.5 1.5 L8.5 2.5 L8.5 9.5 L0.5 8.5 Z" fill="#F25022" />
-      {/* Top-right: green */}
-      <path d="M10 2 L19 0.5 L19 8 L10 9.5 Z" fill="#7FBA00" />
-      {/* Bottom-left: blue */}
-      <path d="M0.5 10.5 L8.5 11.5 L8.5 18.5 L0.5 17.5 Z" fill="#00A4EF" />
-      {/* Bottom-right: yellow */}
-      <path d="M10 10.5 L19 9 L19 16.5 L10 18 Z" fill="#FFB900" />
+    <svg
+      width={size}
+      height={size * (150 / 170)}
+      viewBox="0 0 170 150"
+      style={{
+        flexShrink: 0,
+        filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.4))",
+      }}
+    >
+      <path d="M170 20.7c-33 13.7-49 6-63.2-3.6L90.8 73.5c14.3 9.7 31.5 17.7 63.2 3.5l16.3-56.3z" fill="#91c300"/>
+      <path d="M63 134.2c-14.3-9.6-30-17.6-63-3.9l16.2-56.6c33-13.6 49-5.9 63.3 3.8L63 134.2z" fill="#00b4f1"/>
+      <path d="M82.2 67.3a53.9 53.9 0 0 0-31-11.3c-8.7-.1-19.1 2.4-32.2 7.8L35.2 7.4c33.1-13.7 49-6 63.3 3.7L82.2 67.3z" fill="#f8682c"/>
+      <path d="M88 83c14.4 9.6 30.3 17.3 63.3 3.6L135 142.8c-33 13.7-48.9 6-63.2-3.7L88.1 83z" fill="#ffc300"/>
     </svg>
   )
 }
-
 export default function LinkXPVariant({ href, label }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
