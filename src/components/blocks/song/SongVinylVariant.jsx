@@ -32,6 +32,27 @@ function WoodTexture() {
   </>
 }
 
+function BeigeTexture() {
+  return <>
+    {/* Glossy specular streak across the top third */}
+    <div style={{
+      position: 'absolute', inset: 0, borderRadius: 18, pointerEvents: 'none',
+      background: 'linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.18) 22%, rgba(255,255,255,0.04) 42%, transparent 60%)',
+    }} />
+    {/* Depth gradient — slightly darker toward bottom edge */}
+    <div style={{
+      position: 'absolute', inset: 0, borderRadius: 18, pointerEvents: 'none',
+      background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.07) 100%)',
+    }} />
+    {/* Narrow bright glint line near top */}
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+      borderRadius: '18px 18px 0 0', pointerEvents: 'none',
+      background: 'linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.55) 30%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.55) 70%, transparent 95%)',
+    }} />
+  </>
+}
+
 function MetalTexture() {
   return <>
     <div style={{
@@ -294,7 +315,7 @@ export default function SongVinylVariant({ block, playing, ready, togglePlay, vo
       if (w > 10) {
         setContainerW(w)
         setVinylScale(w < 500
-          ? (w / PLAT) * 0.72
+          ? (w / PLAT) * 0.60
           : (w / VINYL_BASE_W) * 0.92
         )
       }
@@ -346,12 +367,14 @@ export default function SongVinylVariant({ block, playing, ready, togglePlay, vo
         position: 'relative',
         background: vinylBase === 'metal'
           ? 'linear-gradient(168deg, #2e2e2e 0%, #1a1a1a 45%, #232323 75%, #111 100%)'
+          : vinylBase === 'beige'
+          ? 'linear-gradient(168deg, #e8dfc8 0%, #d8cdb0 45%, #dfd4bc 75%, #cec3a8 100%)'
           : 'linear-gradient(168deg, #1e0f04 0%, #0e0602 40%, #160b03 72%, #0a0401 100%)',
         borderRadius: 18,
         padding: '18px 16px 14px',
         boxShadow: '0 16px 56px rgba(0,0,0,0.7), 0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)',
       }}>
-        {vinylBase === 'wood' ? <WoodTexture /> : <MetalTexture />}
+        {vinylBase === 'wood' ? <WoodTexture /> : vinylBase === 'beige' ? <BeigeTexture /> : <MetalTexture />}
         {/* Base edge highlight */}
         <div style={{ position: 'absolute', inset: 0, borderRadius: 18, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)' }} />
 
@@ -374,7 +397,7 @@ export default function SongVinylVariant({ block, playing, ready, togglePlay, vo
                 background: 'repeating-radial-gradient(circle at 50% 50%, #0c0c0c 0px, #0c0c0c 1px, #1c1c1c 1px, #1c1c1c 2.5px)',
                 cursor: ready ? 'pointer' : 'default',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                animation: 'spin-vinyl 3.8s linear infinite',
+                animation: 'spin-vinyl 1.81s linear infinite',
                 animationPlayState: playing ? 'running' : 'paused',
               }}
             >
