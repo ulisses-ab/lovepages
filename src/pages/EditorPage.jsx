@@ -17,8 +17,8 @@ import EditorTopBar from '../components/editor/EditorTopBar'
 import BlockPanel from '../components/editor/BlockPanel'
 import Canvas from '../components/editor/Canvas'
 import { useT } from '../lib/i18n'
-import { getPageBgStyle } from '../lib/pageUtils'
 import { supabase } from '../lib/supabase'
+import PageBgWrapper from '../components/ui/PageBgWrapper'
 import { BLOCK_ICONS, createBlock } from '../lib/blockDefaults'
 
 export default function EditorPage() {
@@ -31,6 +31,9 @@ export default function EditorPage() {
   const loaded = useRef(false)
   const autoSaveTimer = useRef(null)
   const savePageRef = useRef(null)
+  const [editorWidth, setEditorWidth] = useState(null) // null = flex-1 (equal split)
+  const resizableRef = useRef(null)
+  const isDraggingDivider = useRef(false)
 
   const { t } = useT()
 
@@ -173,6 +176,39 @@ export default function EditorPage() {
     }
   }
 
+  function handleDividerMouseDown(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    isDraggingDivider.current = true
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    const startX = e.clientX
+    const container = resizableRef.current
+    if (!container) return
+    const mainEl = container.querySelector('main')
+    const startWidth = mainEl ? mainEl.getBoundingClientRect().width : container.getBoundingClientRect().width / 2
+
+    function onMouseMove(ev) {
+      if (!isDraggingDivider.current || !resizableRef.current) return
+      const totalWidth = resizableRef.current.getBoundingClientRect().width
+      const dx = ev.clientX - startX
+      const newWidth = Math.max(totalWidth * 0.2, Math.min(totalWidth * 0.8, startWidth + dx))
+      setEditorWidth(newWidth)
+    }
+
+    function onMouseUp() {
+      isDraggingDivider.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+  }
+
   return (
     <div className="flex flex-col h-screen h-[100dvh] bg-base">
       <EditorTopBar
@@ -202,12 +238,9 @@ export default function EditorPage() {
       <div className="flex flex-1 overflow-hidden">
         {previewMode ? (
           /* Full preview */
-          <main
-            className="flex-1 overflow-y-auto"
-            style={getPageBgStyle(pageSettings)}
-          >
+          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" contained>
             <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
-          </main>
+          </PageBgWrapper>
         ) : (
           <DndContext
             sensors={sensors}
@@ -223,27 +256,41 @@ export default function EditorPage() {
               <BlockPanel onAddBlock={handleAddBlock} />
             </aside>
 
-            {/* Editor canvas */}
-            <main className="flex-1 overflow-y-auto border-r border-overlay flex flex-col">
-              <Canvas
-                blocks={blocks}
-                setBlocks={setBlocks}
-                previewMode={false}
-                pageSettings={pageSettings}
-                onChangeSettings={patch => setPageSettings(prev => ({ ...prev, ...patch }))}
-                onAddBlock={handleAddBlock}
-                panelDragOverId={isDraggingFromPanel ? overId : null}
-                isDraggingFromPanel={isDraggingFromPanel}
-              />
-            </main>
+            {/* Editor canvas + preview — resizable on desktop */}
+            <div ref={resizableRef} className="flex flex-1 overflow-hidden">
+              {/* Editor canvas */}
+              <main
+                className="overflow-y-auto flex flex-col"
+                style={editorWidth ? { width: editorWidth, flexShrink: 0, flexGrow: 0 } : { flex: 1 }}
+              >
+                <Canvas
+                  blocks={blocks}
+                  setBlocks={setBlocks}
+                  previewMode={false}
+                  pageSettings={pageSettings}
+                  onChangeSettings={patch => setPageSettings(prev => ({ ...prev, ...patch }))}
+                  onAddBlock={handleAddBlock}
+                  panelDragOverId={isDraggingFromPanel ? overId : null}
+                  isDraggingFromPanel={isDraggingFromPanel}
+                />
+              </main>
 
-            {/* Live preview — desktop only */}
-            <div className="flex-1 overflow-hidden hidden md:flex md:flex-col">
-              <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
-                {t('editor.previewLabel')}
+              {/* Resize divider — desktop only */}
+              <div
+                className="hidden md:flex w-1 shrink-0 cursor-col-resize bg-overlay hover:bg-primary/60 active:bg-primary transition-colors duration-150 items-center justify-center group"
+                onMouseDown={handleDividerMouseDown}
+              >
+                <div className="w-0.5 h-8 rounded-full bg-fg-ghost group-hover:bg-primary/80 transition-colors duration-150" />
               </div>
-              <div className="flex-1 overflow-y-auto" style={getPageBgStyle(pageSettings)}>
-                <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
+
+              {/* Live preview — desktop only */}
+              <div className="flex-1 overflow-hidden hidden md:flex md:flex-col">
+                <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
+                  {t('editor.previewLabel')}
+                </div>
+                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" contained>
+                  <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
+                </PageBgWrapper>
               </div>
             </div>
 

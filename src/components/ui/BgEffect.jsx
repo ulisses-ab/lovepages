@@ -8,7 +8,7 @@ function sr(n) {
 
 const COUNT = 24
 
-function Bubbles() {
+function Bubbles({ contained = false }) {
   const items = useMemo(() => (
     Array.from({ length: COUNT }, (_, i) => ({
       id:      i,
@@ -22,7 +22,7 @@ function Bubbles() {
   ), [])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+    <div style={{ position: contained ? 'absolute' : 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
       {items.map(b => (
         <div
           key={b.id}
@@ -53,7 +53,7 @@ function Bubbles() {
   )
 }
 
-export default function BgEffect({ effect }) {
-  if (effect === 'bubbles') return <Bubbles />
+export default function BgEffect({ effect, contained = false }) {
+  if (effect === 'bubbles') return <Bubbles contained={contained} />
   return null
 }

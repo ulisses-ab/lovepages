@@ -7,7 +7,7 @@ import BgEffect from './BgEffect'
  * - Fade: renders two position:fixed layers behind the content so the
  *   fade effect fills the viewport regardless of scroll depth.
  */
-export default function PageBgWrapper({ settings, className = '', style = {}, children }) {
+export default function PageBgWrapper({ settings, className = '', style = {}, children, contained = false }) {
   if (settings?.bgFade) {
     const fit1 = settings.bgImageFit  || 'cover'
     const fit2 = settings.bgImageFit2 || 'cover'
@@ -30,18 +30,18 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
       WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
     }
     return (
-      <div className={className} style={{ position: 'relative', ...style }}>
+      <div className={className} style={{ position: 'relative', overflow: contained ? 'hidden' : undefined, ...style }}>
         <div style={layer2} />
         <div style={layer1} />
-        <BgEffect effect={settings?.bgEffect} />
+        <BgEffect effect={settings?.bgEffect} contained={contained} />
         <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
       </div>
     )
   }
 
   return (
-    <div className={className} style={{ ...getPageBgStyle(settings), ...style }}>
-      <BgEffect effect={settings?.bgEffect} />
+    <div className={className} style={{ position: 'relative', overflow: contained ? 'hidden' : undefined, ...getPageBgStyle(settings), ...style }}>
+      <BgEffect effect={settings?.bgEffect} contained={contained} />
       {children}
     </div>
   )
