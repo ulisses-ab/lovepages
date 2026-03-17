@@ -3,6 +3,9 @@ import { ChevronDown, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { inputClass, colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ColorPicker from '../ui/ColorPicker'
+import TextTypewriterVariant from './text/TextTypewriterVariant'
+import TextPostitVariant from './text/TextPostitVariant'
+import TextRansomVariant from './text/TextRansomVariant'
 
 // All available fonts — each key maps to its CSS font-family stack.
 // These are loaded via Google Fonts in index.html.
@@ -29,45 +32,6 @@ const FONT_SIZES = {
   '2xl':{ label: '2×', px: 24 },
   '3xl':{ label: '3×', px: 30 },
   '4xl':{ label: '4×', px: 36 },
-}
-
-// Ransom note: pool of distinct font stacks for per-letter randomisation
-const RANSOM_FONTS = [
-  "'Playfair Display', serif",
-  "'Cormorant Garamond', serif",
-  "'Abril Fatface', serif",
-  "'Bebas Neue', sans-serif",
-  "'Special Elite', monospace",
-  "'Space Mono', monospace",
-  "'Dancing Script', cursive",
-  "'Fredoka', sans-serif",
-  "Impact, 'Arial Black', sans-serif",
-  "Georgia, serif",
-  "'Times New Roman', serif",
-  "Arial, Helvetica, sans-serif",
-]
-
-// Paired fg/bg themes — always readable, deliberately mismatched
-const RANSOM_THEMES = [
-  { bg: 'transparent', color: '#111111' },
-  { bg: 'transparent', color: '#111111' },
-  { bg: 'transparent', color: '#111111' },
-  { bg: 'transparent', color: '#1a1a1a' },
-  { bg: '#000000',     color: '#f0f0f0' },
-  { bg: '#f5f0e1',     color: '#111111' },
-  { bg: '#fffde7',     color: '#8b0000' },
-  { bg: '#fce4ec',     color: '#880e4f' },
-  { bg: '#e8f5e9',     color: '#1b5e20' },
-  { bg: '#fff8e1',     color: '#e65100' },
-  { bg: 'transparent', color: '#00008b' },
-  { bg: 'transparent', color: '#8b0000' },
-  { bg: '#ffffff',     color: '#000000' },
-]
-
-// Fast seeded pseudo-random: deterministic per (index, seed) pair
-function ransomRand(i, offset, seed) {
-  const x = ((i * 7 + offset + 1) * 2654435761 + seed * 6271) >>> 0
-  return x / 0xffffffff
 }
 
 // Legacy font keys used by old heading/paragraph/quote blocks
@@ -318,156 +282,13 @@ export default function TextBlock({ block, isEditing, onChange }) {
   }
 
   // ── Typewriter note ───────────────────────────────────────────────────────────
-  if (variant === 'typewriter') {
-    const lineH = 26
-    const topPad = 34
-    return (
-      <div style={{
-        position: 'relative',
-        background: 'linear-gradient(175deg, #f8f3e8 0%, #f2ead6 60%, #ede3c8 100%)',
-        borderRadius: 3,
-        padding: `${topPad}px 28px 28px 56px`,
-        boxShadow: [
-          '2px 4px 14px rgba(0,0,0,0.22)',
-          '0 1px 3px rgba(0,0,0,0.12)',
-          'inset 0 0 0 1px rgba(120,90,40,0.08)',
-        ].join(', '),
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 3, pointerEvents: 'none',
-          backgroundImage: [
-            'repeating-linear-gradient(0deg, transparent 0px, transparent 1px, rgba(120,80,20,0.025) 1px, rgba(120,80,20,0.025) 2px)',
-            'repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(100,60,10,0.015) 3px, rgba(100,60,10,0.015) 4px)',
-          ].join(', '),
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          backgroundImage: `repeating-linear-gradient(to bottom, transparent 0px, transparent ${lineH - 1}px, rgba(140,175,210,0.30) ${lineH - 1}px, rgba(140,175,210,0.30) ${lineH}px)`,
-          backgroundPosition: `0 ${topPad}px`,
-        }} />
-        <div style={{
-          position: 'absolute', left: 42, top: 0, bottom: 0, width: 1.5,
-          background: 'rgba(195,55,55,0.45)',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0, borderRadius: 3, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse at center, transparent 55%, rgba(120,80,20,0.06) 100%)',
-        }} />
-        <p style={{
-          position: 'relative',
-          fontFamily: '"Courier New", Courier, monospace',
-          fontSize: sizePx,
-          lineHeight: `${lineH}px`,
-          color: '#1c140a',
-          whiteSpace: 'pre-wrap',
-          letterSpacing: '0.04em',
-          textAlign,
-          textShadow: '0.4px 0.4px 0 rgba(0,0,0,0.18), -0.2px 0 0 rgba(0,0,0,0.07)',
-          margin: 0,
-        }}>
-          {content}
-        </p>
-      </div>
-    )
-  }
+  if (variant === 'typewriter') return <TextTypewriterVariant content={content} sizePx={sizePx} textAlign={textAlign} />
 
   // ── Post-it note ──────────────────────────────────────────────────────────────
-  if (variant === 'postit') {
-    const base = noteColor || '#fde047'
-    const hexToRgb = h => {
-      const n = parseInt(h.replace('#', ''), 16)
-      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-    }
-    const toHex = ([r, g, b]) =>
-      '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('')
-    const [r, g, b] = hexToRgb(base)
-    const light    = toHex([r * 1.08, g * 1.08, b * 1.08])
-    const dark     = toHex([r * 0.88, g * 0.88, b * 0.88])
-    const gradient = `linear-gradient(175deg, ${light} 0%, ${base} 60%, ${dark} 100%)`
-    return (
-      <div style={{ position: 'relative', paddingTop: 14, maxWidth: 220, margin: '0 auto' }}>
-        <div style={{
-          position: 'absolute', top: 0, left: '50%',
-          transform: 'translateX(-50%) rotate(-1.5deg)',
-          width: 60, height: 22, zIndex: 2, overflow: 'hidden', pointerEvents: 'none',
-        }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1.5, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.75) 80%, transparent)' }} />
-          <div style={{ position: 'absolute', top: 1.5, left: 0, right: 0, bottom: 1.5, background: 'rgba(248,242,218,0.13)' }} />
-          <div style={{ position: 'absolute', top: 2, left: '-10%', right: '-10%', bottom: 2, background: 'linear-gradient(108deg, transparent 30%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.32) 52%, transparent 70%)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(210,200,170,0.5) 20%, rgba(210,200,170,0.6) 50%, rgba(210,200,170,0.5) 80%, transparent)' }} />
-        </div>
-        <div style={{
-          position: 'relative', aspectRatio: '1 / 1', background: gradient, overflow: 'hidden',
-          transform: 'rotate(-2deg)',
-          boxShadow: '0 4px 18px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3), 4px 5px 0 rgba(0,0,0,0.1)',
-          zIndex: 1, display: 'flex', alignItems: 'flex-start', padding: '16px',
-        }}>
-          <p style={{
-            fontFamily: "'Caveat', cursive",
-            fontSize: sizePx,
-            fontWeight: 700,
-            lineHeight: 1.4,
-            color: '#1c1400',
-            whiteSpace: 'pre-wrap',
-            textAlign,
-            margin: 0,
-            width: '100%',
-          }}>
-            {content}
-          </p>
-        </div>
-      </div>
-    )
-  }
+  if (variant === 'postit') return <TextPostitVariant content={content} sizePx={sizePx} textAlign={textAlign} noteColor={noteColor} />
 
   // ── Ransom note ───────────────────────────────────────────────────────────────
-  if (variant === 'ransom') {
-    // Seed from the content so the same text always renders identically
-    const seed = content.split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * (i + 1), 0) & 0x7fffffff
-    const chars = content.split('')
-    return (
-      <p style={{ textAlign, margin: 0, lineHeight: 2, wordBreak: 'break-word' }}>
-        {chars.map((char, i) => {
-          if (char === '\n') return <br key={i} />
-          if (char === ' ')  return <span key={i} style={{ display: 'inline-block', width: sizePx * 0.4 }} />
-
-          const r = (offset) => ransomRand(i, offset, seed)
-          const theme    = RANSOM_THEMES[Math.floor(r(0) * RANSOM_THEMES.length)]
-          const font     = RANSOM_FONTS[Math.floor(r(1) * RANSOM_FONTS.length)]
-          const weight   = r(2) > 0.45 ? 700 : 400
-          const isItalic = r(3) > 0.72
-          const isUpper  = r(4) > 0.55
-          const scale    = 0.72 + r(5) * 0.72  // 0.72× – 1.44×
-          const rotate   = (r(6) - 0.5) * 18   // –9° to +9°
-          const hasBg    = theme.bg !== 'transparent'
-          return (
-            <span
-              key={i}
-              style={{
-                display: 'inline-block',
-                fontFamily: font,
-                fontWeight: weight,
-                fontStyle: isItalic ? 'italic' : 'normal',
-                fontSize: sizePx * scale,
-                textTransform: isUpper ? 'uppercase' : 'none',
-                transform: `rotate(${rotate}deg)`,
-                transformOrigin: 'center 85%',
-                color: theme.color,
-                backgroundColor: theme.bg,
-                padding: hasBg ? '1px 3px' : '0 1px',
-                margin: `0 ${Math.round(r(7) * 1.5)}px`,
-                lineHeight: 1.05,
-                verticalAlign: 'bottom',
-              }}
-            >
-              {char}
-            </span>
-          )
-        })}
-      </p>
-    )
-  }
+  if (variant === 'ransom') return <TextRansomVariant content={content} sizePx={sizePx} textAlign={textAlign} />
 
   // Fallback
   return <p style={{ fontSize: sizePx, textAlign, color: color || colors.fg, whiteSpace: 'pre-wrap' }}>{content}</p>
