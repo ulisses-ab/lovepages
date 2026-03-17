@@ -14,8 +14,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --bg-tile-size: 90px; }
-@media (min-width: 768px) { :root { --bg-tile-size: 180px; } }
+:root { --bg-tile-size: 25vw; }
 
 @layer base {
   html {
@@ -41,5 +40,10 @@
 @keyframes flip-bottom {
   from { transform: rotateX(90deg); }
   to   { transform: rotateX(0deg); }
+}
+
+@keyframes aero-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50%       { transform: scaleY(1); }
 }
 

@@ -70,7 +70,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
           onChange={e => onChange({ artist: e.target.value })}
         />
 
-        {(variant === 'cover' || variant === 'vinyl' || variant === 'aero') && (
+        {(variant === 'cover' || variant === 'vinyl') && (
           <div className="space-y-1 pt-1">
             <p className="text-xs text-fg-muted">{t('song.coverImage')}</p>
             <ImageUpload

@@ -161,7 +161,7 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // polaroid: off-white polaroid frame with wider bottom, square 1:1 crop, handwritten caption (Caveat), tape strip at top, slight rotation derived from block id
 
 // song
-{ "embedUrl": "youtube url", "title": "string", "artist": "string", "autoplay": true, "variant": "default | cover | vinyl", "coverUrl": "url or empty string", "accentColor": "#hex or empty (default: theme primary — play button, progress bar)", "textColor": "#hex or empty (default: theme fg — title, artist)" }
+{ "embedUrl": "youtube url", "title": "string", "artist": "string", "autoplay": true, "variant": "default | cover | vinyl | aero", "coverUrl": "url or empty string", "accentColor": "#hex or empty (default: theme primary — play button, progress bar)", "textColor": "#hex or empty (default: theme fg — title, artist)" }
 // autoplay: only one song block may have this true at a time
 // — toggling via checkbox: enforced in Canvas.handleUpdate
 // — adding a new block: enforced in EditorPage.handleAddBlock
@@ -170,6 +170,7 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "default": horizontal bar with play button and progress bar
 // — "cover": square cover image (clickable to play/pause, hover reveals overlay icon) with title, artist, and progress bar to its right; no card background
 // — "vinyl": large spinning vinyl disc with play button to its left, title and progress bar below; coverUrl appears as the center label
+// — "aero": Frutiger Aero skeuomorphic mini-player — brushed metallic silver-blue chassis, circular control disc, dark LCD screen with glowing time display, animated EQ bars, green LED progress bar
 // coverUrl: used by "cover" and "vinyl" variants; supports Supabase Storage upload or direct URL
 
 // link
@@ -265,7 +266,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 Currently the mapping looks like this (variants per block type):
 
 - **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation)
-- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable)
+- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — WMP9/10 skeuomorphic mini-player: metallic chassis, LCD screen, EQ bars)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
 
