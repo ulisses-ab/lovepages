@@ -42,9 +42,9 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      gap: 12,
-      padding: '12px 14px',
-      borderRadius: 20,
+      gap: 14,
+      padding: '20px 32px 20px 24px',
+      borderRadius: '55% 45% 50% 50% / 48% 50% 50% 52%',
       background: 'linear-gradient(160deg, #ddeaf4 0%, #b0c8dc 25%, #7898b4 55%, #c0d4e4 80%, #ddeaf4 100%)',
       border: '1px solid rgba(255,255,255,0.75)',
       boxShadow: [
@@ -58,11 +58,10 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
       userSelect: 'none',
     }}>
 
-      {/* Glossy top-half reflection */}
+      {/* Glossy top-half reflection — clips to parent stone shape via overflow:hidden */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
         background: 'linear-gradient(180deg, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.12) 46%, transparent 100%)',
-        borderRadius: 20,
       }} />
 
       {/* ── Left: circular control disc ── */}
