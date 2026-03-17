@@ -22,12 +22,13 @@ export default function TextXPVariant({ content, sizePx, textAlign }) {
   const chars   = content ? content.length : 0
 
   return (
-    <div ref={wrapRef} style={{ width: '100%', lineHeight: 1 }}>
+    <div ref={wrapRef} style={{ width: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', height: BASE_H * scale, overflow: 'hidden', lineHeight: 1 }}>
       <div style={{
         width: BASE_W,
-        height: BASE_H,
+        flexShrink: 0,
         transform: `scale(${scale})`,
-        transformOrigin: 'top left',
+        transformOrigin: 'top center',
         fontFamily: 'Tahoma, "MS Sans Serif", Arial, sans-serif',
         fontSize: 11,
         color: XP.text,
@@ -134,8 +135,7 @@ export default function TextXPVariant({ content, sizePx, textAlign }) {
 
         </div>
       </div>
-      {/* phantom div — corrects container height after CSS scale */}
-      <div style={{ height: BASE_H * scale }} />
+      </div>
     </div>
   )
 }

@@ -172,11 +172,12 @@ export default function SongXPVariant({ block, playing, ready, progress, toggleP
   }
 
   return (
-    <div ref={wrapRef} style={{ width: '100%', lineHeight: 1 }}>
+    <div ref={wrapRef} style={{ width: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', height: BASE_H * scale, overflow: 'hidden', lineHeight: 1 }}>
       <div style={{
-        width: BASE_W, height: BASE_H,
+        width: BASE_W, flexShrink: 0,
         transform: `scale(${scale})`,
-        transformOrigin: 'top left',
+        transformOrigin: 'top center',
         fontFamily: 'Tahoma, "MS Sans Serif", Arial, sans-serif',
         fontSize: 11,
         color: XP.text,
@@ -445,8 +446,7 @@ export default function SongXPVariant({ block, playing, ready, progress, toggleP
 
         </div>{/* outer window frame */}
       </div>
-      {/* phantom div to set container height */}
-      <div style={{ height: BASE_H * scale }} />
+      </div>
     </div>
   )
 }
