@@ -38,7 +38,7 @@ export default function BlockStyleControls({ block, onChange }) {
       )}
 
       {/* Scale — desktop / mobile */}
-      <div>
+      <div className="w-1/2">
         <p className="text-xs text-fg-muted mb-1.5">{t('style.scale')}</p>
         <div className="space-y-1.5">
           {[
