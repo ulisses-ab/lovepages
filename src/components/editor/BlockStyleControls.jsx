@@ -1,9 +1,12 @@
+import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { useT } from '../../lib/i18n'
 import BackgroundChooser from '../ui/BackgroundChooser'
 import ColorPicker from '../ui/ColorPicker'
 
 export default function BlockStyleControls({ block, onChange }) {
   const { t } = useT()
+  const [advancedOpen, setAdvancedOpen] = useState(false)
 
   return (
     <div className="space-y-3 mt-3">
@@ -37,34 +40,6 @@ export default function BlockStyleControls({ block, onChange }) {
         />
       )}
 
-      {/* Scale — desktop / mobile */}
-      <div className="w-1/2">
-        <p className="text-xs text-fg-muted mb-1.5">{t('style.scale')}</p>
-        <div className="space-y-1.5">
-          {[
-            { key: 'scaleDesktop', label: t('style.scaleDesktop') },
-            { key: 'scaleMobile',  label: t('style.scaleMobile')  },
-          ].map(({ key, label }) => {
-            const val = block[key] ?? 100
-            return (
-              <div key={key} className="flex items-center gap-2">
-                <span className="text-xs text-fg-muted w-12 shrink-0">{label}</span>
-                <input
-                  type="range"
-                  min={30}
-                  max={150}
-                  step={5}
-                  value={val}
-                  onChange={e => onChange({ [key]: Number(e.target.value) })}
-                  className="flex-1 h-1 accent-primary"
-                />
-                <span className="text-xs text-fg-muted tabular-nums w-8 text-right shrink-0">{val}%</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
       {/* Border / Shadow / Full bleed — pill toggles */}
       <div className="flex flex-wrap gap-1.5">
         {[
@@ -84,6 +59,45 @@ export default function BlockStyleControls({ block, onChange }) {
             {label}
           </button>
         ))}
+      </div>
+
+      {/* Advanced options — collapsible */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen(v => !v)}
+          className="flex items-center gap-1.5 text-xs text-fg-ghost hover:text-fg-muted transition"
+        >
+          <ChevronDown size={13} className={`transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
+          Advanced
+        </button>
+
+        {advancedOpen && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-fg-muted">{t('style.scale')}</p>
+            {[
+              { key: 'scaleDesktop', label: t('style.scaleDesktop') },
+              { key: 'scaleMobile',  label: t('style.scaleMobile')  },
+            ].map(({ key, label }) => {
+              const val = block[key] ?? 100
+              return (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="text-xs text-fg-muted w-12 shrink-0">{label}</span>
+                  <input
+                    type="range"
+                    min={30}
+                    max={150}
+                    step={5}
+                    value={val}
+                    onChange={e => onChange({ [key]: Number(e.target.value) })}
+                    className="flex-1 h-1 accent-primary"
+                  />
+                  <span className="text-xs text-fg-muted tabular-nums w-8 text-right shrink-0">{val}%</span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
