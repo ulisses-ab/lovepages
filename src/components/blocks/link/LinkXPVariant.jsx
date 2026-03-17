@@ -1,17 +1,18 @@
 // Windows XP "Start" button — green glossy pill with Windows flag logo
 
 function WindowsFlag({ size = 20 }) {
-  // Classic XP waving-flag four-quadrant logo
+  // Classic XP waving-flag — four parallelograms forming a V-wave crease at center
+  // Left column leans \, right column leans /, so all edges form a V (center dips deepest)
   return (
     <svg width={size} height={size} viewBox="0 0 20 20" style={{ flexShrink: 0, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }}>
       {/* Top-left: red */}
-      <path d="M1 1 Q5 0.5 9.2 3.5 L9.2 9.5 Q5 7 1 7.5 Z" fill="#F25022" />
+      <path d="M0.5,0.5 L9,2.5 L9,10.5 L0.5,8.5 Z" fill="#F25022" />
       {/* Top-right: green */}
-      <path d="M10.8 3 Q15 0 19 1 L19 7 Q15 6.5 10.8 9 Z" fill="#7FBA00" />
+      <path d="M11,2.5 L19.5,0.5 L19.5,8.5 L11,10.5 Z" fill="#7FBA00" />
       {/* Bottom-left: blue */}
-      <path d="M1 9 Q5 8.5 9.2 11 L9.2 17 Q5 14.5 1 14 Z" fill="#00A4EF" />
+      <path d="M0.5,9.5 L9,11.5 L9,19.5 L0.5,17.5 Z" fill="#00A4EF" />
       {/* Bottom-right: yellow */}
-      <path d="M10.8 10.5 Q15 8 19 8.5 L19 14.5 Q15 14 10.8 17 Z" fill="#FFB900" />
+      <path d="M11,11.5 L19.5,9.5 L19.5,17.5 L11,19.5 Z" fill="#FFB900" />
     </svg>
   )
 }
