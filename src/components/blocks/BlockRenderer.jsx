@@ -56,9 +56,14 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     return () => ro.disconnect()
   }, [isEditing])
 
-  const scaleStyle = scale !== 100
+  // For fullBleed blocks, scale is applied only to the inner content container
+  // so the outer block stays edge-to-edge. For normal blocks, scale the outer wrapper.
+  const scaleTransform = scale !== 100
     ? { transform: `scale(${scale / 100})`, transformOrigin: 'top center' }
     : {}
+  const outerScaleStyle   = block.fullBleed ? {} : scaleTransform
+  const contentScaleStyle = block.fullBleed ? scaleTransform : {}
+
   const marginStyle = (scale !== 100 && naturalHeight != null)
     ? { marginBottom: -(1 - scale / 100) * naturalHeight }
     : {}
@@ -110,13 +115,13 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
 
     return (
-      <div ref={wrapperRef} className={outerClass} style={{ ...scaleStyle, ...marginStyle }}>
+      <div ref={wrapperRef} className={outerClass} style={{ ...outerScaleStyle, ...marginStyle }}>
         <div style={layer2} />
         <div style={layer1} />
         <div className="relative">
           {block.fullBleed
-            ? <div className="max-w-3xl mx-auto p-4">{renderBlock()}</div>
-            : <div className="p-4">{renderBlock()}</div>
+            ? <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
+            : <div className="p-4" style={contentScaleStyle}>{renderBlock()}</div>
           }
         </div>
       </div>
@@ -131,7 +136,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     backgroundSize: block.bgImage ? (fit === 'tile' ? 'var(--bg-tile-size)' : fit) : undefined,
     backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
     backgroundPosition: block.bgImage ? 'center' : undefined,
-    ...scaleStyle,
+    ...outerScaleStyle,
     ...marginStyle,
   }
 
@@ -144,7 +149,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   if (block.fullBleed) {
     return (
       <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
-        <div className="max-w-3xl mx-auto p-4">
+        <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>
           {renderBlock()}
         </div>
       </div>
