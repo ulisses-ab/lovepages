@@ -1,125 +1,72 @@
-import { useRef, useState, useEffect } from 'react'
-import { XP, raised, sunken, WinCtrlBtn, XPBtn } from '../XPShared'
+// Windows XP "Start" button — green glossy pill with Windows flag logo
 
-const BASE_W = 290
-const BASE_H = 138
+function WindowsFlag({ size = 20 }) {
+  // Classic XP waving-flag four-quadrant logo
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" style={{ flexShrink: 0, filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }}>
+      {/* Top-left: red */}
+      <path d="M1 1 Q5 0.5 9.2 3.5 L9.2 9.5 Q5 7 1 7.5 Z" fill="#F25022" />
+      {/* Top-right: green */}
+      <path d="M10.8 3 Q15 0 19 1 L19 7 Q15 6.5 10.8 9 Z" fill="#7FBA00" />
+      {/* Bottom-left: blue */}
+      <path d="M1 9 Q5 8.5 9.2 11 L9.2 17 Q5 14.5 1 14 Z" fill="#00A4EF" />
+      {/* Bottom-right: yellow */}
+      <path d="M10.8 10.5 Q15 8 19 8.5 L19 14.5 Q15 14 10.8 17 Z" fill="#FFB900" />
+    </svg>
+  )
+}
 
 export default function LinkXPVariant({ href, label }) {
-  const wrapRef = useRef(null)
-  const [scale, setScale] = useState(1)
-
-  useEffect(() => {
-    const el = wrapRef.current
-    if (!el) return
-    const ro = new ResizeObserver(([entry]) => {
-      setScale(Math.min(entry.contentRect.width / BASE_W, 1))
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
   return (
-    <div ref={wrapRef} style={{ width: '100%' }}>
-      <div style={{ display: 'flex', justifyContent: 'center', height: BASE_H * scale, overflow: 'hidden', lineHeight: 1 }}>
-      <div style={{
-        width: BASE_W,
-        flexShrink: 0,
-        transform: `scale(${scale})`,
-        transformOrigin: 'top center',
-        fontFamily: 'Tahoma, "MS Sans Serif", Arial, sans-serif',
-        fontSize: 11,
-        color: XP.text,
-      }}>
-
-        {/* ── Outer window frame ──────────────────────────────────────────── */}
-        <div style={{
-          width: BASE_W,
-          height: BASE_H,
-          background: XP.chrome,
-          border: `3px solid ${XP.frameBlue}`,
-          outline: `1px solid ${XP.frameDark}`,
-          boxShadow: '4px 4px 12px rgba(0,0,0,0.55)',
-          display: 'flex',
-          flexDirection: 'column',
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <a
+        href={href || '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '7px 22px 7px 12px',
+          borderRadius: 999,
+          background: 'linear-gradient(180deg, #82CE4A 0%, #5DB52A 30%, #3D9610 55%, #4CAF18 85%, #3A8C0C 100%)',
+          border: '2px solid #1E5C04',
+          outline: '1px solid rgba(255,255,255,0.18)',
+          boxShadow: [
+            '0 3px 8px rgba(0,0,0,0.55)',
+            '0 1px 2px rgba(0,0,0,0.3)',
+            'inset 0 1px 0 rgba(255,255,255,0.22)',
+            'inset 0 -1px 0 rgba(0,0,0,0.2)',
+          ].join(', '),
+          fontFamily: 'Tahoma, "MS Sans Serif", Arial, sans-serif',
+          fontSize: 16,
+          fontWeight: 'bold',
+          color: '#ffffff',
+          textShadow: '0 1px 3px rgba(0,0,0,0.65)',
+          textDecoration: 'none',
+          position: 'relative',
           overflow: 'hidden',
-        }}>
+          cursor: 'pointer',
+          userSelect: 'none',
+          letterSpacing: 0.3,
+        }}
+      >
+        {/* Gloss highlight — upper half */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '48%',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.06) 100%)',
+          borderRadius: '999px 999px 60% 60%',
+          pointerEvents: 'none',
+        }} />
 
-          {/* ── Title bar ────────────────────────────────────────────────── */}
-          <div style={{
-            height: 28, flexShrink: 0,
-            background: `linear-gradient(90deg, ${XP.titleGradL} 0%, ${XP.titleGradR} 70%, #80C0FF 100%)`,
-            display: 'flex', alignItems: 'center',
-            padding: '0 4px 0 6px',
-          }}>
-            <span style={{ fontSize: 14, marginRight: 5, lineHeight: 1 }}>🌐</span>
-            <span style={{
-              flex: 1, color: XP.titleText, fontSize: 11, fontWeight: 'bold',
-              textShadow: '1px 1px 1px rgba(0,0,30,0.5)',
-              letterSpacing: 0.2,
-            }}>
-              Open Link
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', paddingBottom: 2, gap: 2 }}>
-              <WinCtrlBtn type="close" onClick={() => {}} />
-            </div>
-          </div>
+        {/* Windows flag */}
+        <WindowsFlag size={20} />
 
-          {/* ── Dialog content ───────────────────────────────────────────── */}
-          <div style={{
-            flex: 1,
-            background: XP.chrome,
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '14px 16px 10px',
-            gap: 10,
-          }}>
-
-            {/* Icon + message row */}
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              {/* Shield / warning icon (XP-style) */}
-              <div style={{
-                width: 36, height: 36, flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 28, lineHeight: 1,
-              }}>
-                🌐
-              </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <div style={{ fontSize: 11, color: XP.text, lineHeight: 1.4, fontWeight: 'bold' }}>
-                  {label || 'Click here'}
-                </div>
-                <div style={{
-                  fontSize: 10, color: XP.textMuted, lineHeight: 1.3,
-                }}>
-                  This link will open a new window.
-                </div>
-              </div>
-            </div>
-
-            {/* Horizontal rule */}
-            <div style={{
-              height: 1,
-              background: `linear-gradient(90deg, ${XP.chromeDark}, transparent)`,
-              marginTop: 2,
-            }} />
-
-            {/* Button row */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-              <a
-                href={href || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-              >
-                <XPBtn wide primary>Open</XPBtn>
-              </a>
-              <XPBtn wide>Cancel</XPBtn>
-            </div>
-
-          </div>
-        </div>
-      </div>
-      </div>
+        {/* Label */}
+        <span style={{ position: 'relative' }}>{label || 'start'}</span>
+      </a>
     </div>
   )
 }
