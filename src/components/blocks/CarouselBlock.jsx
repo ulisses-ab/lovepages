@@ -298,7 +298,7 @@ function AlbumView({ block }) {
     const update = (w) => {
       if (w < 10) return
       const isMobile = w < 500
-      const pageW = isMobile ? Math.floor(w - STRIP) : Math.floor(w / 2)
+      const pageW = isMobile ? Math.floor(w - STRIP) : Math.floor(w / 2 * 1.15)
       const pageH = Math.floor(pageW * 1.1)
       setMobile(isMobile)
       setPageSize({ width: pageW, height: pageH })
