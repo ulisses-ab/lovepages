@@ -61,31 +61,35 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
           position: 'absolute', inset: 0,
           // Pebble silhouette: subtly uneven, like a polished river stone
           borderRadius: '52% 48% 44% 56% / 56% 54% 46% 44%',
-          background: 'linear-gradient(158deg, #f8faff 0%, #eaf1f9 32%, #dae6f4 58%, #cad8ec 100%)',
+          background: 'linear-gradient(158deg, #ffffff 0%, #edf4fb 28%, #d8e8f5 55%, #c2d4e8 100%)',
           boxShadow: [
-            '0 16px 48px rgba(0,40,110,0.26)',
-            '0 5px 14px rgba(0,20,70,0.18)',
-            '0 1px 3px rgba(0,0,0,0.10)',
-            'inset 0 1.5px 0 rgba(255,255,255,1)',
-            'inset 0 0 0 1px rgba(255,255,255,0.55)',
+            // Lift — main depth shadow
+            '0 22px 60px rgba(0,30,90,0.38)',
+            '0 8px 20px rgba(0,20,70,0.28)',
+            '0 2px 5px rgba(0,0,0,0.16)',
+            // Dark bottom-edge rim — makes the shell look thick/solid
+            '0 3px 0 rgba(160,195,230,0.7)',
+            // Inner top bevel
+            'inset 0 2px 0 rgba(255,255,255,1)',
+            'inset 0 0 0 1.5px rgba(255,255,255,0.7)',
           ].join(', '),
         }}>
 
-          {/* Outer shell: main gloss diagonal sweep */}
+          {/* Outer shell: strong gloss diagonal sweep */}
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none',
-            background: 'linear-gradient(148deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.50) 20%, rgba(255,255,255,0.12) 38%, rgba(255,255,255,0.02) 55%, transparent 68%)',
+            background: 'linear-gradient(148deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.58) 18%, rgba(255,255,255,0.14) 36%, rgba(255,255,255,0.02) 52%, transparent 66%)',
           }} />
-          {/* Bottom depth shadow inside shell */}
+          {/* Bottom depth darkening */}
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none',
-            background: 'linear-gradient(to bottom, transparent 55%, rgba(140,185,225,0.22) 100%)',
+            background: 'linear-gradient(to bottom, transparent 45%, rgba(110,160,210,0.30) 100%)',
           }} />
-          {/* Thin bright edge rim at top */}
+          {/* Bright edge rim at top */}
           <div style={{
-            position: 'absolute', top: 0, left: '8%', right: '8%', height: 2,
+            position: 'absolute', top: 1, left: '6%', right: '6%', height: 2.5,
             borderRadius: '50%', pointerEvents: 'none',
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.9) 70%, transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,1) 28%, rgba(255,255,255,1) 72%, transparent)',
           }} />
 
           {/* ── INNER AQUA PANEL ─────────────────────────────────────────── */}
