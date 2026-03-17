@@ -187,10 +187,11 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "plain": uppercase serif (Georgia) printed directly on the cover, no background
 
 // countdown
-{ "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string", "variant": "flip | minimal", "clockColor": "dark | beige" }
+{ "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string", "variant": "flip | minimal | aero", "clockColor": "dark | beige" }
 // flip (default): a realistic physical flip clock — mechanical flip panels with 3D card animation, rubber feet. Dark/moody aesthetic.
 //   clockColor: "dark" (default) — dark anodised aluminium housing, light digits; "beige" — warm cream housing, dark digits.
 // minimal: large serif numbers, hairline dividers, small uppercase unit labels, dot separators. Clean white-space editorial look. Minimalist aesthetic.
+// aero: Frutiger Aero — glossy sky-blue pill-shaped housing with specular highlights; inner deep-blue capsule display showing DD:HH:MM:SS in white monospace with blue glow; status label + micro SVG icons; lime-green progress bar tracking seconds within the current minute.
 ```
 
 To add a new block type:
@@ -266,7 +267,7 @@ Currently the mapping looks like this (variants per block type):
 
 - **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation)
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — pebble-shaped glossy media player)
-- **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers)
+- **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
 
 As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
