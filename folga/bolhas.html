@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>bolhas — folga do claude</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw; height: 100vh; overflow: hidden;
+      background: radial-gradient(ellipse at 40% 30%, #0090d8 0%, #005aaa 40%, #002060 100%);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* fundo animado — ondas de luz suave */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 80%, rgba(0,200,255,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 35% at 80% 20%, rgba(100,220,255,0.10) 0%, transparent 70%);
+      animation: ondas 8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes ondas {
+      from { opacity: 0.6; transform: scale(1); }
+      to   { opacity: 1;   transform: scale(1.08); }
+    }
+
+    /* legenda no canto */
+    .nota {
+      position: fixed; bottom: 28px; right: 32px;
+      color: rgba(255,255,255,0.28);
+      font-size: 11px; letter-spacing: 0.5px;
+      line-height: 1.7;
+      text-align: right;
+      pointer-events: none;
+    }
+
+    .nota strong {
+      display: block;
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+
+    /* cada bolha é um <div> criado pelo JS */
+    .bolha {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+
+      /* vidro aqua */
+      background: radial-gradient(
+        circle at 38% 32%,
+        rgba(255,255,255,0.55) 0%,
+        rgba(200,240,255,0.22) 35%,
+        rgba(100,200,255,0.08) 65%,
+        transparent 100%
+      );
+      border: 1px solid rgba(255,255,255,0.30);
+
+      /* cap de gloss — pseudo-element */
+      overflow: hidden;
+    }
+
+    /* o cap branco na metade superior de cada bolha */
+    .bolha::after {
+      content: '';
+      position: absolute;
+      top: 4%; left: 12%; right: 12%; height: 42%;
+      border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.65),
+        rgba(255,255,255,0.06)
+      );
+    }
+
+    /* anel de brilho externo */
+    .bolha::before {
+      content: '';
+      position: absolute; inset: -1px;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(130,220,255,0.35), 0 0 14px rgba(80,180,255,0.18);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="nota">
+    <strong>folga do claude</strong>
+    16 mar 2026 · frutiger aero<br>
+    clique para criar bolhas
+  </div>
+
+  <script>
+    // ── configurações ────────────────────────────────────────────────
+    const MAX_BOLHAS   = 60
+    const INTERVALO_MS = 420   // nova bolha automática a cada N ms
+
+    let bolhas = []
+
+    // ── criar uma bolha ──────────────────────────────────────────────
+    function criarBolha(x, y) {
+      if (bolhas.length >= MAX_BOLHAS) return
+
+      const tamanho = 18 + Math.random() * 70          // px
+      const duracao = 5  + Math.random() * 9            // segundos
+      const deriva  = (Math.random() - 0.5) * 120       // desvio horizontal
+
+      // posição inicial: passada (clique) ou aleatória na base
+      const startX = x ?? (Math.random() * window.innerWidth)
+      const startY = y ?? (window.innerHeight + tamanho)
+
+      const el = document.createElement('div')
+      el.className = 'bolha'
+
+      Object.assign(el.style, {
+        width:  tamanho + 'px',
+        height: tamanho + 'px',
+        left:   (startX - tamanho / 2) + 'px',
+        top:    (startY - tamanho / 2) + 'px',
+        opacity: 0,
+        transition: `opacity 0.6s ease`,
+      })
+
+      document.body.appendChild(el)
+      bolhas.push(el)
+
+      // forçar reflow para a transição de opacidade funcionar
+      el.getBoundingClientRect()
+      el.style.opacity = 0.75 + Math.random() * 0.25
+
+      // animação via Web Animations API — subida com deriva e fade out
+      const anim = el.animate([
+        { transform: `translate(0, 0)`,                          opacity: el.style.opacity },
+        { transform: `translate(${deriva * 0.4}px, ${-window.innerHeight * 0.5}px)`, opacity: el.style.opacity, offset: 0.7 },
+        { transform: `translate(${deriva}px, ${-(window.innerHeight + tamanho * 2)}px)`, opacity: 0 },
+      ], {
+        duration: duracao * 1000,
+        easing: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+        fill: 'forwards',
+      })
+
+      anim.onfinish = () => {
+        el.remove()
+        bolhas = bolhas.filter(b => b !== el)
+      }
+    }
+
+    // ── bolhas automáticas ───────────────────────────────────────────
+    setInterval(() => {
+      // nascem na parte inferior, distribuídas
+      const x = Math.random() * window.innerWidth
+      const y = window.innerHeight + 10
+      criarBolha(x, y)
+    }, INTERVALO_MS)
+
+    // ── clique / toque cria um burst ─────────────────────────────────
+    function burst(cx, cy) {
+      const n = 3 + Math.floor(Math.random() * 4)
+      for (let i = 0; i < n; i++) {
+        setTimeout(() => {
+          const jitter = 30
+          criarBolha(
+            cx + (Math.random() - 0.5) * jitter,
+            cy + (Math.random() - 0.5) * jitter
+          )
+        }, i * 60)
+      }
+    }
+
+    document.addEventListener('click',     e => burst(e.clientX, e.clientY))
+    document.addEventListener('touchstart', e => {
+      e.preventDefault()
+      for (const t of e.touches) burst(t.clientX, t.clientY)
+    }, { passive: false })
+
+    // ── seed inicial para não começar vazio ──────────────────────────
+    for (let i = 0; i < 18; i++) {
+      setTimeout(() => {
+        criarBolha(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight   // posições variadas, não só na base
+        )
+      }, i * 80)
+    }
+  </script>
+</body>
+</html>
