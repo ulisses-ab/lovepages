@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -39,8 +39,28 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   const scale = isMobile
     ? (block.scaleMobile ?? block.scale ?? 100)
     : (block.scaleDesktop ?? block.scale ?? 100)
+
+  // Measure the wrapper's layout height (unaffected by CSS transform) so we can
+  // collapse the dead space that transform: scale() leaves behind.
+  // marginBottom = -(1 - scale/100) * naturalHeight removes dead space when scale < 1
+  // and adds space when scale > 1 so overflowing content isn't covered by the next block.
+  const wrapperRef = useRef(null)
+  const [naturalHeight, setNaturalHeight] = useState(null)
+  useEffect(() => {
+    if (isEditing || !wrapperRef.current) return
+    const ro = new ResizeObserver(([entry]) => {
+      const h = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+      setNaturalHeight(h)
+    })
+    ro.observe(wrapperRef.current)
+    return () => ro.disconnect()
+  }, [isEditing])
+
   const scaleStyle = scale !== 100
     ? { transform: `scale(${scale / 100})`, transformOrigin: 'top center' }
+    : {}
+  const marginStyle = (scale !== 100 && naturalHeight != null)
+    ? { marginBottom: -(1 - scale / 100) * naturalHeight }
     : {}
 
   // In the editor, never apply block backgrounds — they're preview-only.
@@ -90,7 +110,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
 
     return (
-      <div className={outerClass} style={scaleStyle}>
+      <div ref={wrapperRef} className={outerClass} style={{ ...scaleStyle, ...marginStyle }}>
         <div style={layer2} />
         <div style={layer1} />
         <div className="relative">
@@ -112,6 +132,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
     backgroundPosition: block.bgImage ? 'center' : undefined,
     ...scaleStyle,
+    ...marginStyle,
   }
 
   const wrapperClass = [
@@ -122,7 +143,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
 
   if (block.fullBleed) {
     return (
-      <div className={wrapperClass} style={wrapperStyle}>
+      <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
         <div className="max-w-3xl mx-auto p-4">
           {renderBlock()}
         </div>
@@ -131,7 +152,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   }
 
   return (
-    <div className={wrapperClass} style={wrapperStyle}>
+    <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
       {renderBlock()}
     </div>
   )
