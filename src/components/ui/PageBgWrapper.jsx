@@ -1,4 +1,5 @@
 import { getPageBgStyle } from '../../lib/pageUtils'
+import BgEffect from './BgEffect'
 
 /**
  * Wraps page content with the correct background treatment.
@@ -14,7 +15,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
       position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
       backgroundColor: settings.bgColor2 || undefined,
       backgroundImage: settings.bgImage2 ? `url(${settings.bgImage2})` : undefined,
-      backgroundSize: settings.bgImage2 ? (fit2 === 'tile' ? '200px' : fit2) : undefined,
+      backgroundSize: settings.bgImage2 ? (fit2 === 'tile' ? 'var(--bg-tile-size)' : fit2) : undefined,
       backgroundRepeat: settings.bgImage2 ? (fit2 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
       backgroundPosition: settings.bgImage2 ? 'center' : undefined,
     }
@@ -22,7 +23,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
       position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
       backgroundColor: settings.bgColor || undefined,
       backgroundImage: settings.bgImage ? `url(${settings.bgImage})` : undefined,
-      backgroundSize: settings.bgImage ? (fit1 === 'tile' ? '200px' : fit1) : undefined,
+      backgroundSize: settings.bgImage ? (fit1 === 'tile' ? 'var(--bg-tile-size)' : fit1) : undefined,
       backgroundRepeat: settings.bgImage ? (fit1 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
       backgroundPosition: settings.bgImage ? 'center' : undefined,
       maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
@@ -32,6 +33,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
       <div className={className} style={{ position: 'relative', ...style }}>
         <div style={layer2} />
         <div style={layer1} />
+        <BgEffect effect={settings?.bgEffect} />
         <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
       </div>
     )
@@ -39,6 +41,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
 
   return (
     <div className={className} style={{ ...getPageBgStyle(settings), ...style }}>
+      <BgEffect effect={settings?.bgEffect} />
       {children}
     </div>
   )

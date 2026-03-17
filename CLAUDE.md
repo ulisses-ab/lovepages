@@ -115,7 +115,8 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "bgImageFit": "cover | contain | tile — how the image fills the page (default: cover)",
   "bgFade": false,
   "bgColor2": "#hex or empty — second background stop for fade",
-  "bgImage2": "url or empty — second background image for fade"
+  "bgImage2": "url or empty — second background image for fade",
+  "bgEffect": "empty string | bubbles — animated overlay rendered by BgEffect component (position:fixed, zIndex:0)"
 }
 ```
 

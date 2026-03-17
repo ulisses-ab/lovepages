@@ -130,6 +130,9 @@ export const translations = {
     'pageOptions.bgFitCover': 'Cover',
     'pageOptions.bgFitContain': 'Contain',
     'pageOptions.bgFitTile': 'Tile',
+    'pageOptions.effect': 'Effect',
+    'pageOptions.effectNone': 'None',
+    'pageOptions.effectBubbles': 'Bubbles',
 
     // ImageUpload (shared component)
     'imageUpload.upload': 'Upload image',
@@ -318,6 +321,9 @@ export const translations = {
     'pageOptions.bgFitCover': 'Cobrir',
     'pageOptions.bgFitContain': 'Conter',
     'pageOptions.bgFitTile': 'Ladrilho',
+    'pageOptions.effect': 'Efeito',
+    'pageOptions.effectNone': 'Nenhum',
+    'pageOptions.effectBubbles': 'Bolhas',
 
     // ImageUpload (shared component)
     'imageUpload.upload': 'Enviar imagem',

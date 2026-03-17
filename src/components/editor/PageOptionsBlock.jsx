@@ -43,6 +43,29 @@ export default function PageOptionsBlock({ pageSettings, onChange }) {
             bgImageFit2={pageSettings.bgImageFit2 || 'cover'}
             onChange={onChange}
           />
+
+          {/* Background effect */}
+          <div>
+            <p className="text-xs text-fg-muted mb-2">{t('pageOptions.effect')}</p>
+            <div className="flex gap-1.5">
+              {[
+                { value: '',        label: t('pageOptions.effectNone') },
+                { value: 'bubbles', label: t('pageOptions.effectBubbles') },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => onChange({ bgEffect: opt.value })}
+                  className={`px-3 py-1 text-xs rounded-full border transition ${
+                    (pageSettings.bgEffect || '') === opt.value
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
