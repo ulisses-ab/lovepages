@@ -24,6 +24,11 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     block.shadow ? 'shadow-md' : '',
   ].filter(Boolean).join(' ')
 
+  const scale = block.scale ?? 100
+  const scaleStyle = scale !== 100
+    ? { transform: `scale(${scale / 100})`, transformOrigin: 'top center' }
+    : {}
+
   // In the editor, never apply block backgrounds — they're preview-only.
   if (isEditing) {
     return (
@@ -71,7 +76,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
 
     return (
-      <div className={outerClass}>
+      <div className={outerClass} style={scaleStyle}>
         <div style={layer2} />
         <div style={layer1} />
         <div className="relative">
@@ -92,6 +97,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     backgroundSize: block.bgImage ? (fit === 'tile' ? 'var(--bg-tile-size)' : fit) : undefined,
     backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
     backgroundPosition: block.bgImage ? 'center' : undefined,
+    ...scaleStyle,
   }
 
   const wrapperClass = [

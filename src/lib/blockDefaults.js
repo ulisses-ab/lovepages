@@ -29,6 +29,7 @@ export function createBlock(type) {
     border: false,
     shadow: false,
     fullBleed: false,
+    scale: 100,
     bold: false,
     italic: false,
     outline: false,

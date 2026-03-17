@@ -137,7 +137,8 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "bgImage2": "url or empty — second background image for fade",
   "border": false,
   "shadow": false,
-  "fullBleed": false
+  "fullBleed": false,
+  "scale": 100
 }
 ```
 // fullBleed: when true, the block escapes the max-width container and stretches edge-to-edge (no padding or rounded corners applied by BlockRenderer; PublicPage and Canvas preview render it outside the constrained flex-wrap group)
