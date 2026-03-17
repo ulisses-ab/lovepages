@@ -8,6 +8,7 @@ import SongBarVariant from './song/SongBarVariant'
 import SongCoverVariant from './song/SongCoverVariant'
 import SongVinylVariant from './song/SongVinylVariant'
 import SongAeroVariant from './song/SongAeroVariant'
+import SongXPVariant from './song/SongXPVariant'
 
 export default function SongBlock({ block, isEditing, onChange }) {
   const {
@@ -28,6 +29,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
     { value: 'cover',   label: t('song.variantCover') },
     { value: 'vinyl',   label: t('song.variantVinyl') },
     { value: 'aero',    label: t('song.variantAero') },
+    { value: 'xp',      label: t('song.variantXp') },
   ]
 
   // ── Edit mode ──────────────────────────────────────────────────────────────
@@ -70,7 +72,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
           onChange={e => onChange({ artist: e.target.value })}
         />
 
-        {(variant === 'cover' || variant === 'vinyl') && (
+        {(variant === 'cover' || variant === 'vinyl' || variant === 'xp') && (
           <div className="space-y-1 pt-1">
             <p className="text-xs text-fg-muted">{t('song.coverImage')}</p>
             <ImageUpload
@@ -142,5 +144,6 @@ export default function SongBlock({ block, isEditing, onChange }) {
   if (variant === 'cover') return <><HiddenPlayer mountRef={mountRef} /><SongCoverVariant {...shared} /></>
   if (variant === 'vinyl') return <><HiddenPlayer mountRef={mountRef} /><SongVinylVariant {...shared} volume={volume} setVolume={setVolume} /></>
   if (variant === 'aero')  return <><HiddenPlayer mountRef={mountRef} /><SongAeroVariant  {...shared} /></>
+  if (variant === 'xp')    return <><HiddenPlayer mountRef={mountRef} /><SongXPVariant    {...shared} /></>
   return <><HiddenPlayer mountRef={mountRef} /><SongBarVariant {...shared} /></>
 }

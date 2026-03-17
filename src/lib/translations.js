@@ -106,6 +106,7 @@ export const translations = {
     'song.variantCover': 'Cover',
     'song.variantVinyl': 'Vinyl',
     'song.variantAero': 'Aero',
+    'song.variantXp':   'XP',
 
     // VideoBlock
     'video.youtubeUrl': 'YouTube URL',
@@ -297,6 +298,7 @@ export const translations = {
     'song.variantCover': 'Capa',
     'song.variantVinyl': 'Vinil',
     'song.variantAero': 'Aero',
+    'song.variantXp':   'XP',
 
     // VideoBlock
     'video.youtubeUrl': 'URL do YouTube',

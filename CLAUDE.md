@@ -171,8 +171,9 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "default": horizontal bar with play button and progress bar
 // — "cover": square cover image (clickable to play/pause, hover reveals overlay icon) with title, artist, and progress bar to its right; no card background
 // — "vinyl": large spinning vinyl disc with play button to its left, title and progress bar below; coverUrl appears as the center label
-// — "aero": Frutiger Aero — pebble-shaped early-2000s media player; white glossy outer shell, aqua-blue inner panel, LCD display showing title+time, pill buttons, neon green play button with glow rings
-// coverUrl: used by "cover" and "vinyl" variants; supports Supabase Storage upload or direct URL
+// — "aero": Frutiger Aero — rectangular aqua-blue device body, SVG transport icons, cover art panel with glass reflection, LCD screen with blue-glow monospace, progress track with chrome knob, EQ bars, neon green play button with 4-ring halo
+// — "xp": Windows XP / Luna Blue — full WMP-style window frame; Luna Blue title bar gradient, classic gray chrome (#ECE9D8), 3D raised/sunken borders, menu bar, cover art inset, Tahoma font, XP seek bar with grip-line thumb, transport buttons, status bar
+// coverUrl: used by "cover", "vinyl", and "xp" variants; supports Supabase Storage upload or direct URL
 
 // link
 { "href": "url", "label": "string", "color": "#hex" }
@@ -267,7 +268,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 Currently the mapping looks like this (variants per block type):
 
 - **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation)
-- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — pebble-shaped glossy media player)
+- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — rectangular aqua-blue media player body), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
 
