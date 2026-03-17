@@ -6,6 +6,7 @@ import ColorPicker from '../ui/ColorPicker'
 import TextTypewriterVariant from './text/TextTypewriterVariant'
 import TextPostitVariant from './text/TextPostitVariant'
 import TextRansomVariant from './text/TextRansomVariant'
+import TextCyberpunkVariant from './text/TextCyberpunkVariant'
 
 // All available fonts — each key maps to its CSS font-family stack.
 // These are loaded via Google Fonts in index.html.
@@ -97,7 +98,7 @@ export default function TextBlock({ block, isEditing, onChange }) {
   const { variant, content, align, fontFamily = 'inter', fontSize = 'base', color = '', noteColor = '' } = block
   const { t } = useT()
 
-  const isPhysical = variant === 'typewriter' || variant === 'postit' || variant === 'ransom'
+  const isPhysical = variant === 'typewriter' || variant === 'postit' || variant === 'ransom' || variant === 'cyberpunk'
 
   if (isEditing) {
     return (
@@ -112,6 +113,7 @@ export default function TextBlock({ block, isEditing, onChange }) {
           <option value="typewriter">{t('text.typewriter')}</option>
           <option value="postit">{t('text.postit')}</option>
           <option value="ransom">{t('text.ransom')}</option>
+          <option value="cyberpunk">Cyberpunk</option>
         </select>
 
         {/* Plain variant controls */}
@@ -289,6 +291,9 @@ export default function TextBlock({ block, isEditing, onChange }) {
 
   // ── Ransom note ───────────────────────────────────────────────────────────────
   if (variant === 'ransom') return <TextRansomVariant content={content} sizePx={sizePx} textAlign={textAlign} />
+
+  // ── Cyberpunk ─────────────────────────────────────────────────────────────────
+  if (variant === 'cyberpunk') return <TextCyberpunkVariant content={content} sizePx={sizePx} textAlign={textAlign} />
 
   // Fallback
   return <p style={{ fontSize: sizePx, textAlign, color: color || colors.fg, whiteSpace: 'pre-wrap' }}>{content}</p>

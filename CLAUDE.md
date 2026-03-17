@@ -155,6 +155,7 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // typewriter: cottagecore — aged cream paper, red margin line, ruled lines, Courier ink-impression effect
 // postit: playful/bold — sticky note with adhesive strip, ruled lines, dog-ear corner, cursive font; noteColor controls paper color
 // ransom: playful/bold — each letter rendered with a different randomly-chosen font, weight, italic, size, rotation, and color/background theme (seeded by content so the same text always renders the same)
+// cyberpunk: cyberpunk — dark panel (#06060f→#0a0018), cyan neon border + glow, scanline overlay, corner bracket accents (magenta), Space Mono font; text rendered in three layers: cyan ghost offset left, magenta ghost offset right, white main text with cyan text-shadow glow
 
 // image
 { "variant": "default | polaroid", "src": "url", "alt": "string", "caption": "string" }
@@ -267,7 +268,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 ### How this maps to blocks
 Currently the mapping looks like this (variants per block type):
 
-- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation)
+- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation), `cyberpunk` (cyberpunk — dark panel, neon cyan border glow, scanlines, Space Mono, RGB chromatic-aberration glitch ghost layers)
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — rectangular aqua-blue media player body), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
