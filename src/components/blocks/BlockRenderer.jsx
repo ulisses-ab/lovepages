@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -24,7 +25,20 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     block.shadow ? 'shadow-md' : '',
   ].filter(Boolean).join(' ')
 
-  const scale = block.scale ?? 100
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const handler = e => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // back-compat: old blocks only had `scale`
+  const scale = isMobile
+    ? (block.scaleMobile ?? block.scale ?? 100)
+    : (block.scaleDesktop ?? block.scale ?? 100)
   const scaleStyle = scale !== 100
     ? { transform: `scale(${scale / 100})`, transformOrigin: 'top center' }
     : {}

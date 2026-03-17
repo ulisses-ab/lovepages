@@ -37,21 +37,32 @@ export default function BlockStyleControls({ block, onChange }) {
         />
       )}
 
-      {/* Scale */}
+      {/* Scale — desktop / mobile */}
       <div>
-        <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-fg-muted">{t('style.scale')}</p>
-          <span className="text-xs text-fg-muted tabular-nums">{block.scale ?? 100}%</span>
+        <p className="text-xs text-fg-muted mb-1.5">{t('style.scale')}</p>
+        <div className="space-y-1.5">
+          {[
+            { key: 'scaleDesktop', label: t('style.scaleDesktop') },
+            { key: 'scaleMobile',  label: t('style.scaleMobile')  },
+          ].map(({ key, label }) => {
+            const val = block[key] ?? 100
+            return (
+              <div key={key} className="flex items-center gap-2">
+                <span className="text-xs text-fg-muted w-12 shrink-0">{label}</span>
+                <input
+                  type="range"
+                  min={30}
+                  max={150}
+                  step={5}
+                  value={val}
+                  onChange={e => onChange({ [key]: Number(e.target.value) })}
+                  className="flex-1 h-1 accent-primary"
+                />
+                <span className="text-xs text-fg-muted tabular-nums w-8 text-right shrink-0">{val}%</span>
+              </div>
+            )
+          })}
         </div>
-        <input
-          type="range"
-          min={30}
-          max={150}
-          step={5}
-          value={block.scale ?? 100}
-          onChange={e => onChange({ scale: Number(e.target.value) })}
-          className="w-full accent-primary"
-        />
       </div>
 
       {/* Border / Shadow / Full bleed — pill toggles */}
