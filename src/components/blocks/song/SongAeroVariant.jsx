@@ -103,15 +103,15 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
             overflow: 'hidden',
           }}>
 
-            {/* Panel: water ripple rings (nature motif) */}
+            {/* Panel: water ripple rings (nature motif) — kept inside bounds */}
             <div style={{
-              position: 'absolute', right: '-5%', top: '8%',
-              width: 90, height: 90, borderRadius: '50%', pointerEvents: 'none',
+              position: 'absolute', right: '28%', top: '12%',
+              width: 60, height: 60, borderRadius: '50%', pointerEvents: 'none',
               boxShadow: [
-                '0 0 0 1px rgba(255,255,255,0.07)',
-                '0 0 0 10px rgba(255,255,255,0.04)',
-                '0 0 0 22px rgba(255,255,255,0.025)',
-                '0 0 0 36px rgba(255,255,255,0.015)',
+                '0 0 0 1px rgba(255,255,255,0.10)',
+                '0 0 0 10px rgba(255,255,255,0.06)',
+                '0 0 0 22px rgba(255,255,255,0.035)',
+                '0 0 0 36px rgba(255,255,255,0.02)',
               ].join(', '),
             }} />
 
@@ -195,26 +195,27 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
                 </span>
               )}
 
-              {/* Progress groove */}
-              {ready ? (
-                <div
-                  onClick={handleSeek} onTouchEnd={handleSeek}
-                  style={{ cursor: 'pointer', padding: '5px 0' }}
-                  role="slider"
-                  aria-valuenow={Math.round(progress.current)}
-                  aria-valuemin={0}
-                  aria-valuemax={Math.round(progress.duration)}
-                >
-                  <div style={{
-                    height: 5, borderRadius: 3,
-                    background: 'linear-gradient(to bottom, #010e1a, #02182a)',
-                    boxShadow: [
-                      'inset 0 2px 5px rgba(0,0,0,0.85)',
-                      'inset 0 0 0 0.5px rgba(0,110,190,0.28)',
-                      '0 1px 0 rgba(255,255,255,0.09)',
-                    ].join(', '),
-                    overflow: 'hidden',
-                  }}>
+              {/* Progress groove — always visible; fill appears when playing */}
+              <div
+                onClick={ready ? handleSeek : undefined}
+                onTouchEnd={ready ? handleSeek : undefined}
+                style={{ cursor: ready ? 'pointer' : 'default', padding: '5px 0' }}
+                role="slider"
+                aria-valuenow={Math.round(progress.current)}
+                aria-valuemin={0}
+                aria-valuemax={Math.round(progress.duration)}
+              >
+                <div style={{
+                  height: 6, borderRadius: 3,
+                  background: 'linear-gradient(to bottom, #010e1a, #021828)',
+                  boxShadow: [
+                    'inset 0 2px 5px rgba(0,0,0,0.85)',
+                    'inset 0 0 0 0.5px rgba(0,130,210,0.35)',
+                    '0 1px 0 rgba(255,255,255,0.10)',
+                  ].join(', '),
+                  overflow: 'hidden',
+                }}>
+                  {pct > 0 && (
                     <div style={{
                       height: '100%', borderRadius: 3,
                       width: `${pct}%`,
@@ -222,17 +223,18 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
                       boxShadow: '0 0 10px rgba(0,215,255,0.85)',
                       transition: 'width 0.5s',
                     }} />
-                  </div>
+                  )}
                 </div>
-              ) : (
-                <span style={{ fontSize: 7, color: 'rgba(140,215,255,0.48)' }}>loading…</span>
+              </div>
+              {!ready && (
+                <span style={{ fontSize: 7, color: 'rgba(140,215,255,0.48)', marginTop: -4 }}>loading…</span>
               )}
 
               {/* Pill control buttons — each with Aqua gloss cap */}
               <div style={{ display: 'flex', gap: 5 }}>
                 {['⏮', '⏹', '⏭'].map((icon, i) => (
                   <div key={i} style={{
-                    height: 13, paddingLeft: 8, paddingRight: 8, borderRadius: 7,
+                    height: 16, paddingLeft: 9, paddingRight: 9, borderRadius: 8,
                     background: 'linear-gradient(175deg, rgba(255,255,255,0.32) 0%, rgba(160,220,255,0.15) 55%, rgba(100,180,245,0.10) 100%)',
                     boxShadow: [
                       'inset 0 1px 2px rgba(255,255,255,0.62)',
@@ -241,7 +243,7 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
                       '0 0 0 0.5px rgba(255,255,255,0.26)',
                     ].join(', '),
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 6, color: 'rgba(255,255,255,0.85)',
+                    fontSize: 7.5, color: 'rgba(255,255,255,0.88)',
                     position: 'relative', overflow: 'hidden',
                   }}>
                     {/* Aqua gloss cap on each pill */}
