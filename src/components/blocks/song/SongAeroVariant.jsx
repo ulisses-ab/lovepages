@@ -95,7 +95,7 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
           {/* ── INNER AQUA PANEL ─────────────────────────────────────────── */}
           <div style={{
             position: 'absolute', inset: '13px 12px 12px 13px',
-            borderRadius: '45% 40% 36% 50% / 48% 50% 38% 42%',
+            borderRadius: '28px 22px 18px 26px / 26px 28px 20px 24px',
             // Frutiger Aero aqua: deep at edges, bright sky-blue center-left
             background: 'linear-gradient(140deg, #0070be 0%, #0096d8 28%, #00b8f0 52%, #0098d8 72%, #0068b0 100%)',
             boxShadow: [
