@@ -16,7 +16,7 @@ function WindowsFlag({ size = 20 }) {
     </svg>
   )
 }
-export default function LinkXPVariant({ href, label }) {
+export default function LinkXPVariant({ href, label, showFlag = true }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <a
@@ -62,7 +62,7 @@ export default function LinkXPVariant({ href, label }) {
         }} />
 
         {/* Windows flag */}
-        <WindowsFlag size={20} />
+        {showFlag && <WindowsFlag size={20} />}
 
         {/* Label */}
         <span style={{ position: 'relative' }}>{label || 'start'}</span>

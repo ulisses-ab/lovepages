@@ -49,12 +49,23 @@ export default function LinkBlock({ block, isEditing, onChange }) {
             label={t('link.buttonColor')}
           />
         )}
+        {variant === 'xp' && (
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={block.showFlag !== false}
+              onChange={e => onChange({ showFlag: e.target.checked })}
+              className="accent-primary"
+            />
+            <span className="text-xs text-fg-muted">Show Windows logo</span>
+          </label>
+        )}
       </div>
     )
   }
 
   // ── Windows XP dialog ─────────────────────────────────────────────────────────
-  if (variant === 'xp') return <LinkXPVariant href={href} label={label} />
+  if (variant === 'xp') return <LinkXPVariant href={href} label={label} showFlag={block.showFlag !== false} />
 
   // ── Default button ────────────────────────────────────────────────────────────
   return (
