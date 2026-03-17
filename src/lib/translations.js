@@ -58,7 +58,7 @@ export const translations = {
     'sortable.deleteBlock': 'Delete block',
 
     // BlockStyleControls
-    'style.style': 'Style',
+    'style.style': 'Block style',
     'style.align': 'Align',
     'style.textColor': 'Text color',
     'style.background': 'Background',
@@ -74,24 +74,14 @@ export const translations = {
     'style.to': 'To',
 
     // TextBlock
-    'text.heading': 'Heading',
-    'text.paragraph': 'Paragraph',
-    'text.quote': 'Quote',
-    'text.sansSerif': 'Sans-serif',
-    'text.serif': 'Serif',
-    'text.monospace': 'Monospace',
-    'text.cursive': 'Cursive',
-    'text.small': 'Small',
-    'text.medium': 'Medium',
-    'text.large': 'Large',
-    'text.xLarge': 'X-Large',
-    'text.2xLarge': '2X-Large',
-    'text.3xLarge': '3X-Large',
-    'text.4xLarge': '4X-Large',
-    'text.writeSomething': 'Write something\u2026',
+    'text.plain': 'Plain text',
     'text.typewriter': 'Typewriter note',
     'text.postit': 'Post-it note',
+    'text.ransom': 'Ransom note',
     'text.noteColor': 'Note color',
+    'text.font': 'Font',
+    'text.outlineHint': 'Hollow outline letters',
+    'text.writeSomething': 'Write something\u2026',
 
     // ImageBlock
     'image.caption': 'Caption (optional)',
@@ -249,7 +239,7 @@ export const translations = {
     'sortable.deleteBlock': 'Excluir bloco',
 
     // BlockStyleControls
-    'style.style': 'Estilo',
+    'style.style': 'Estilo do bloco',
     'style.align': 'Alinhamento',
     'style.textColor': 'Cor do texto',
     'style.background': 'Fundo',
@@ -265,24 +255,14 @@ export const translations = {
     'style.to': 'Para',
 
     // TextBlock
-    'text.heading': 'T\u00edtulo',
-    'text.paragraph': 'Par\u00e1grafo',
-    'text.quote': 'Cita\u00e7\u00e3o',
-    'text.sansSerif': 'Sem serifa',
-    'text.serif': 'Serifa',
-    'text.monospace': 'Monoespa\u00e7ado',
-    'text.cursive': 'Cursivo',
-    'text.small': 'Pequeno',
-    'text.medium': 'M\u00e9dio',
-    'text.large': 'Grande',
-    'text.xLarge': 'Extra grande',
-    'text.2xLarge': '2\u00d7 grande',
-    'text.3xLarge': '3\u00d7 grande',
-    'text.4xLarge': '4\u00d7 grande',
-    'text.writeSomething': 'Escreva algo\u2026',
+    'text.plain': 'Texto simples',
     'text.typewriter': 'Nota datilografada',
     'text.postit': 'Post-it',
+    'text.ransom': 'Bilhete anônimo',
     'text.noteColor': 'Cor do papel',
+    'text.font': 'Fonte',
+    'text.outlineHint': 'Letras ocas com contorno',
+    'text.writeSomething': 'Escreva algo\u2026',
 
     // ImageBlock
     'image.caption': 'Legenda (opcional)',

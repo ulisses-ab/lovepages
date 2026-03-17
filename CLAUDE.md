@@ -112,11 +112,14 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 {
   "bgColor": "#hex or empty string — solid background color",
   "bgImage": "url or empty string — background image (overrides bgColor when set)",
-  "bgImageFit": "cover | contain | tile — how the image fills the page (default: cover)"
+  "bgImageFit": "cover | contain | tile — how the image fills the page (default: cover)",
+  "bgFade": false,
+  "bgColor2": "#hex or empty — second background stop for fade",
+  "bgImage2": "url or empty — second background image for fade"
 }
 ```
 
-`getPageBgStyle(settings)` in `src/lib/pageUtils.js` converts these to an inline style object applied to the preview container.
+`getPageBgStyle(settings)` in `src/lib/pageUtils.js` converts these to an inline style object for simple color/image backgrounds. `PageBgWrapper` (`src/components/ui/PageBgWrapper.jsx`) handles all three modes including fade (uses `position:fixed` layers so the fade fills the viewport regardless of scroll depth).
 
 ### Base fields (all block types)
 
@@ -127,7 +130,8 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "width": "full | half | third",
   "align": "left | center | right",
   "bgColor": "#hex or empty string",
-  "bgImage": "url or empty string — background image for the block (rendered cover/center; overrides bgColor visually)",
+  "bgImage": "url or empty string — background image for the block",
+  "bgImageFit": "cover | contain | tile — how the image fills the block (default: cover)",
   "bgFade": false,
   "bgColor2": "#hex or empty — second background stop for fade",
   "bgImage2": "url or empty — second background image for fade",
@@ -143,10 +147,11 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 
 ```json
 // text
-{ "variant": "heading | paragraph | quote | typewriter | postit", "content": "string", "fontFamily": "sans | serif | mono | cursive", "fontSize": "sm | base | lg | xl | 2xl | 3xl | 4xl", "color": "#hex or empty string (empty = theme default)", "noteColor": "#hex or empty — post-it background color (default: #fde68a)" }
-// fontFamily and color are ignored for typewriter and postit variants (font is fixed by the aesthetic)
+{ "variant": "heading | paragraph | quote | typewriter | postit | ransom", "content": "string", "fontFamily": "sans | serif | mono | cursive", "fontSize": "sm | base | lg | xl | 2xl | 3xl | 4xl", "color": "#hex or empty string (empty = theme default)", "noteColor": "#hex or empty — post-it background color (default: #fde68a)" }
+// fontFamily and color are ignored for typewriter, postit, and ransom variants (font is fixed by the aesthetic)
 // typewriter: cottagecore — aged cream paper, red margin line, ruled lines, Courier ink-impression effect
 // postit: playful/bold — sticky note with adhesive strip, ruled lines, dog-ear corner, cursive font; noteColor controls paper color
+// ransom: playful/bold — each letter rendered with a different randomly-chosen font, weight, italic, size, rotation, and color/background theme (seeded by content so the same text always renders the same)
 
 // image
 { "src": "url", "alt": "string", "caption": "string" }
@@ -254,7 +259,7 @@ Each block variant should be consciously designed for one of these aesthetics, n
 ### How this maps to blocks
 Currently the mapping looks like this (variants per block type):
 
-- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note)
+- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation)
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)

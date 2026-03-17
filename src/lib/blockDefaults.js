@@ -12,7 +12,7 @@ export const BLOCK_TYPES = {
 }
 
 export const ALIGN_OPTIONS = ['left', 'center', 'right']
-export const TEXT_VARIANTS = ['heading', 'paragraph', 'quote']
+export const TEXT_VARIANTS = ['plain', 'typewriter', 'postit', 'ransom']
 
 export function createBlock(type) {
   const base = {
@@ -29,11 +29,14 @@ export function createBlock(type) {
     border: false,
     shadow: false,
     fullBleed: false,
+    bold: false,
+    italic: false,
+    outline: false,
   }
 
   switch (type) {
     case BLOCK_TYPES.TEXT:
-      return { ...base, variant: 'paragraph', content: 'Write something...', fontFamily: 'sans', fontSize: 'base', color: '', noteColor: '' }
+      return { ...base, variant: 'plain', content: 'Write something...', fontFamily: 'inter', fontSize: 'base', color: '', noteColor: '' }
     case BLOCK_TYPES.IMAGE:
       return { ...base, src: '', alt: '', caption: '' }
     case BLOCK_TYPES.SONG:
