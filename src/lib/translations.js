@@ -81,6 +81,7 @@ export const translations = {
     'text.typewriter': 'Typewriter note',
     'text.postit': 'Post-it note',
     'text.ransom': 'Ransom note',
+    'text.xp': 'XP Notepad',
     'text.noteColor': 'Note color',
     'text.font': 'Font',
     'text.outlineHint': 'Hollow outline letters',
@@ -92,6 +93,7 @@ export const translations = {
     'image.noImage': 'No image',
     'image.variantDefault': 'Default',
     'image.variantPolaroid': 'Polaroid',
+    'image.variantXp': 'Windows XP',
 
     // SongBlock
     'song.youtubeUrl': 'YouTube URL',
@@ -119,6 +121,8 @@ export const translations = {
     'link.buttonLabel': 'Button label',
     'link.buttonColor': 'Button color',
     'link.clickHere': 'Click here',
+    'link.variantDefault': 'Button',
+    'link.variantXp': 'Windows XP',
 
     // PageOptionsBar
     'pageOptions.title': 'Page options',
@@ -173,6 +177,7 @@ export const translations = {
     'countdown.variantFlip': 'Flip clock',
     'countdown.variantMinimal': 'Minimal',
     'countdown.variantAero': 'Aero',
+    'countdown.variantXp': 'Windows XP',
     'countdown.colorDark': 'Dark',
     'countdown.colorBeige': 'Beige',
     'countdown.label': 'Label (e.g. "Days until the wedding")',
@@ -273,6 +278,7 @@ export const translations = {
     'text.typewriter': 'Nota datilografada',
     'text.postit': 'Post-it',
     'text.ransom': 'Bilhete anônimo',
+    'text.xp': 'Bloco de Notas XP',
     'text.noteColor': 'Cor do papel',
     'text.font': 'Fonte',
     'text.outlineHint': 'Letras ocas com contorno',
@@ -284,6 +290,7 @@ export const translations = {
     'image.noImage': 'Sem imagem',
     'image.variantDefault': 'Padrão',
     'image.variantPolaroid': 'Polaroid',
+    'image.variantXp': 'Windows XP',
 
     // SongBlock
     'song.youtubeUrl': 'URL do YouTube',
@@ -311,6 +318,8 @@ export const translations = {
     'link.buttonLabel': 'Texto do bot\u00e3o',
     'link.buttonColor': 'Cor do bot\u00e3o',
     'link.clickHere': 'Clique aqui',
+    'link.variantDefault': 'Bot\u00e3o',
+    'link.variantXp': 'Windows XP',
 
     // PageOptionsBar
     'pageOptions.title': 'Opções da página',
@@ -365,6 +374,7 @@ export const translations = {
     'countdown.variantFlip': 'Rel\u00f3gio flip',
     'countdown.variantMinimal': 'Minimalista',
     'countdown.variantAero': 'Aero',
+    'countdown.variantXp': 'Windows XP',
     'countdown.colorDark': 'Escuro',
     'countdown.colorBeige': 'Bege',
     'countdown.label': 'R\u00f3tulo (ex: "Dias at\u00e9 o casamento")',

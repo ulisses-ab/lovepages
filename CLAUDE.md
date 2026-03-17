@@ -177,7 +177,7 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // coverUrl: used by "cover", "vinyl", and "xp" variants; supports Supabase Storage upload or direct URL
 
 // link
-{ "href": "url", "label": "string", "color": "#hex" }
+{ "href": "url", "label": "string", "color": "#hex", "variant": "default | xp" }
 
 // carousel
 { "images": [{ "src": "url", "caption": "string" }], "mode": "slider | album", "albumTitle": "string", "coverColor": "#hex or empty", "coverTitleStyle": "sticker | postit | plain" }
@@ -268,10 +268,12 @@ Each block variant should be consciously designed for one of these aesthetics, n
 ### How this maps to blocks
 Currently the mapping looks like this (variants per block type):
 
-- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation), `cyberpunk` (cyberpunk — dark panel, neon cyan border glow, scanlines, Space Mono, RGB chromatic-aberration glitch ghost layers)
+- **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation), `cyberpunk` (cyberpunk — dark panel, neon cyan border glow, scanlines, Space Mono, RGB chromatic-aberration glitch ghost layers), `xp` (retro — classic Windows XP Notepad window, Courier New, title bar, menu bar, status bar)
+- **Image**: `default` (neutral — plain image), `polaroid` (cottagecore — polaroid frame with tape), `xp` (retro — Windows XP "Windows Picture and Fax Viewer" window with toolbar and status bar)
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — rectangular aqua-blue media player body), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
-- **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar)
-- **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover)
+- **Link**: `default` (neutral — rounded pill button), `xp` (retro — Windows XP "Open Link" dialog box with globe icon and 3D raised Open/Cancel buttons)
+- **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar), `xp` (retro — Windows XP "Date and Time Properties" control panel dialog with tabbed chrome, sunken digit panels, OK/Cancel/Apply buttons)
+- **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover), `xp` (retro — Windows XP "My Pictures" Windows Explorer window with task pane sidebar, image viewport, and filmstrip)
 
 As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
 

@@ -5,6 +5,7 @@ import { getTimeLeft, fireConfetti, LabelTag } from './countdown/CountdownShared
 import CountdownFlipVariant from './countdown/CountdownFlipVariant'
 import CountdownMinimalVariant from './countdown/CountdownMinimalVariant'
 import CountdownAeroVariant from './countdown/CountdownAeroVariant'
+import CountdownXPVariant from './countdown/CountdownXPVariant'
 
 export default function CountdownBlock({ block, isEditing, onChange }) {
   const { targetDate, label, expiredMessage, variant = 'flip', clockColor = 'dark' } = block
@@ -41,6 +42,7 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
       { value: 'flip',    label: t('countdown.variantFlip') },
       { value: 'minimal', label: t('countdown.variantMinimal') },
       { value: 'aero',    label: t('countdown.variantAero') },
+      { value: 'xp',      label: t('countdown.variantXp') },
     ]
     return (
       <div className="space-y-3">
@@ -126,6 +128,14 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
     return (
       <div ref={rootRef} className="py-2">
         <CountdownMinimalVariant days={days} hours={hours} minutes={minutes} seconds={seconds} label={label} />
+      </div>
+    )
+  }
+
+  if (variant === 'xp') {
+    return (
+      <div ref={rootRef} className="py-2">
+        <CountdownXPVariant days={days} hours={hours} minutes={minutes} seconds={seconds} label={label} />
       </div>
     )
   }

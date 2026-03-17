@@ -1,6 +1,7 @@
 import { inputClass } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ImageUpload from '../ui/ImageUpload'
+import ImageXPVariant from './image/ImageXPVariant'
 
 // Tape strip — same construction as the post-it tape in TextBlock
 function Tape({ style }) {
@@ -31,6 +32,7 @@ export default function ImageBlock({ block, isEditing, onChange }) {
         >
           <option value="default">{t('image.variantDefault')}</option>
           <option value="polaroid">{t('image.variantPolaroid')}</option>
+          <option value="xp">{t('image.variantXp')}</option>
         </select>
         <ImageUpload
           value={src}
@@ -52,6 +54,9 @@ export default function ImageBlock({ block, isEditing, onChange }) {
       </div>
     )
   }
+
+  // ── Windows XP Picture Viewer ────────────────────────────────────────────────
+  if (variant === 'xp') return <ImageXPVariant src={src} alt={alt} caption={caption} />
 
   // ── Polaroid ──────────────────────────────────────────────────────────────────
   if (variant === 'polaroid') {

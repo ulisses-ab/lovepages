@@ -44,7 +44,7 @@ export function createBlock(type) {
     case BLOCK_TYPES.SONG:
       return { ...base, embedUrl: '', title: '', artist: '', autoplay: true, variant: 'default', coverUrl: '', accentColor: '', textColor: '', vinylBase: 'wood' }
     case BLOCK_TYPES.LINK:
-      return { ...base, href: '', label: 'Click here', color: colors.primary }
+      return { ...base, href: '', label: 'Click here', color: colors.primary, variant: 'default' }
     case BLOCK_TYPES.COUNTDOWN:
       return { ...base, targetDate: '', label: '', expiredMessage: '', variant: 'flip', clockColor: 'dark' }
     case BLOCK_TYPES.CAROUSEL:

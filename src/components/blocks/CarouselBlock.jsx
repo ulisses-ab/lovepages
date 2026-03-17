@@ -5,6 +5,7 @@ import ImageUpload from '../ui/ImageUpload'
 import ColorPicker from '../ui/ColorPicker'
 import CarouselAlbumVariant, { AL } from './carousel/CarouselAlbumVariant'
 import CarouselSliderVariant from './carousel/CarouselSliderVariant'
+import CarouselXPVariant from './carousel/CarouselXPVariant'
 
 export default function CarouselBlock({ block, isEditing, onChange }) {
   const { images = [], mode = 'slider', albumTitle = '' } = block
@@ -37,6 +38,7 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
           {[
             { value: 'slider', label: '▤ Slider' },
             { value: 'album',  label: '📖 Album' },
+            { value: 'xp',     label: '🪟 My Pictures' },
           ].map(opt => (
             <button
               key={opt.value}
@@ -145,6 +147,7 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
   }
 
   // ── Variant dispatch ───────────────────────────────────────────────────────
+  if (mode === 'xp')    return <CarouselXPVariant block={block} />
   if (mode === 'album') return <CarouselAlbumVariant block={block} />
   return <CarouselSliderVariant images={images} />
 }
