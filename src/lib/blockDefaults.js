@@ -39,7 +39,7 @@ export function createBlock(type) {
     case BLOCK_TYPES.TEXT:
       return { ...base, variant: 'plain', content: 'Write something...', fontFamily: 'inter', fontSize: 'base', color: '', noteColor: '' }
     case BLOCK_TYPES.IMAGE:
-      return { ...base, src: '', alt: '', caption: '' }
+      return { ...base, variant: 'default', src: '', alt: '', caption: '' }
     case BLOCK_TYPES.SONG:
       return { ...base, embedUrl: '', title: '', artist: '', autoplay: true, variant: 'default', coverUrl: '', accentColor: '', textColor: '', vinylBase: 'wood' }
     case BLOCK_TYPES.LINK:

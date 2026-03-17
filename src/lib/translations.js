@@ -88,6 +88,8 @@ export const translations = {
     'image.caption': 'Caption (optional)',
     'image.altText': 'Alt text',
     'image.noImage': 'No image',
+    'image.variantDefault': 'Default',
+    'image.variantPolaroid': 'Polaroid',
 
     // SongBlock
     'song.youtubeUrl': 'YouTube URL',
@@ -270,6 +272,8 @@ export const translations = {
     'image.caption': 'Legenda (opcional)',
     'image.altText': 'Texto alternativo',
     'image.noImage': 'Sem imagem',
+    'image.variantDefault': 'Padrão',
+    'image.variantPolaroid': 'Polaroid',
 
     // SongBlock
     'song.youtubeUrl': 'URL do YouTube',

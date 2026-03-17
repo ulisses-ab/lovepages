@@ -155,7 +155,9 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // ransom: playful/bold — each letter rendered with a different randomly-chosen font, weight, italic, size, rotation, and color/background theme (seeded by content so the same text always renders the same)
 
 // image
-{ "src": "url", "alt": "string", "caption": "string" }
+{ "variant": "default | polaroid", "src": "url", "alt": "string", "caption": "string" }
+// default: plain image with optional caption
+// polaroid: off-white polaroid frame with wider bottom, square 1:1 crop, handwritten caption (Caveat), tape strip at top, slight rotation derived from block id
 
 // song
 { "embedUrl": "youtube url", "title": "string", "artist": "string", "autoplay": true, "variant": "default | cover | vinyl", "coverUrl": "url or empty string", "accentColor": "#hex or empty (default: theme primary — play button, progress bar)", "textColor": "#hex or empty (default: theme fg — title, artist)" }
