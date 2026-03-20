@@ -1,22 +1,31 @@
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 
-function HtmlRenderer({ html, className }) {
+function HtmlFrame({ html, className }) {
   const ref = useRef(null)
 
+  // Auto-size the iframe to its content height
   useEffect(() => {
-    if (!ref.current) return
-    ref.current.innerHTML = html
-    // dangerouslySetInnerHTML doesn't execute scripts — manually re-run them
-    ref.current.querySelectorAll('script').forEach(old => {
-      const script = document.createElement('script')
-      Array.from(old.attributes).forEach(a => script.setAttribute(a.name, a.value))
-      script.textContent = old.textContent
-      old.replaceWith(script)
-    })
-  }, [html])
+    const frame = ref.current
+    if (!frame) return
+    function resize() {
+      try {
+        frame.style.height = frame.contentDocument.body.scrollHeight + 'px'
+      } catch {}
+    }
+    frame.addEventListener('load', resize)
+    return () => frame.removeEventListener('load', resize)
+  }, [])
 
-  return <div ref={ref} className={className} />
+  return (
+    <iframe
+      ref={ref}
+      srcDoc={html}
+      className={className}
+      style={{ width: '100%', border: 'none', display: 'block' }}
+      scrolling="no"
+    />
+  )
 }
 
 export default function CustomBlock({ block, isEditing, onChange }) {
@@ -27,7 +36,7 @@ export default function CustomBlock({ block, isEditing, onChange }) {
 
   if (!isEditing) {
     if (!block.html?.trim()) return null
-    return <HtmlRenderer html={block.html} className="w-full" />
+    return <HtmlFrame html={block.html} />
   }
 
   async function handleGenerate() {
@@ -100,10 +109,7 @@ export default function CustomBlock({ block, isEditing, onChange }) {
       {block.html?.trim() && (
         <div>
           <p className="text-xs text-fg-muted mb-2">Preview</p>
-          <HtmlRenderer
-            html={block.html}
-            className="rounded-lg overflow-hidden border border-overlay p-3 bg-white/5"
-          />
+          <HtmlFrame html={block.html} className="rounded-lg overflow-hidden border border-overlay" />
         </div>
       )}
     </div>
