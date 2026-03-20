@@ -38,13 +38,6 @@ function getSizeStyle(size) {
 
 // Layout presets map friendly names → flex property sets
 const LAYOUT_PRESETS = {
-  sidebyside: {
-    label: 'Center aligned',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   stacked: {
     label: 'Stacked',
     flexDirection: 'column',
@@ -71,6 +64,13 @@ const LAYOUT_PRESETS = {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  sidebyside: {
+    label: 'Center aligned',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   right: {
@@ -106,8 +106,8 @@ function LayoutPresetCard({ id, selected, onClick }) {
     >
       <div className="w-full h-10 flex items-center justify-center">
         {id === 'sidebyside' && (
-          <div className="flex gap-1.5 items-center">
-            {[0, 1, 2].map(i => (
+          <div className="flex justify-center items-center gap-1.5 w-full">
+            {[0, 1].map(i => (
               <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
             ))}
           </div>
