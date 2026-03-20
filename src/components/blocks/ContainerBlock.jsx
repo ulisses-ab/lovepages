@@ -14,9 +14,11 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { ChevronDown } from 'lucide-react'
 import BlockRenderer from './BlockRenderer'
 import BackgroundChooser from '../ui/BackgroundChooser'
 import BlockStyleControls from '../editor/BlockStyleControls'
+import CollapsibleSection from '../ui/CollapsibleSection'
 import { BLOCK_TYPES, BLOCK_ICONS, BLOCK_LABELS, createBlock } from '../../lib/blockDefaults'
 import { HelpCircle } from 'lucide-react'
 
@@ -32,6 +34,80 @@ function getSizeStyle(size) {
     case 'auto':  return { flexShrink: 0 }
     default:      return { width: '100%' }
   }
+}
+
+// Layout presets map friendly names → flex property sets
+const LAYOUT_PRESETS = {
+  sidebyside: {
+    label: 'Side by side',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stacked: {
+    label: 'Stacked',
+    flexDirection: 'column',
+    flexWrap: 'nowrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  spread: {
+    label: 'Spread out',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+}
+
+function detectPreset(flexDirection, flexWrap, justifyContent) {
+  if (flexDirection === 'column') return 'stacked'
+  if (justifyContent === 'space-between' || justifyContent === 'space-evenly') return 'spread'
+  if (flexDirection === 'row') return 'sidebyside'
+  return null
+}
+
+function LayoutPresetCard({ id, selected, onClick }) {
+  const { label } = LAYOUT_PRESETS[id]
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition ${
+        selected
+          ? 'border-primary bg-primary/10'
+          : 'border-overlay bg-surface hover:border-subtle'
+      }`}
+    >
+      <div className="w-full h-10 flex items-center justify-center">
+        {id === 'sidebyside' && (
+          <div className="flex gap-1.5 items-center">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+        {id === 'stacked' && (
+          <div className="flex flex-col gap-1 items-center w-full px-3">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`h-2 w-full rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+        {id === 'spread' && (
+          <div className="flex justify-between items-center w-full px-1">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+      </div>
+      <span className={`text-xs leading-tight text-center ${selected ? 'text-primary-dim font-medium' : 'text-fg-muted'}`}>
+        {label}
+      </span>
+    </button>
+  )
 }
 
 function SegmentedControl({ label, value, options, onChange }) {
@@ -59,7 +135,6 @@ function SegmentedControl({ label, value, options, onChange }) {
 }
 
 // A child block rendered inline inside the container's live visual area.
-// Shows the block's visual preview; clicking "Edit" switches to the editing form.
 function InlineChildBlock({ block, onUpdate, onDelete }) {
   const [editOpen, setEditOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -134,7 +209,9 @@ function InlineChildBlock({ block, onUpdate, onDelete }) {
           <div className="px-3 py-3 bg-base space-y-3">
             <BlockRenderer block={block} isEditing onChange={patch => onUpdate({ ...block, ...patch })} />
             {block.type !== 'container' && (
-              <BlockStyleControls block={block} onChange={patch => onUpdate({ ...block, ...patch })} />
+              <CollapsibleSection title="How wide?">
+                <BlockStyleControls block={block} onChange={patch => onUpdate({ ...block, ...patch })} />
+              </CollapsibleSection>
             )}
           </div>
         ) : (
@@ -157,6 +234,8 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
   const gap            = block.gap            ?? 16
   const padding        = block.padding        ?? 24
 
+  const activePreset = detectPreset(flexDirection, flexWrap, justifyContent)
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
@@ -168,6 +247,11 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     const oldIdx = children.findIndex(c => c.id === active.id)
     const newIdx = children.findIndex(c => c.id === over.id)
     onChange({ children: arrayMove(children, oldIdx, newIdx) })
+  }
+
+  function applyPreset(id) {
+    const { flexDirection, flexWrap, justifyContent, alignItems } = LAYOUT_PRESETS[id]
+    onChange({ flexDirection, flexWrap, justifyContent, alignItems })
   }
 
   const fit1 = block.bgImageFit  || 'cover'
@@ -249,10 +333,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     )
   }
 
-  // ── Edit mode ──────────────────────────────────────────────────────────────
-  // Build background style for the container body in edit mode.
-  // Image-fade requires absolute-positioned layers (complex); falls back to no bg in edit mode —
-  // the effect is still visible in the live preview panel on the right.
+  // ── Edit mode — background style for the container body ───────────────────
   let bgStyle = {}
   if (block.bgFade && !block.bgImage && !block.bgImage2) {
     bgStyle = { background: `linear-gradient(to bottom, ${block.bgColor || 'transparent'}, ${block.bgColor2 || 'transparent'})` }
@@ -268,22 +349,25 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
 
   return (
     <div className="w-full rounded-b-xl overflow-hidden border border-overlay border-t-0">
+
       {/* Settings toggle bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-overlay/60 border-b border-overlay">
-        <span className="text-xs text-fg-muted font-medium">Background &amp; Layout</span>
-        <button
-          onClick={() => setSettingsOpen(v => !v)}
-          className="text-xs text-primary-dim hover:text-primary transition"
-        >
-          {settingsOpen ? 'Hide' : 'Edit settings'}
-        </button>
-      </div>
+      <button
+        onClick={() => setSettingsOpen(v => !v)}
+        className="w-full flex items-center justify-between px-3 py-2 bg-overlay/40 hover:bg-overlay/70 border-b border-overlay transition"
+      >
+        <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">
+          Background &amp; Layout
+        </span>
+        <ChevronDown size={14} className={`text-fg-muted transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
+      </button>
 
       {/* Collapsible settings panel */}
       {settingsOpen && (
-        <div className="px-4 py-3 bg-surface border-b border-overlay space-y-4">
+        <div className="px-4 py-4 bg-surface border-b border-overlay space-y-5">
+
+          {/* Background */}
           <div>
-            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">Background</p>
+            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">Background</p>
             <BackgroundChooser
               bgColor={block.bgColor}
               bgImage={block.bgImage}
@@ -294,9 +378,51 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
               onChange={onChange}
             />
           </div>
+
+          {/* Layout */}
           <div>
-            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-3">Layout</p>
-            <div className="space-y-3">
+            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">How items are arranged</p>
+
+            {/* Visual preset cards */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {Object.keys(LAYOUT_PRESETS).map(id => (
+                <LayoutPresetCard
+                  key={id}
+                  id={id}
+                  selected={activePreset === id}
+                  onClick={() => applyPreset(id)}
+                />
+              ))}
+            </div>
+
+            {/* Space & Padding sliders */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <p className="text-xs text-fg-muted mb-1.5">
+                  Space between items <span className="text-fg-faint">{gap}px</span>
+                </p>
+                <input
+                  type="range" min={0} max={64} step={4}
+                  value={gap}
+                  onChange={e => onChange({ gap: Number(e.target.value) })}
+                  className="w-full accent-primary"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-fg-muted mb-1.5">
+                  Padding around edges <span className="text-fg-faint">{padding}px</span>
+                </p>
+                <input
+                  type="range" min={0} max={80} step={4}
+                  value={padding}
+                  onChange={e => onChange({ padding: Number(e.target.value) })}
+                  className="w-full accent-primary"
+                />
+              </div>
+            </div>
+
+            {/* Advanced layout — collapsible for power users */}
+            <CollapsibleSection title="Advanced layout">
               <SegmentedControl
                 label="Direction"
                 value={flexDirection}
@@ -338,33 +464,12 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
                   { value: 'stretch',    label: 'Stretch', icon: '↕' },
                 ]}
               />
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <p className="text-xs text-fg-muted mb-1">Gap <span className="text-fg-faint">{gap}px</span></p>
-                  <input
-                    type="range" min={0} max={64} step={4}
-                    value={gap}
-                    onChange={e => onChange({ gap: Number(e.target.value) })}
-                    className="w-full accent-primary"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-fg-muted mb-1">Padding <span className="text-fg-faint">{padding}px</span></p>
-                  <input
-                    type="range" min={0} max={80} step={4}
-                    value={padding}
-                    onChange={e => onChange({ padding: Number(e.target.value) })}
-                    className="w-full accent-primary"
-                  />
-                </div>
-              </div>
-            </div>
+            </CollapsibleSection>
           </div>
         </div>
       )}
 
-      {/* Container visual body — always visible, children rendered live with editing controls.
-          stopPropagation keeps pointer events from leaking to the outer EditorPage DndContext. */}
+      {/* Container visual body — children rendered live with editing controls */}
       <div style={{ ...bgStyle, width: '100%' }} onPointerDown={e => e.stopPropagation()}>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={children.map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -382,7 +487,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
                 />
               ))}
               {children.length === 0 && (
-                <p className="text-fg-faint text-sm w-full text-center py-6">
+                <p className="text-fg-faint text-sm w-full text-center py-8">
                   Empty — add blocks below
                 </p>
               )}
@@ -395,10 +500,10 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
           {showAddMenu ? (
             <div className="bg-overlay/90 rounded-xl overflow-hidden border border-overlay/60">
               <div className="flex items-center justify-between px-3 py-2 border-b border-overlay">
-                <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">Add block inside</span>
-                <button onClick={() => setShowAddMenu(false)} className="text-fg-muted text-lg leading-none">×</button>
+                <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">Add a block</span>
+                <button onClick={() => setShowAddMenu(false)} className="text-fg-muted text-lg leading-none hover:text-fg-secondary transition">×</button>
               </div>
-              <div className="divide-y divide-overlay">
+              <div className="grid grid-cols-2 p-2 gap-1">
                 {Object.values(BLOCK_TYPES).map(type => {
                   const Icon = BLOCK_ICONS[type]
                   return (
@@ -408,9 +513,9 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
                         onChange({ children: [...children, createBlock(type)] })
                         setShowAddMenu(false)
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-fg-secondary hover:bg-primary-subtle/40 transition text-left"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-fg-secondary hover:bg-primary-subtle/40 hover:text-fg transition text-left"
                     >
-                      <Icon size={14} className="shrink-0" />
+                      <Icon size={14} className="shrink-0 text-fg-muted" />
                       {BLOCK_LABELS[type]}
                     </button>
                   )
@@ -420,9 +525,9 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
           ) : (
             <button
               onClick={() => setShowAddMenu(true)}
-              className="w-full py-2 rounded-xl border-2 border-dashed border-overlay text-fg-muted text-sm hover:border-primary hover:text-primary transition"
+              className="w-full py-2.5 rounded-xl border-2 border-dashed border-overlay text-fg-muted text-sm hover:border-primary hover:text-primary transition"
             >
-              + Add block inside
+              + Add a block
             </button>
           )}
         </div>
