@@ -53,10 +53,17 @@ const LAYOUT_PRESETS = {
     alignItems: 'center',
   },
   spread: {
-    label: 'Spread out',
+    label: 'Space between',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  around: {
+    label: 'Space around',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
   left: {
@@ -78,6 +85,7 @@ const LAYOUT_PRESETS = {
 function detectPreset(flexDirection, flexWrap, justifyContent) {
   if (flexDirection === 'column') return 'stacked'
   if (justifyContent === 'space-between' || justifyContent === 'space-evenly') return 'spread'
+  if (justifyContent === 'space-around') return 'around'
   if (justifyContent === 'flex-start' && flexDirection === 'row') return 'left'
   if (justifyContent === 'flex-end'   && flexDirection === 'row') return 'right'
   if (flexDirection === 'row') return 'sidebyside'
@@ -113,6 +121,13 @@ function LayoutPresetCard({ id, selected, onClick }) {
         )}
         {id === 'spread' && (
           <div className="flex justify-between items-center w-full px-1">
+            {[0, 1, 2].map(i => (
+              <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+        {id === 'around' && (
+          <div className="flex justify-around items-center w-full">
             {[0, 1, 2].map(i => (
               <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
             ))}
@@ -414,7 +429,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
             <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">How items are arranged</p>
 
             {/* Visual preset cards */}
-            <div className="grid grid-cols-5 gap-1.5 mb-3">
+            <div className="grid grid-cols-3 gap-1.5 mb-3">
               {Object.keys(LAYOUT_PRESETS).map(id => (
                 <LayoutPresetCard
                   key={id}
