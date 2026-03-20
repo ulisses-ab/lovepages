@@ -1,5 +1,23 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
+
+function HtmlRenderer({ html, className }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!ref.current) return
+    ref.current.innerHTML = html
+    // dangerouslySetInnerHTML doesn't execute scripts — manually re-run them
+    ref.current.querySelectorAll('script').forEach(old => {
+      const script = document.createElement('script')
+      Array.from(old.attributes).forEach(a => script.setAttribute(a.name, a.value))
+      script.textContent = old.textContent
+      old.replaceWith(script)
+    })
+  }, [html])
+
+  return <div ref={ref} className={className} />
+}
 
 export default function CustomBlock({ block, isEditing, onChange }) {
   const [aiPrompt, setAiPrompt] = useState('')
@@ -9,12 +27,7 @@ export default function CustomBlock({ block, isEditing, onChange }) {
 
   if (!isEditing) {
     if (!block.html?.trim()) return null
-    return (
-      <div
-        className="w-full"
-        dangerouslySetInnerHTML={{ __html: block.html }}
-      />
-    )
+    return <HtmlRenderer html={block.html} className="w-full" />
   }
 
   async function handleGenerate() {
@@ -39,7 +52,6 @@ export default function CustomBlock({ block, isEditing, onChange }) {
 
   return (
     <div className="space-y-3">
-      {/* AI generate bar */}
       {aiOpen ? (
         <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-2">
           <p className="text-xs text-fg-muted">Describe what you want — e.g. "a Google Maps embed for Eiffel Tower" or "a confetti animation"</p>
@@ -88,9 +100,9 @@ export default function CustomBlock({ block, isEditing, onChange }) {
       {block.html?.trim() && (
         <div>
           <p className="text-xs text-fg-muted mb-2">Preview</p>
-          <div
+          <HtmlRenderer
+            html={block.html}
             className="rounded-lg overflow-hidden border border-overlay p-3 bg-white/5"
-            dangerouslySetInnerHTML={{ __html: block.html }}
           />
         </div>
       )}
