@@ -34,6 +34,8 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget 
     )
   }
 
+  const isContainerDropTarget = isDropTarget && block.type === 'container'
+
   return (
     <div
       ref={setNodeRef}
@@ -41,11 +43,18 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget 
       className={`relative bg-surface rounded-xl border transition ${
         expanded
           ? 'border-primary shadow-md shadow-primary-subtle/30'
-          : 'border-overlay hover:border-subtle'
+          : isContainerDropTarget
+            ? 'border-primary ring-2 ring-primary/40'
+            : 'border-overlay hover:border-subtle'
       }`}
     >
-      {isDropTarget && (
+      {isDropTarget && !isContainerDropTarget && (
         <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
+      {isContainerDropTarget && (
+        <div className="absolute inset-0 rounded-xl bg-primary/5 pointer-events-none z-10 flex items-center justify-center">
+          <span className="text-xs text-primary font-medium bg-surface/80 px-2 py-0.5 rounded-full">Drop inside container</span>
+        </div>
       )}
       {/* Block header — draggable from anywhere */}
       <div

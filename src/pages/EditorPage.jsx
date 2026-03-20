@@ -16,6 +16,7 @@ import { useAuth } from '../hooks/useAuth'
 import EditorTopBar from '../components/editor/EditorTopBar'
 import BlockPanel from '../components/editor/BlockPanel'
 import Canvas from '../components/editor/Canvas'
+import AiGenerateModal from '../components/editor/AiGenerateModal'
 import { useT } from '../lib/i18n'
 import { supabase } from '../lib/supabase'
 import PageBgWrapper from '../components/ui/PageBgWrapper'
@@ -26,6 +27,7 @@ export default function EditorPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [previewMode, setPreviewMode] = useState(false)
+  const [aiModalOpen, setAiModalOpen] = useState(false)
   const [activeId, setActiveId] = useState(null)
   const [overId, setOverId] = useState(null)
   const loaded = useRef(false)
@@ -108,6 +110,16 @@ export default function EditorPage() {
       // Dropping from the block panel — insert at position
       const newBlock = createBlock(active.data.current.blockType)
       setBlocks(prev => {
+        // Check if dropping onto a container block → add as child instead
+        const overBlock = over ? prev.find(b => b.id === over.id) : null
+        if (overBlock?.type === 'container') {
+          return prev.map(b =>
+            b.id === overBlock.id
+              ? { ...b, children: [...(b.children || []), newBlock] }
+              : b
+          )
+        }
+
         // Enforce autoplay exclusivity for song blocks
         const base = newBlock.type === 'song' && newBlock.autoplay
           ? prev.map(b => b.type === 'song' ? { ...b, autoplay: false } : b)
@@ -133,6 +145,13 @@ export default function EditorPage() {
   function handleDragCancel() {
     setActiveId(null)
     setOverId(null)
+  }
+
+  function handleAiApply({ title, blocks: aiBlocks, settings: aiSettings }) {
+    if (title) setPageTitle(title)
+    setBlocks(aiBlocks)
+    if (aiSettings) setPageSettings(prev => ({ ...prev, ...aiSettings }))
+    setAiModalOpen(false)
   }
 
   function handleAddBlock(block) {
@@ -238,7 +257,7 @@ export default function EditorPage() {
       <div className="flex flex-1 overflow-hidden">
         {previewMode ? (
           /* Full preview */
-          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" contained>
+          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto">
             <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
           </PageBgWrapper>
         ) : (
@@ -253,7 +272,7 @@ export default function EditorPage() {
           >
             {/* Desktop sidebar — hidden on mobile */}
             <aside className="hidden md:flex flex-col w-56 bg-surface border-r border-overlay overflow-y-auto shrink-0">
-              <BlockPanel onAddBlock={handleAddBlock} />
+              <BlockPanel onAddBlock={handleAddBlock} onOpenAi={() => setAiModalOpen(true)} />
             </aside>
 
             {/* Editor canvas + preview — resizable on desktop */}
@@ -288,7 +307,7 @@ export default function EditorPage() {
                 <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
                   {t('editor.previewLabel')}
                 </div>
-                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" contained>
+                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto">
                   <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
                 </PageBgWrapper>
               </div>
@@ -313,6 +332,13 @@ export default function EditorPage() {
         )}
       </div>
 
+    {aiModalOpen && (
+        <AiGenerateModal
+          hasBlocks={blocks.length > 0}
+          onApply={handleAiApply}
+          onClose={() => setAiModalOpen(false)}
+        />
+      )}
     </div>
   )
 }
