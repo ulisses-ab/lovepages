@@ -62,7 +62,7 @@ export default function PublicPage({ slug: slugProp }) {
   const colPadding = page.settings?.columnPadding ?? 24
 
   return (
-    <PageBgWrapper settings={page.settings} className="min-h-screen" style={{ overflowX: 'hidden' }} viewportFixed>
+    <PageBgWrapper settings={page.settings} className="min-h-screen" style={{ overflowX: 'clip' }} viewportFixed>
       {segments.map((seg, i) =>
         seg.fullBleed ? (
           <BlockRenderer key={seg.block.id} block={seg.block} />

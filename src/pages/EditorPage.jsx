@@ -134,9 +134,21 @@ export default function EditorPage() {
       return
     }
 
-    // Reordering existing blocks
+    // Reordering existing blocks (or sliding one into a container)
     if (!over || active.id === over.id) return
     setBlocks(prev => {
+      const overBlock = prev.find(b => b.id === over.id)
+      if (overBlock?.type === 'container') {
+        // Move the dragged block into the container's children
+        const draggedBlock = prev.find(b => b.id === active.id)
+        if (!draggedBlock) return prev
+        return prev
+          .filter(b => b.id !== active.id)
+          .map(b => b.id === overBlock.id
+            ? { ...b, children: [...(b.children || []), draggedBlock] }
+            : b
+          )
+      }
       const oldIndex = prev.findIndex(b => b.id === active.id)
       const newIndex = prev.findIndex(b => b.id === over.id)
       return arrayMove(prev, oldIndex, newIndex)
@@ -257,9 +269,9 @@ export default function EditorPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {previewMode ? (
-          /* Full preview */
-          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto">
-            <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
+          /* Full preview — transform contains fixed bg layers to this panel */
+          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
+            <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
           </PageBgWrapper>
         ) : (
           <DndContext
@@ -309,7 +321,8 @@ export default function EditorPage() {
                 <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
                   {t('editor.previewLabel')}
                 </div>
-                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto">
+                {/* transform contains fixed bg layers to the preview panel */}
+                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
                   <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
                 </PageBgWrapper>
               </div>
