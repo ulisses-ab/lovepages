@@ -269,11 +269,9 @@ export default function EditorPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {previewMode ? (
-          /* Full preview — PageBgWrapper is non-scrolling; Canvas scrolls inside it */
-          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
-            <div className="absolute inset-0 overflow-y-auto">
-              <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
-            </div>
+          /* Full preview — transform contains fixed bg layers to this panel */
+          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
+            <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
           </PageBgWrapper>
         ) : (
           <DndContext
@@ -323,11 +321,9 @@ export default function EditorPage() {
                 <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
                   {t('editor.previewLabel')}
                 </div>
-                {/* PageBgWrapper is non-scrolling; Canvas scrolls inside it */}
-                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
-                  <div className="absolute inset-0 overflow-y-auto">
-                    <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
-                  </div>
+                {/* transform contains fixed bg layers to the preview panel */}
+                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
+                  <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
                 </PageBgWrapper>
               </div>
             </div>
