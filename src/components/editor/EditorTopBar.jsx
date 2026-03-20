@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, LogOut, Globe } from 'lucide-react'
+import { ChevronLeft, LogOut, Globe, Smartphone, Monitor } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useT } from '../../lib/i18n'
@@ -9,6 +9,7 @@ import PublishModal from './PublishModal'
 export default function EditorTopBar({
   pageTitle, setPageTitle,
   previewMode, setPreviewMode,
+  mobilePreview, setMobilePreview,
   saving,
   onBack, user,
   pageId, pageSlug, pagePublished, pageExpiresAt,
@@ -79,6 +80,15 @@ export default function EditorTopBar({
             <span className="text-xs text-fg-faint hidden sm:inline">{t('editor.saving')}</span>
           )}
           <LangToggle />
+          {previewMode && (
+            <button
+              onClick={() => setMobilePreview(v => !v)}
+              title={mobilePreview ? 'Desktop view' : 'Mobile view'}
+              className="p-2 rounded-lg bg-overlay text-fg-tertiary hover:bg-subtle transition"
+            >
+              {mobilePreview ? <Monitor size={16} /> : <Smartphone size={16} />}
+            </button>
+          )}
           <button
             onClick={() => setPreviewMode(v => !v)}
             className={`p-2 rounded-lg text-sm font-medium transition ${

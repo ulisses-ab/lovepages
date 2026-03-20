@@ -27,6 +27,7 @@ export default function EditorPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [previewMode, setPreviewMode] = useState(false)
+  const [mobilePreview, setMobilePreview] = useState(false)
   const [aiModalOpen, setAiModalOpen] = useState(false)
   const [activeId, setActiveId] = useState(null)
   const [overId, setOverId] = useState(null)
@@ -248,6 +249,8 @@ export default function EditorPage() {
         setPageTitle={setPageTitle}
         previewMode={previewMode}
         setPreviewMode={setPreviewMode}
+        mobilePreview={mobilePreview}
+        setMobilePreview={setMobilePreview}
         saving={saving}
         onBack={() => navigate('/dashboard')}
         user={user}
@@ -269,10 +272,28 @@ export default function EditorPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {previewMode ? (
-          /* Full preview — transform contains fixed bg layers to this panel */
-          <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
-            <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
-          </PageBgWrapper>
+          mobilePreview ? (
+            /* Mobile phone frame */
+            <div className="flex-1 bg-base flex flex-col items-center justify-start overflow-auto py-8 gap-3">
+              <p className="text-xs text-fg-faint tracking-wide uppercase shrink-0">Mobile preview</p>
+              <div className="shrink-0 w-[390px] h-[844px] rounded-[44px] border-[6px] border-surface shadow-2xl overflow-hidden relative" style={{ transform: 'translateZ(0)' }}>
+                {/* notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-surface rounded-b-2xl z-10" />
+                <PageBgWrapper settings={pageSettings} className="absolute inset-0 overflow-y-auto" viewportFixed style={{ transform: 'translateZ(0)' }}>
+                  <div className="pt-7">
+                    <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+                  </div>
+                </PageBgWrapper>
+                {/* home indicator */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-fg-faint/40 z-10" />
+              </div>
+            </div>
+          ) : (
+            /* Full preview — transform contains fixed bg layers to this panel */
+            <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
+              <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+            </PageBgWrapper>
+          )
         ) : (
           <DndContext
             sensors={sensors}
