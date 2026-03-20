@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_edge_functions",
+      "mcp__supabase__get_logs",
+      "mcp__stripe__get_stripe_account_info",
+      "mcp__stripe__list_payment_intents",
+      "Bash(npm install:*)",
+      "Bash(npm list:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:phenotypically-affixal-sarina.ngrok-free.dev)",
+      "Bash(cp /home/ulissesalvesbicalho/Downloads/DEARLY-6.png /home/ulissesalvesbicalho/code/lovepages/public/ovo.png)",
+      "Bash(cp /home/ulissesalvesbicalho/Downloads/DEARLY-7.png /home/ulissesalvesbicalho/code/lovepages/public/ovo-blink.png)",
+      "Bash(container\" label so the intent is clear.:*)",
+      "Bash(git revert:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

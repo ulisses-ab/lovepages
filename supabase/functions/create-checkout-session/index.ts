@@ -60,37 +60,89 @@ Deno.serve(async (req) => {
       }
     }
 
-    const isBrazil = country === 'BR'
-    const currency = isBrazil ? 'brl' : 'usd'
-    const unitAmount = isBrazil ? 2000 : 1000 // R$20.00 or $10.00
-
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
-      apiVersion: '2023-10-16',
-    })
-
     const origin = req.headers.get('origin') || 'http://localhost:5173'
+    const isBrazil = country === 'BR'
 
-    const session = await stripe.checkout.sessions.create({
-      line_items: [{
-        price_data: {
-          currency,
-          unit_amount: unitAmount,
-          product_data: {
-            name: 'Lovepage — 1 year',
-            description: 'Your page stays live for 1 year',
-          },
+    if (false) {
+      // Mercado Pago for Brazilian users
+      const mpAccessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN')
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')
+
+      const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1')
+      const preference: Record<string, unknown> = {
+        items: [{
+          title: 'Lovepage — 1 ano',
+          description: 'Sua página fica no ar por 1 ano',
+          quantity: 1,
+          currency_id: 'BRL',
+          unit_price: 20,
+        }],
+        back_urls: {
+          success: `${origin}/payment-success?page_id=${pageId}`,
+          failure: `${origin}/editor/${pageId}`,
+          pending: `${origin}/payment-success?page_id=${pageId}`,
         },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${origin}/payment-success?page_id=${pageId}`,
-      cancel_url: `${origin}/editor/${pageId}`,
-      metadata: { pageId, slug },
-    })
+        external_reference: `${pageId}:${slug}`,
+        notification_url: `${supabaseUrl}/functions/v1/mp-webhook`,
+      }
+      // auto_return only works with public HTTPS URLs, not localhost
+      if (!isLocalhost) {
+        preference.auto_return = 'approved'
+      }
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+      const mpRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${mpAccessToken}`,
+        },
+        body: JSON.stringify(preference),
+      })
+
+      if (!mpRes.ok) {
+        const err = await mpRes.text()
+        console.error('Mercado Pago error:', err)
+        return new Response(JSON.stringify({ error: 'Failed to create MP preference' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const mpData = await mpRes.json()
+      // Use sandbox_init_point in test mode, init_point in production
+      const url = mpData.init_point
+
+      return new Response(JSON.stringify({ url }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    } else {
+      // Stripe for international users
+      const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
+        apiVersion: '2023-10-16',
+      })
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            unit_amount: 1000, // $10.00
+            product_data: {
+              name: 'Lovepage — 1 year',
+              description: 'Your page stays live for 1 year',
+            },
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${origin}/payment-success?page_id=${pageId}`,
+        cancel_url: `${origin}/editor/${pageId}`,
+        metadata: { pageId, slug },
+      })
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
   } catch (err) {
     console.error(err)
     return new Response(JSON.stringify({ error: err.message }), {

@@ -5,9 +5,9 @@
  */
 export const colors = {
   // Page-level backgrounds
-  base:    '#23272a', // outermost page bg
-  surface: '#2e343d', // panels, cards
-  overlay: '#424a57', // inputs, secondary surfaces, panel borders
+  base:    '#181d23', // outermost page bg
+  surface: '#1a202a', // panels, cards
+  overlay: '#3a4453', // inputs, secondary surfaces, panel borders
   subtle:  '#5a616a', // input borders, hover backgrounds
 
   // Foreground / text
@@ -19,9 +19,9 @@ export const colors = {
   fgGhost:     '#4b5563',
 
   // Brand / primary (purple)
-  primary:       '#9333ea', // main buttons, active states
-  primaryHover:  '#7e22ce', // button hover
-  primaryDim:    '#c084fc', // subtle text, dim borders
+  primary:       '#ff3131', // main buttons, active states
+  primaryHover:  '#fb5656', // button hover
+  primaryDim:    '#ff7f7f', // subtle text, dim borders
   primarySubtle: '#4a044e', // very dark purple for hover bg tints
 
   // Vinyl disc gradient shades (SongBlock vinyl variant)

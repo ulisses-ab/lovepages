@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, Globe, Check, AlertCircle, Loader, CreditCard, Clock } from 'lucide-react'
+import { useT } from '../../lib/i18n'
 
 function slugify(text) {
   return (text || '')
@@ -35,6 +36,7 @@ export default function PublishModal({
   saving,
   checkSlugAvailable,
 }) {
+  const { t } = useT()
   const [slug, setSlug] = useState(currentSlug || slugify(pageTitle))
   const [slugStatus, setSlugStatus] = useState(null) // null | 'checking' | 'available' | 'taken' | 'invalid'
   const [redirecting, setRedirecting] = useState(false)
@@ -102,7 +104,7 @@ export default function PublishModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-overlay">
           <div className="flex items-center gap-2">
             <Globe size={18} className="text-primary" />
-            <h2 className="text-fg font-semibold text-base">Publish page</h2>
+            <h2 className="text-fg font-semibold text-base">{t('publish.title')}</h2>
           </div>
           <button onClick={onClose} className="text-fg-faint hover:text-fg transition-colors">
             <X size={18} />
@@ -113,7 +115,7 @@ export default function PublishModal({
           {/* Slug input */}
           <div>
             <label className="block text-xs text-fg-muted mb-1.5 font-medium">
-              Choose your page address
+              {t('publish.chooseAddress')}
             </label>
             <div className="flex items-center gap-1 bg-overlay rounded-xl px-3 py-2.5 border border-overlay focus-within:border-primary transition-colors">
               {baseDomain
@@ -136,25 +138,25 @@ export default function PublishModal({
               {slugStatus === 'checking' && (
                 <>
                   <Loader size={12} className="text-fg-muted animate-spin" />
-                  <span className="text-xs text-fg-muted">Checking…</span>
+                  <span className="text-xs text-fg-muted">{t('publish.checking')}</span>
                 </>
               )}
               {slugStatus === 'available' && (
                 <>
                   <Check size={12} className="text-green-400" />
-                  <span className="text-xs text-green-400">Available!</span>
+                  <span className="text-xs text-green-400">{t('publish.available')}</span>
                 </>
               )}
               {slugStatus === 'taken' && (
                 <>
                   <AlertCircle size={12} className="text-red-400" />
-                  <span className="text-xs text-red-400">Already taken — try another name</span>
+                  <span className="text-xs text-red-400">{t('publish.taken')}</span>
                 </>
               )}
               {slugStatus === 'invalid' && slug.length > 0 && (
                 <>
                   <AlertCircle size={12} className="text-fg-muted" />
-                  <span className="text-xs text-fg-muted">Only lowercase letters, numbers, and hyphens</span>
+                  <span className="text-xs text-fg-muted">{t('publish.invalid')}</span>
                 </>
               )}
             </div>
@@ -163,7 +165,7 @@ export default function PublishModal({
           {/* Preview URL */}
           {canPublish && (
             <div className="bg-overlay rounded-xl px-3 py-2.5">
-              <p className="text-xs text-fg-muted mb-0.5">Your page will be live at:</p>
+              <p className="text-xs text-fg-muted mb-0.5">{t('publish.liveAt')}</p>
               <p className="text-sm text-primary font-medium break-all">{publicUrl}</p>
             </div>
           )}
@@ -173,10 +175,8 @@ export default function PublishModal({
             <div className="bg-overlay rounded-xl px-3 py-3 flex items-start gap-3">
               <CreditCard size={16} className="text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm text-fg font-medium">One-time payment — {priceLabel}</p>
-                <p className="text-xs text-fg-muted mt-0.5">
-                  Your page stays live for 1 year. You'll be redirected to Stripe to complete payment.
-                </p>
+                <p className="text-sm text-fg font-medium">{t('publish.oneTimePayment').replace('{price}', priceLabel)}</p>
+                <p className="text-xs text-fg-muted mt-0.5">{t('publish.paymentNote')}</p>
               </div>
             </div>
           )}
@@ -186,7 +186,7 @@ export default function PublishModal({
             <div className="bg-green-900/20 border border-green-800/40 rounded-xl px-3 py-2.5 flex items-center gap-2">
               <Clock size={14} className="text-green-400 shrink-0" />
               <p className="text-xs text-green-300">
-                Active until {formatExpiry(pageExpiresAt)} — no new payment needed.
+                {t('publish.activeUntil').replace('{date}', formatExpiry(pageExpiresAt))}
               </p>
             </div>
           )}
@@ -195,7 +195,7 @@ export default function PublishModal({
           {published && currentSlug && (
             <div className="bg-green-900/20 border border-green-800/40 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs text-green-400 font-medium mb-0.5">Currently live</p>
+                <p className="text-xs text-green-400 font-medium mb-0.5">{t('publish.currentlyLive')}</p>
                 <a
                   href={liveUrl}
                   target="_blank"
@@ -210,7 +210,7 @@ export default function PublishModal({
                 disabled={busy}
                 className="text-xs text-red-400 hover:text-red-300 transition-colors shrink-0 disabled:opacity-50"
               >
-                Unpublish
+                {t('publish.unpublish')}
               </button>
             </div>
           )}
@@ -222,7 +222,7 @@ export default function PublishModal({
             onClick={onClose}
             className="flex-1 py-3 rounded-xl bg-overlay text-fg-secondary text-sm font-medium hover:bg-subtle transition-colors"
           >
-            Cancel
+            {t('publish.cancel')}
           </button>
           <button
             onClick={handlePublishClick}
@@ -231,12 +231,12 @@ export default function PublishModal({
           >
             {redirecting && <Loader size={14} className="animate-spin" />}
             {busy && !redirecting
-              ? 'Publishing…'
+              ? t('publish.publishing')
               : redirecting
-                ? 'Redirecting…'
+                ? t('publish.redirecting')
                 : alreadyPaid
-                  ? (published ? 'Update link' : 'Publish')
-                  : `Pay ${priceLabel} & Publish`
+                  ? (published ? t('publish.updateLink') : t('publish.publish'))
+                  : t('publish.payAndPublish').replace('{price}', priceLabel)
             }
           </button>
         </div>

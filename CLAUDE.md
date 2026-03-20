@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | link | countdown | carousel | container | custom`
+Block types: `text | image | song | link | countdown | carousel | container`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -204,16 +204,17 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // countdown
 { "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string", "variant": "flip | minimal | aero", "clockColor": "dark | beige" }
 
-// custom
-{ "html": "raw HTML string" }
-// Renders html via dangerouslySetInnerHTML. Scripts injected via innerHTML don't execute (browser security),
-// but inline handlers (onclick etc.) do. Intended for trusted owner-authored content only.
-// Edit mode shows a monospace textarea + live preview below.
-
 // container
 { "children": "[array of full block objects]", "fullBleed": true }
 // Always renders full-width (fullBleed:true by default). Background (bgColor/bgImage/bgFade etc.) is set via BackgroundChooser in edit mode.
-// Children are any block types, including other containers (nesting is supported); each child renders with its own BlockRenderer instance inside the container's background section.
+// Children are any block types, including other containers (nesting is supported).
+// In edit mode, ContainerBlock renders its visual body inline on the canvas (not as a side-panel list):
+//   - A collapsible "Background & Layout" settings bar sits at the top.
+//   - Children render as InlineChildBlock: live visual preview + drag handle + Edit/Delete toolbar.
+//   - Clicking "Edit" on a child switches it from preview to its editing form + BlockStyleControls.
+//   - Dragging a top-level block onto a container moves it inside (EditorPage.handleDragEnd).
+//   - Dragging from the block panel onto a container adds it as a child (EditorPage.handleDragEnd).
+// In SortableBlock, containers always show their body (not gated by expanded). Header is a minimal drag bar.
 // flip (default): a realistic physical flip clock — mechanical flip panels with 3D card animation, rubber feet. Dark/moody aesthetic.
 //   clockColor: "dark" (default) — dark anodised aluminium housing, light digits; "beige" — warm cream housing, dark digits.
 // minimal: large serif numbers, hairline dividers, small uppercase unit labels, dot separators. Clean white-space editorial look. Minimalist aesthetic.

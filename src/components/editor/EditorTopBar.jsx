@@ -64,14 +64,14 @@ export default function EditorTopBar({
             <ChevronLeft size={18} />
           </button>
         )}
-        <span className="text-primary-dim font-bold text-lg shrink-0">💌 lovepages</span>
+        <img src="/logo.png" alt="Lovio" className="h-8 w-auto shrink-0" />
 
         <input
           type="text"
           value={pageTitle}
           onChange={e => setPageTitle(e.target.value)}
           placeholder={t('editor.titlePlaceholder')}
-          className="flex-1 min-w-0 text-sm font-medium text-fg-secondary bg-transparent border-none outline-none placeholder-fg-faint"
+          className="flex-1 min-w-0 max-w-xs text-base font-semibold text-fg bg-transparent border-b border-transparent hover:border-overlay focus:border-primary outline-none placeholder-fg-faint transition-colors pb-0.5"
         />
 
         <div className="flex items-center gap-1 sm:gap-2 ml-auto">

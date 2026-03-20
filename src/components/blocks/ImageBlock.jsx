@@ -143,7 +143,7 @@ export default function ImageBlock({ block, isEditing, onChange }) {
 
   return (
     <figure className="w-full">
-      <img src={src} alt={alt} className="w-full rounded object-cover" />
+      <img src={src} alt={alt} className="w-full object-cover" />
       {caption && (
         <figcaption className="text-center text-sm text-fg-muted mt-1">{caption}</figcaption>
       )}
