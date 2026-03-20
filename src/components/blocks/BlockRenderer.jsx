@@ -5,9 +5,20 @@ import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
-import { getSizeStyle } from '../../lib/pageUtils'
 
-export default function BlockRenderer({ block, isEditing = false, onChange }) {
+// Maps block.size → flex child style.
+// The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
+// Each block's size determines how much of that row it claims.
+function getSizeStyle(size) {
+  switch (size) {
+    case 'half':  return { flex: '1 1 calc(50% - 8px)', minWidth: '200px', maxWidth: '100%' }
+    case 'third': return { flex: '1 1 calc(33.33% - 11px)', minWidth: '150px', maxWidth: '100%' }
+    case 'auto':  return { flexShrink: 0 }
+    default:      return { width: '100%' }  // 'full'
+  }
+}
+
+export default function BlockRenderer({ block, isEditing = false, onChange, isHighlighted = false }) {
   function renderBlock() {
     const props = { block, isEditing, onChange }
     switch (block.type) {
@@ -27,7 +38,12 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   }
 
   return (
-    <div style={getSizeStyle(block.size ?? 'full')}>
+    <div
+      style={getSizeStyle(block.size ?? 'full')}
+      className={`transition-[outline,outline-offset] duration-150 rounded-lg ${
+        isHighlighted ? 'outline outline-2 outline-primary/50 outline-offset-2' : 'outline-none'
+      }`}
+    >
       {renderBlock()}
     </div>
   )

@@ -30,6 +30,7 @@ export default function EditorPage() {
   const [aiModalOpen, setAiModalOpen] = useState(false)
   const [activeId, setActiveId] = useState(null)
   const [overId, setOverId] = useState(null)
+  const [hoveredBlockId, setHoveredBlockId] = useState(null)
   const loaded = useRef(false)
   const autoSaveTimer = useRef(null)
   const savePageRef = useRef(null)
@@ -291,6 +292,7 @@ export default function EditorPage() {
                   onAddBlock={handleAddBlock}
                   panelDragOverId={isDraggingFromPanel ? overId : null}
                   isDraggingFromPanel={isDraggingFromPanel}
+                  onHoverBlock={setHoveredBlockId}
                 />
               </main>
 
@@ -308,7 +310,7 @@ export default function EditorPage() {
                   {t('editor.previewLabel')}
                 </div>
                 <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto">
-                  <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} />
+                  <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
                 </PageBgWrapper>
               </div>
             </div>
