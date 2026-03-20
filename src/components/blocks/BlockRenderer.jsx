@@ -5,6 +5,7 @@ import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
+import { colors } from '../../lib/theme'
 
 // Maps block.size → flex child style.
 // The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
@@ -38,12 +39,16 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
   }
 
   return (
-    <div
-      style={getSizeStyle(block.size ?? 'full')}
-      className={`transition-[outline,outline-offset] duration-150 rounded-lg ${
-        isHighlighted ? 'outline outline-2 outline-primary/50 outline-offset-2' : 'outline-none'
-      }`}
-    >
+    <div style={{ ...getSizeStyle(block.size ?? 'full'), position: 'relative' }} className="rounded-lg">
+      {/* Hover highlight overlay — fades in when this block is hovered in the editor */}
+      <div
+        className="absolute inset-0 rounded-lg pointer-events-none z-10 transition-opacity duration-150"
+        style={{
+          opacity: isHighlighted ? 1 : 0,
+          boxShadow: `0 0 0 2px ${colors.primary}, 0 0 24px ${colors.primary}99`,
+          background: `${colors.primary}18`,
+        }}
+      />
       {renderBlock()}
     </div>
   )
