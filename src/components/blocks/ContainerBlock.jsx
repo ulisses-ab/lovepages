@@ -39,7 +39,7 @@ function getSizeStyle(size) {
 // Layout presets map friendly names → flex property sets
 const LAYOUT_PRESETS = {
   sidebyside: {
-    label: 'Side by side',
+    label: 'Center aligned',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
