@@ -5,6 +5,7 @@ import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
+import CustomBlock from './CustomBlock'
 
 // Maps block.size → flex child style.
 // The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
@@ -29,6 +30,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
       case 'countdown': return <CountdownBlock {...props} />
       case 'carousel':  return <CarouselBlock {...props} />
       case 'container': return <ContainerBlock {...props} />
+      case 'custom':    return <CustomBlock {...props} />
       default:          return <p className="text-fg-muted text-sm">Unknown block</p>
     }
   }

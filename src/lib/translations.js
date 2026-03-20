@@ -50,6 +50,7 @@ export const translations = {
     'block.song': 'Song',
     'block.video': 'Video',
     'block.link': 'Link',
+    'block.custom': 'Custom HTML',
 
     // SortableBlock
     'sortable.dragToReorder': 'Drag to reorder',
@@ -242,6 +243,7 @@ export const translations = {
     'block.song': 'M\u00fasica',
     'block.video': 'V\u00eddeo',
     'block.link': 'Link',
+    'block.custom': 'HTML Personalizado',
 
     // SortableBlock
     'sortable.dragToReorder': 'Arrastar para reordenar',
