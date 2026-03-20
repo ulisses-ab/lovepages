@@ -43,7 +43,8 @@ export default function Canvas({
         </p>
       )
     }
-    // Group consecutive non-fullBleed blocks so fullBleed blocks can stretch edge-to-edge
+    // fullBleed blocks escape the max-width column and stretch edge-to-edge.
+    // All other blocks render inside the constrained centered column.
     const segments = []
     let group = []
     for (const block of blocks) {
@@ -56,13 +57,20 @@ export default function Canvas({
     }
     if (group.length) segments.push({ fullBleed: false, blocks: group })
 
+    const colGap     = pageSettings?.columnGap     ?? 16
+    const colPadding = pageSettings?.columnPadding ?? 24
+
     return (
       <div className="w-full">
         {segments.map((seg, i) =>
           seg.fullBleed ? (
             <BlockRenderer key={seg.block.id} block={seg.block} />
           ) : (
-            <div key={i} className="flex flex-wrap gap-4 p-6 max-w-3xl mx-auto">
+            <div
+              key={i}
+              className="flex flex-wrap max-w-3xl mx-auto"
+              style={{ gap: colGap, padding: colPadding }}
+            >
               {seg.blocks.map(block => (
                 <BlockRenderer key={block.id} block={block} />
               ))}

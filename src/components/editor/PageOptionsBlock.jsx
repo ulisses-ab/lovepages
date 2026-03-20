@@ -44,6 +44,31 @@ export default function PageOptionsBlock({ pageSettings, onChange }) {
             onChange={onChange}
           />
 
+            {/* Column layout */}
+          <div>
+            <p className="text-xs text-fg-muted mb-2">Layout</p>
+            <div className="space-y-2">
+              {[
+                { key: 'columnGap',     label: 'Block gap',  min: 0, max: 64, step: 4,  default: 16, unit: 'px' },
+                { key: 'columnPadding', label: 'Page padding', min: 0, max: 80, step: 4, default: 24, unit: 'px' },
+              ].map(({ key, label, min, max, step, default: def, unit }) => {
+                const val = pageSettings[key] ?? def
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-xs text-fg-muted w-24 shrink-0">{label}</span>
+                    <input
+                      type="range" min={min} max={max} step={step}
+                      value={val}
+                      onChange={e => onChange({ [key]: Number(e.target.value) })}
+                      className="flex-1 h-1 accent-primary"
+                    />
+                    <span className="text-xs text-fg-muted tabular-nums w-8 text-right shrink-0">{val}{unit}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Background effect */}
           <div>
             <p className="text-xs text-fg-muted mb-2">{t('pageOptions.effect')}</p>

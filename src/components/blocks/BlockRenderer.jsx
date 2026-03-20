@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -6,6 +5,18 @@ import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
+
+// Maps block.size → flex child style.
+// The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
+// Each block's size determines how much of that row it claims.
+function getSizeStyle(size) {
+  switch (size) {
+    case 'half':  return { flex: '1 1 calc(50% - 8px)', minWidth: '200px', maxWidth: '100%' }
+    case 'third': return { flex: '1 1 calc(33.33% - 11px)', minWidth: '150px', maxWidth: '100%' }
+    case 'auto':  return { flexShrink: 0 }
+    default:      return { width: '100%' }  // 'full'
+  }
+}
 
 export default function BlockRenderer({ block, isEditing = false, onChange }) {
   function renderBlock() {
@@ -22,148 +33,12 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
     }
   }
 
-  const decorationClass = [
-    block.border ? 'border border-subtle' : '',
-    block.shadow ? 'shadow-md' : '',
-  ].filter(Boolean).join(' ')
-
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)')
-    const handler = e => setIsMobile(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  // back-compat: old blocks only had `scale`
-  const scale = isMobile
-    ? (block.scaleMobile ?? block.scale ?? 100)
-    : (block.scaleDesktop ?? block.scale ?? 100)
-
-  // Measure the wrapper's layout height (unaffected by CSS transform) so we can
-  // collapse the dead space that transform: scale() leaves behind.
-  // marginBottom = -(1 - scale/100) * naturalHeight removes dead space when scale < 1
-  // and adds space when scale > 1 so overflowing content isn't covered by the next block.
-  const wrapperRef = useRef(null)
-  const [naturalHeight, setNaturalHeight] = useState(null)
-  useEffect(() => {
-    if (isEditing || !wrapperRef.current) return
-    const ro = new ResizeObserver(([entry]) => {
-      const h = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
-      setNaturalHeight(h)
-    })
-    ro.observe(wrapperRef.current)
-    return () => ro.disconnect()
-  }, [isEditing])
-
-  // For fullBleed blocks, scale is applied only to the inner content container
-  // so the outer block stays edge-to-edge. For normal blocks, scale the outer wrapper.
-  const scaleTransform = scale !== 100
-    ? { transform: `scale(${scale / 100})`, transformOrigin: 'top center' }
-    : {}
-  const outerScaleStyle   = block.fullBleed ? {} : scaleTransform
-  const contentScaleStyle = block.fullBleed ? scaleTransform : {}
-
-  const marginStyle = (scale !== 100 && naturalHeight != null)
-    ? { marginBottom: -(1 - scale / 100) * naturalHeight }
-    : {}
-
-  // In the editor, never apply block backgrounds — they're preview-only.
   if (isEditing) {
-    return (
-      <div className={`w-full min-w-0 p-4 rounded-lg ${decorationClass}`}>
-        {renderBlock()}
-      </div>
-    )
-  }
-
-  // Fade: two stacked absolute layers (bg2 below, bg1 above with a downward mask),
-  // content sits above both as position:relative.
-  if (block.bgFade) {
-    const outerClass = [
-      'w-full min-w-0 relative',
-      block.fullBleed ? '' : 'rounded-lg',
-      decorationClass,
-    ].filter(Boolean).join(' ')
-
-    // Border-radius is applied directly to the layer divs so their backgrounds
-    // are clipped correctly without needing overflow-hidden on the outer wrapper
-    // (which would clip block content like rotated text).
-    const layerRadius = block.fullBleed ? undefined : 'inherit'
-
-    const fit1 = block.bgImageFit  || 'cover'
-    const fit2 = block.bgImageFit2 || 'cover'
-
-    const layer2 = {
-      position: 'absolute', inset: 0, borderRadius: layerRadius,
-      backgroundColor: block.bgColor2 || undefined,
-      backgroundImage: block.bgImage2 ? `url(${block.bgImage2})` : undefined,
-      backgroundSize: block.bgImage2 ? (fit2 === 'tile' ? 'var(--bg-tile-size)' : fit2) : undefined,
-      backgroundRepeat: block.bgImage2 ? (fit2 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
-      backgroundPosition: block.bgImage2 ? 'center' : undefined,
-    }
-
-    const layer1 = {
-      position: 'absolute', inset: 0, borderRadius: layerRadius,
-      backgroundColor: block.bgColor || undefined,
-      backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-      backgroundSize: block.bgImage ? (fit1 === 'tile' ? 'var(--bg-tile-size)' : fit1) : undefined,
-      backgroundRepeat: block.bgImage ? (fit1 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
-      backgroundPosition: block.bgImage ? 'center' : undefined,
-      maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
-      WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
-    }
-
-    return (
-      <div ref={wrapperRef} className={outerClass} style={{ ...outerScaleStyle, ...marginStyle }}>
-        <div style={layer2} />
-        <div style={layer1} />
-        <div className="relative">
-          {block.fullBleed
-            ? block.type === 'container'
-              ? <div style={contentScaleStyle}>{renderBlock()}</div>
-              : <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
-            : <div className="p-4" style={contentScaleStyle}>{renderBlock()}</div>
-          }
-        </div>
-      </div>
-    )
-  }
-
-  // Normal (no fade)
-  const fit = block.bgImageFit || 'cover'
-  const wrapperStyle = {
-    backgroundColor: block.bgColor || undefined,
-    backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-    backgroundSize: block.bgImage ? (fit === 'tile' ? 'var(--bg-tile-size)' : fit) : undefined,
-    backgroundRepeat: block.bgImage ? (fit === 'tile' ? 'repeat' : 'no-repeat') : undefined,
-    backgroundPosition: block.bgImage ? 'center' : undefined,
-    ...outerScaleStyle,
-    ...marginStyle,
-  }
-
-  const wrapperClass = [
-    'w-full min-w-0',
-    block.fullBleed ? '' : 'p-4 rounded-lg',
-    decorationClass,
-  ].filter(Boolean).join(' ')
-
-  if (block.fullBleed) {
-    return (
-      <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
-        {block.type === 'container' ? (
-          <div style={contentScaleStyle}>{renderBlock()}</div>
-        ) : (
-          <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
-        )}
-      </div>
-    )
+    return <div className="w-full min-w-0">{renderBlock()}</div>
   }
 
   return (
-    <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
+    <div style={getSizeStyle(block.size ?? 'full')}>
       {renderBlock()}
     </div>
   )

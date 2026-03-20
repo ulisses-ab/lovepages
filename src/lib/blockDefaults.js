@@ -12,29 +12,21 @@ export const BLOCK_TYPES = {
   CONTAINER: 'container',
 }
 
-export const ALIGN_OPTIONS = ['left', 'center', 'right']
 export const TEXT_VARIANTS = ['plain', 'typewriter', 'postit', 'ransom']
+
+// size: how the block participates in its parent container's flex layout
+// 'full'  → flex: 0 0 100% (takes the whole row)
+// 'half'  → flex: 1 1 calc(50% - gap/2) (two per row)
+// 'third' → flex: 1 1 calc(33% - gap)   (three per row)
+// 'auto'  → flex: 0 0 auto              (shrinks to content width)
+export const SIZE_OPTIONS = ['full', 'half', 'third', 'auto']
 
 export function createBlock(type) {
   const base = {
     id: nanoid(),
     type,
+    size: 'full',
     align: 'center',
-    bgColor: '',
-    bgImage: '',
-    bgImageFit: '',
-    bgFade: false,
-    bgColor2: '',
-    bgImage2: '',
-    bgImageFit2: '',
-    border: false,
-    shadow: false,
-    fullBleed: false,
-    scaleDesktop: 100,
-    scaleMobile: 100,
-    bold: false,
-    italic: false,
-    outline: false,
   }
 
   switch (type) {
@@ -51,7 +43,17 @@ export function createBlock(type) {
     case BLOCK_TYPES.CAROUSEL:
       return { ...base, images: [], mode: 'slider', albumTitle: '', coverColor: '', coverTitleStyle: 'sticker' }
     case BLOCK_TYPES.CONTAINER:
-      return { ...base, fullBleed: true, children: [] }
+      return {
+        ...base,
+        fullBleed: true,  // escapes the page's max-width column by default
+        children: [],
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 16,
+        padding: 24,
+      }
     default:
       return base
   }

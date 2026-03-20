@@ -58,13 +58,20 @@ export default function PublicPage({ slug: slugProp }) {
   }
   if (group.length) segments.push({ fullBleed: false, blocks: group })
 
+  const colGap     = page.settings?.columnGap     ?? 16
+  const colPadding = page.settings?.columnPadding ?? 24
+
   return (
     <PageBgWrapper settings={page.settings} className="min-h-screen" style={{ overflowX: 'hidden' }} viewportFixed>
       {segments.map((seg, i) =>
         seg.fullBleed ? (
           <BlockRenderer key={seg.block.id} block={seg.block} />
         ) : (
-          <div key={i} className="flex flex-wrap gap-4 p-3 sm:p-6 max-w-3xl mx-auto">
+          <div
+            key={i}
+            className="flex flex-wrap max-w-3xl mx-auto"
+            style={{ gap: colGap, padding: colPadding }}
+          >
             {seg.blocks.map(block => (
               <BlockRenderer key={block.id} block={block} />
             ))}

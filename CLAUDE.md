@@ -117,7 +117,9 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "bgFade": false,
   "bgColor2": "#hex or empty — second background stop for fade",
   "bgImage2": "url or empty — second background image for fade",
-  "bgEffect": "empty string | bubbles — animated overlay rendered by BgEffect component (position:fixed, zIndex:0)"
+  "bgEffect": "empty string | bubbles — animated overlay rendered by BgEffect component (position:fixed, zIndex:0)",
+  "columnGap": "number (px) — gap between blocks in the page column (default: 16)",
+  "columnPadding": "number (px) — padding around the page column (default: 24)"
 }
 ```
 
@@ -128,8 +130,8 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 ```json
 {
   "id": "nanoid string",
-  "type": "text | image | song | link | countdown | carousel",
-  "width": "full | half | third",
+  "type": "text | image | song | link | countdown | carousel | container",
+  "size": "full | half | third | auto",
   "align": "left | center | right",
   "bgColor": "#hex or empty string",
   "bgImage": "url or empty string — background image for the block",
@@ -139,12 +141,21 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "bgImage2": "url or empty — second background image for fade",
   "border": false,
   "shadow": false,
-  "fullBleed": false,
-  "scaleDesktop": 100,
-  "scaleMobile": 100
+  "fullBleed": false
 }
 ```
-// fullBleed: when true, the block escapes the max-width container and stretches edge-to-edge (no padding or rounded corners applied by BlockRenderer; PublicPage and Canvas preview render it outside the constrained flex-wrap group)
+// size: flex child participation in the parent container's layout (page column or container block)
+//   "full"  → width: 100% (takes the entire row)
+//   "half"  → flex: 1 1 calc(50% - 8px) with minWidth:200px (two per row)
+//   "third" → flex: 1 1 calc(33.33% - 11px) with minWidth:150px (three per row)
+//   "auto"  → flexShrink:0, shrinks to content width
+//   Applied by BlockRenderer as a wrapper style in non-editing (preview/public) mode.
+// fullBleed: when true, the block escapes the page's max-width column and stretches edge-to-edge.
+//   Both Canvas (preview) and PublicPage group consecutive non-fullBleed blocks into a constrained
+//   flex-wrap column; fullBleed blocks render outside that group at full viewport width.
+//   Container blocks default to fullBleed:true.
+// align: used by individual block components for their internal content alignment (e.g. TextBlock text-align).
+//   Not applied by BlockRenderer itself.
 // bgFade: when true, renders two stacked absolute background layers — bgColor2/bgImage2 at bottom, bgColor/bgImage on top with CSS mask-image linear-gradient(to bottom, black, transparent). Works for all combos: color→color, image→color, color→image, image→image.
 
 ### Type-specific fields
