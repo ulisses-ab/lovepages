@@ -1,6 +1,6 @@
 import {
   SortableContext,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useState } from 'react'
 import SortableBlock from './SortableBlock'
@@ -81,14 +81,22 @@ export default function Canvas({
     )
   }
 
+  const colGap     = pageSettings?.columnGap     ?? 16
+  const colPadding = pageSettings?.columnPadding ?? 24
+
   return (
-    <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
-      <div className="p-6 space-y-3 w-full max-w-2xl mx-auto">
+    <SortableContext items={blocks.map(b => b.id)} strategy={rectSortingStrategy}>
+      <div
+        className="flex flex-wrap w-full max-w-2xl mx-auto"
+        style={{ gap: colGap, padding: colPadding }}
+      >
         {pageSettings && onChangeSettings && (
-          <PageOptionsBlock pageSettings={pageSettings} onChange={onChangeSettings} />
+          <div style={{ width: '100%' }}>
+            <PageOptionsBlock pageSettings={pageSettings} onChange={onChangeSettings} />
+          </div>
         )}
         {blocks.length === 0 && (
-          <div className={`text-center py-20 rounded-xl transition-all ${isDraggingFromPanel ? 'ring-2 ring-primary/50 ring-dashed bg-primary-subtle/10' : 'text-fg-faint'}`}>
+          <div style={{ width: '100%' }} className={`text-center py-20 rounded-xl transition-all ${isDraggingFromPanel ? 'ring-2 ring-primary/50 ring-dashed bg-primary-subtle/10' : 'text-fg-faint'}`}>
             <p className="text-4xl mb-3">✨</p>
             <p className="text-sm hidden md:block">
               {isDraggingFromPanel ? 'Drop here to add your first block' : 'Click or drag a block from the left panel to get started.'}
@@ -108,12 +116,12 @@ export default function Canvas({
 
         {/* "Append here" indicator when dragging from panel below all blocks */}
         {isDraggingFromPanel && blocks.length > 0 && !panelDragOverId && (
-          <div className="h-0.5 rounded-full bg-primary/50 animate-pulse" />
+          <div style={{ width: '100%' }} className="h-0.5 rounded-full bg-primary/50 animate-pulse" />
         )}
 
         {/* Mobile inline add-block button */}
         {onAddBlock && (
-          <div className="md:hidden mt-2">
+          <div style={{ width: '100%' }} className="md:hidden">
             {showAddMenu ? (
               <div className="bg-surface border border-overlay rounded-xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-overlay">

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import BlockRenderer from '../blocks/BlockRenderer'
 import BlockStyleControls from './BlockStyleControls'
 import { BLOCK_ICONS } from '../../lib/blockDefaults'
+import { getSizeStyle } from '../../lib/pageUtils'
 import { useT } from '../../lib/i18n'
 
 export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget }) {
@@ -24,11 +25,13 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget 
     onUpdate(block.id, patch)
   }
 
+  const sizeStyle = getSizeStyle(block.size ?? 'full')
+
   if (isDragging) {
     return (
       <div
         ref={setNodeRef}
-        style={style}
+        style={{ ...style, ...sizeStyle }}
         className="rounded-xl border-2 border-dashed border-primary bg-surface h-12"
       />
     )
@@ -39,7 +42,7 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget 
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, ...sizeStyle }}
       className={`relative bg-surface rounded-xl border transition ${
         expanded
           ? 'border-primary shadow-md shadow-primary-subtle/30'
