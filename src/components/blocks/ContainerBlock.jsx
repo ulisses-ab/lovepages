@@ -26,13 +26,18 @@ function getIcon(type) {
   return BLOCK_ICONS[type] ?? HelpCircle
 }
 
-// Mirrors BlockRenderer's getSizeStyle — children participate in the container's flex layout
-function getSizeStyle(size) {
+// Context-aware size style for container children.
+// In a row container, size:'full' participates in the row (flex:1 1 auto) instead of
+// forcing width:100% which would cause every child to stack onto its own line.
+function getSizeStyle(size, flexDirection) {
   switch (size) {
     case 'half':  return { flex: '1 1 calc(50% - 8px)', minWidth: '200px', maxWidth: '100%' }
     case 'third': return { flex: '1 1 calc(33.33% - 11px)', minWidth: '150px', maxWidth: '100%' }
     case 'auto':  return { flexShrink: 0 }
-    default:      return { width: '100%' }
+    default:      // 'full'
+      return flexDirection === 'column'
+        ? { width: '100%' }
+        : { flex: '1 1 auto', minWidth: '120px', maxWidth: '100%' }
   }
 }
 
@@ -180,12 +185,12 @@ function SegmentedControl({ label, value, options, onChange }) {
 }
 
 // A child block rendered inline inside the container's live visual area.
-function InlineChildBlock({ block, onUpdate, onDelete }) {
+function InlineChildBlock({ block, onUpdate, onDelete, flexDirection }) {
   const [editOpen, setEditOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id })
   const Icon = getIcon(block.type)
-  const sizeStyle = getSizeStyle(block.size ?? 'full')
+  const sizeStyle = getSizeStyle(block.size ?? 'full', flexDirection)
   const style = { transform: CSS.Translate.toString(transform), transition }
 
   if (isDragging) {
@@ -260,7 +265,7 @@ function InlineChildBlock({ block, onUpdate, onDelete }) {
             )}
           </div>
         ) : (
-          <BlockRenderer block={block} />
+          <BlockRenderer block={block} noSizeWrapper />
         )}
       </div>
     </div>
@@ -318,7 +323,9 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     const children_el = (
       <>
         {children.map(child => (
-          <BlockRenderer key={child.id} block={child} />
+          <div key={child.id} style={getSizeStyle(child.size ?? 'full', flexDirection)} className="min-w-0">
+            <BlockRenderer block={child} noSizeWrapper />
+          </div>
         ))}
         {children.length === 0 && (
           <p className="text-fg-faint text-sm w-full text-center py-4">Empty container</p>
@@ -523,6 +530,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
                 <InlineChildBlock
                   key={child.id}
                   block={child}
+                  flexDirection={flexDirection}
                   onUpdate={updated => {
                     const next = [...children]
                     next[idx] = updated

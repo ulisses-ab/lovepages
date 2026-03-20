@@ -19,7 +19,7 @@ function getSizeStyle(size) {
   }
 }
 
-export default function BlockRenderer({ block, isEditing = false, onChange, isHighlighted = false }) {
+export default function BlockRenderer({ block, isEditing = false, onChange, isHighlighted = false, noSizeWrapper = false }) {
   function renderBlock() {
     const props = { block, isEditing, onChange }
     switch (block.type) {
@@ -37,6 +37,10 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
 
   if (isEditing) {
     return <div className="w-full min-w-0">{renderBlock()}</div>
+  }
+
+  if (noSizeWrapper) {
+    return <>{renderBlock()}</>
   }
 
   return (
