@@ -59,11 +59,27 @@ const LAYOUT_PRESETS = {
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  left: {
+    label: 'Left-aligned',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  right: {
+    label: 'Right-aligned',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
 }
 
 function detectPreset(flexDirection, flexWrap, justifyContent) {
   if (flexDirection === 'column') return 'stacked'
   if (justifyContent === 'space-between' || justifyContent === 'space-evenly') return 'spread'
+  if (justifyContent === 'flex-start' && flexDirection === 'row') return 'left'
+  if (justifyContent === 'flex-end'   && flexDirection === 'row') return 'right'
   if (flexDirection === 'row') return 'sidebyside'
   return null
 }
@@ -98,6 +114,20 @@ function LayoutPresetCard({ id, selected, onClick }) {
         {id === 'spread' && (
           <div className="flex justify-between items-center w-full px-1">
             {[0, 1, 2].map(i => (
+              <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+        {id === 'left' && (
+          <div className="flex justify-start items-center gap-1.5 w-full px-1">
+            {[0, 1].map(i => (
+              <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
+            ))}
+          </div>
+        )}
+        {id === 'right' && (
+          <div className="flex justify-end items-center gap-1.5 w-full px-1">
+            {[0, 1].map(i => (
               <div key={i} className={`h-6 w-5 rounded-sm ${selected ? 'bg-primary/50' : 'bg-overlay'}`} />
             ))}
           </div>
@@ -384,7 +414,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
             <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">How items are arranged</p>
 
             {/* Visual preset cards */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="grid grid-cols-5 gap-1.5 mb-3">
               {Object.keys(LAYOUT_PRESETS).map(id => (
                 <LayoutPresetCard
                   key={id}
