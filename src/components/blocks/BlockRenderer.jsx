@@ -5,7 +5,6 @@ import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
-import { colors } from '../../lib/theme'
 
 // Maps block.size → flex child style.
 // The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
@@ -45,8 +44,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
         className="absolute inset-0 rounded-lg pointer-events-none z-10 transition-opacity duration-150"
         style={{
           opacity: isHighlighted ? 1 : 0,
-          boxShadow: `0 0 0 2px ${colors.primary}, 0 0 24px ${colors.primary}99`,
-          background: `${colors.primary}18`,
+          background: 'rgba(255, 80, 80, 0.35)',
         }}
       />
       {renderBlock()}
