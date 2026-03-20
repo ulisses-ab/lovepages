@@ -3,6 +3,7 @@ import { ChevronDown, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import { inputClass, colors } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ColorPicker from '../ui/ColorPicker'
+import CollapsibleSection from '../ui/CollapsibleSection'
 import TextTypewriterVariant from './text/TextTypewriterVariant'
 import TextPostitVariant from './text/TextPostitVariant'
 import TextRansomVariant from './text/TextRansomVariant'
@@ -95,6 +96,122 @@ function FontPicker({ value, onChange: onChangeProp }) {
   )
 }
 
+// Mini visual previews for each text variant
+function VariantCard({ value, label, selected, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition ${
+        selected
+          ? 'border-primary bg-primary/10'
+          : 'border-overlay bg-surface hover:border-subtle'
+      }`}
+    >
+      <div className="w-full h-11 flex items-center justify-center overflow-hidden rounded">
+        {children}
+      </div>
+      <span className={`text-xs leading-tight text-center w-full truncate ${
+        selected ? 'text-primary-dim font-medium' : 'text-fg-muted'
+      }`}>
+        {label}
+      </span>
+    </button>
+  )
+}
+
+function PlainPreview() {
+  return (
+    <div style={{ fontFamily: 'Inter, sans-serif', color: '#f3f4f6', textAlign: 'center' }}>
+      <div style={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>Aa</div>
+      <div style={{ fontSize: 9, opacity: 0.5, marginTop: 2 }}>plain text</div>
+    </div>
+  )
+}
+
+function TypewriterPreview() {
+  return (
+    <div style={{
+      background: '#f8f3e8', borderRadius: 4, padding: '5px 7px', width: '100%',
+      fontFamily: "'Courier New', monospace", fontSize: 8, color: '#1c140a', lineHeight: 1.5,
+    }}>
+      <div style={{ borderLeft: '2px solid #c0392b', paddingLeft: 4 }}>
+        Dear friend,<br />I hope this<br />finds you well…
+      </div>
+    </div>
+  )
+}
+
+function PostitPreview() {
+  return (
+    <div style={{
+      background: '#fde047', borderRadius: 2, padding: '5px 7px', width: '100%',
+      fontFamily: "'Caveat', cursive", fontSize: 10, color: '#1c1400', lineHeight: 1.4,
+      boxShadow: '2px 3px 6px rgba(0,0,0,0.2)',
+    }}>
+      <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: 3, marginBottom: 3, fontSize: 7, opacity: 0.5 }}>note</div>
+      Don't forget<br />to smile today!
+    </div>
+  )
+}
+
+function RansomPreview() {
+  const letters = [
+    { ch: 'R', font: 'Impact', color: '#ef4444', bg: '#1e1e1e', rot: -4, size: 13 },
+    { ch: 'A', font: 'Georgia', color: '#fbbf24', bg: 'transparent', rot: 3, size: 11 },
+    { ch: 'N', font: 'Comic Sans MS, cursive', color: '#22d3ee', bg: '#1a1a1a', rot: -2, size: 10 },
+    { ch: 'S', font: 'serif', color: '#f3f4f6', bg: '#dc2626', rot: 5, size: 12 },
+    { ch: 'O', font: 'monospace', color: '#4ade80', bg: 'transparent', rot: -3, size: 9 },
+    { ch: 'M', font: "'Arial Black', sans-serif", color: '#f97316', bg: '#111', rot: 4, size: 11 },
+  ]
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+      {letters.map((l, i) => (
+        <span key={i} style={{
+          fontFamily: l.font, fontSize: l.size, color: l.color,
+          background: l.bg, transform: `rotate(${l.rot}deg)`,
+          display: 'inline-block', lineHeight: 1, padding: '0 1px',
+          fontWeight: i % 2 === 0 ? 700 : 400,
+        }}>{l.ch}</span>
+      ))}
+    </div>
+  )
+}
+
+function CyberpunkPreview() {
+  return (
+    <div style={{
+      background: 'linear-gradient(160deg, #06060f 0%, #0a0018 100%)',
+      border: '1px solid #00e5ff', borderRadius: 3, padding: '5px 8px', width: '100%',
+      fontFamily: "'Space Mono', monospace", color: '#00e5ff', fontSize: 9,
+      textShadow: '0 0 6px #00e5ff, 0 0 12px #00e5ff44',
+      lineHeight: 1.4,
+    }}>
+      <div style={{ opacity: 0.5, fontSize: 7, marginBottom: 2, letterSpacing: 1 }}>// SYS</div>
+      HELLO_WORLD
+    </div>
+  )
+}
+
+function XPPreview() {
+  return (
+    <div style={{ border: '1px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%', fontSize: 8 }}>
+      <div style={{
+        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
+        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 8, fontWeight: 700,
+      }}>
+        Notepad
+      </div>
+      <div style={{
+        background: '#fff', fontFamily: "'Courier New', monospace",
+        color: '#000', padding: '3px 5px', fontSize: 8, lineHeight: 1.4,
+      }}>
+        Once upon<br />a time…
+      </div>
+    </div>
+  )
+}
+
 export default function TextBlock({ block, isEditing, onChange }) {
   const { variant, content, align, fontFamily = 'inter', fontSize = 'base', color = '', noteColor = '' } = block
   const { t } = useT()
@@ -102,109 +219,57 @@ export default function TextBlock({ block, isEditing, onChange }) {
   const isPhysical = variant === 'typewriter' || variant === 'postit' || variant === 'ransom' || variant === 'cyberpunk' || variant === 'xp'
 
   if (isEditing) {
+    const VARIANTS = [
+      { value: 'plain',      label: t('text.plain'),       Preview: PlainPreview },
+      { value: 'typewriter', label: t('text.typewriter'),  Preview: TypewriterPreview },
+      { value: 'postit',     label: t('text.postit'),      Preview: PostitPreview },
+      { value: 'ransom',     label: t('text.ransom'),      Preview: RansomPreview },
+      { value: 'cyberpunk',  label: 'Cyberpunk',           Preview: CyberpunkPreview },
+      { value: 'xp',         label: t('text.xp'),          Preview: XPPreview },
+    ]
+
     return (
       <div className="space-y-3">
-        {/* Variant selector */}
-        <select
-          className={inputClass}
-          value={variant}
-          onChange={e => onChange({ variant: e.target.value })}
-        >
-          <option value="plain">{t('text.plain')}</option>
-          <option value="typewriter">{t('text.typewriter')}</option>
-          <option value="postit">{t('text.postit')}</option>
-          <option value="ransom">{t('text.ransom')}</option>
-          <option value="cyberpunk">Cyberpunk</option>
-          <option value="xp">{t('text.xp')}</option>
-        </select>
+        {/* Content first */}
+        <textarea
+          className={inputClass + ' resize-y min-h-[90px]'}
+          value={content}
+          onChange={e => onChange({ content: e.target.value })}
+          placeholder={t('text.writeSomething')}
+          autoFocus
+        />
 
-        {/* Plain variant controls */}
-        {variant === 'plain' && (
-          <>
-            {/* Font picker */}
-            <FontPicker value={fontFamily} onChange={v => onChange({ fontFamily: v })} />
+        {/* Visual variant picker */}
+        <div>
+          <p className="text-xs text-fg-muted mb-2">{t('text.style')}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {VARIANTS.map(({ value, label, Preview }) => (
+              <VariantCard
+                key={value}
+                value={value}
+                label={label}
+                selected={variant === value}
+                onClick={() => onChange({ variant: value })}
+              >
+                <Preview />
+              </VariantCard>
+            ))}
+          </div>
+        </div>
 
-            {/* Size */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-fg-muted shrink-0">Size</span>
-              <input
-                type="number"
-                min={8} max={200}
-                value={typeof fontSize === 'number' ? fontSize : (FONT_SIZES[fontSize]?.px ?? 16)}
-                onChange={e => onChange({ fontSize: Math.max(8, Math.min(200, Number(e.target.value))) })}
-                className={inputClass + ' w-20 py-1'}
-              />
-              <span className="text-xs text-fg-ghost">px</span>
-            </div>
-
-            {/* Style toggles */}
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => onChange({ bold: !block.bold })}
-                className={`w-9 h-9 rounded border text-sm font-bold transition ${
-                  block.bold
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                }`}
-              >
-                B
-              </button>
-              <button
-                onClick={() => onChange({ italic: !block.italic })}
-                className={`w-9 h-9 rounded border text-sm italic transition ${
-                  block.italic
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                }`}
-              >
-                I
-              </button>
-              <button
-                onClick={() => onChange({ outline: !block.outline })}
-                title={t('text.outlineHint')}
-                className={`w-9 h-9 rounded border text-sm font-bold transition ${
-                  block.outline
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                }`}
-                style={block.outline ? {} : {
-                  color: 'transparent',
-                  WebkitTextStroke: `1.5px var(--color-fg-muted, #888)`,
-                }}
-              >
-                O
-              </button>
-              {block.outline && (
-                <ColorPicker
-                  value={block.outlineColor || colors.fg}
-                  onChange={val => onChange({ outlineColor: val })}
-                />
-              )}
-              <div className="flex-1" />
-              {[
-                { a: 'left',   Icon: AlignLeft },
-                { a: 'center', Icon: AlignCenter },
-                { a: 'right',  Icon: AlignRight },
-              ].map(({ a, Icon }) => (
-                <button
-                  key={a}
-                  onClick={() => onChange({ align: a })}
-                  className={`w-9 h-9 flex items-center justify-center rounded border transition ${
-                    (block.align || 'left') === a
-                      ? 'bg-primary border-primary text-white'
-                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
-                  }`}
-                >
-                  <Icon size={14} />
-                </button>
-              ))}
-            </div>
-          </>
+        {/* Post-it color — shown inline when postit is selected */}
+        {variant === 'postit' && (
+          <ColorPicker
+            value={noteColor || '#fde047'}
+            onChange={val => onChange({ noteColor: val })}
+            label={t('text.noteColor')}
+          />
         )}
 
-        {/* Size + align for physical variants */}
-        {isPhysical && (
-          <div className="flex items-center gap-1.5">
+        {/* Customize look — collapsible, available for all variants */}
+        <CollapsibleSection title={t('text.customizeLook')}>
+          {/* Size + align — available for all variants */}
+          <div className="flex items-center gap-2">
             <span className="text-xs text-fg-muted shrink-0">Size</span>
             <input
               type="number"
@@ -233,23 +298,62 @@ export default function TextBlock({ block, isEditing, onChange }) {
               </button>
             ))}
           </div>
-        )}
 
-        {/* Post-it color */}
-        {variant === 'postit' && (
-          <ColorPicker
-            value={noteColor || '#fde047'}
-            onChange={val => onChange({ noteColor: val })}
-            label={t('text.noteColor')}
-          />
-        )}
-
-        <textarea
-          className={inputClass + ' resize-y min-h-[80px]'}
-          value={content}
-          onChange={e => onChange({ content: e.target.value })}
-          placeholder={t('text.writeSomething')}
-        />
+          {/* Font + style toggles — plain variant only */}
+          {!isPhysical && (
+            <>
+              <FontPicker value={fontFamily} onChange={v => onChange({ fontFamily: v })} />
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => onChange({ bold: !block.bold })}
+                  className={`w-9 h-9 rounded border text-sm font-bold transition ${
+                    block.bold
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                >
+                  B
+                </button>
+                <button
+                  onClick={() => onChange({ italic: !block.italic })}
+                  className={`w-9 h-9 rounded border text-sm italic transition ${
+                    block.italic
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                >
+                  I
+                </button>
+                <button
+                  onClick={() => onChange({ outline: !block.outline })}
+                  title={t('text.outlineHint')}
+                  className={`w-9 h-9 rounded border text-sm font-bold transition ${
+                    block.outline
+                      ? 'bg-primary border-primary text-white'
+                      : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                  }`}
+                  style={block.outline ? {} : {
+                    color: 'transparent',
+                    WebkitTextStroke: `1.5px var(--color-fg-muted, #888)`,
+                  }}
+                >
+                  O
+                </button>
+                {block.outline && (
+                  <ColorPicker
+                    value={block.outlineColor || colors.fg}
+                    onChange={val => onChange({ outlineColor: val })}
+                  />
+                )}
+                <div className="flex-1" />
+                <ColorPicker
+                  value={color || colors.fg}
+                  onChange={val => onChange({ color: val })}
+                />
+              </div>
+            </>
+          )}
+        </CollapsibleSection>
       </div>
     )
   }

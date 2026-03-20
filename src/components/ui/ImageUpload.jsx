@@ -17,6 +17,7 @@ export default function ImageUpload({
   onChange,
   storagePath = 'images',
   previewClass = 'mt-1 rounded max-h-40 object-cover',
+  label,
 }) {
   const [uploading, setUploading] = useState(false)
   const { t } = useT()
@@ -43,7 +44,7 @@ export default function ImageUpload({
     <div className="space-y-1.5">
       <label className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded bg-overlay border border-subtle text-sm text-fg-muted cursor-pointer hover:bg-subtle hover:text-fg-secondary transition select-none">
         <Upload size={12} />
-        {uploading ? t('imageUpload.uploading') : t('imageUpload.upload')}
+        {uploading ? t('imageUpload.uploading') : (label ?? t('imageUpload.upload'))}
         <input
           type="file"
           accept="image/*"

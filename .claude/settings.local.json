@@ -16,7 +16,8 @@
       "Bash(cp /home/ulissesalvesbicalho/Downloads/DEARLY-7.png /home/ulissesalvesbicalho/code/lovepages/public/ovo-blink.png)",
       "Bash(container\" label so the intent is clear.:*)",
       "Bash(git revert:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(node:*)"
     ]
   }
 }

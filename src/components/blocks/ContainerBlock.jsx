@@ -18,6 +18,11 @@ import BlockRenderer from './BlockRenderer'
 import BackgroundChooser from '../ui/BackgroundChooser'
 import BlockStyleControls from '../editor/BlockStyleControls'
 import { BLOCK_TYPES, BLOCK_ICONS, BLOCK_LABELS, createBlock } from '../../lib/blockDefaults'
+import { HelpCircle } from 'lucide-react'
+
+function getIcon(type) {
+  return BLOCK_ICONS[type] ?? HelpCircle
+}
 
 // Mirrors BlockRenderer's getSizeStyle — children participate in the container's flex layout
 function getSizeStyle(size) {
@@ -57,8 +62,9 @@ function SegmentedControl({ label, value, options, onChange }) {
 // Shows the block's visual preview; clicking "Edit" switches to the editing form.
 function InlineChildBlock({ block, onUpdate, onDelete }) {
   const [editOpen, setEditOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id })
-  const Icon = BLOCK_ICONS[block.type]
+  const Icon = getIcon(block.type)
   const sizeStyle = getSizeStyle(block.size ?? 'full')
   const style = { transform: CSS.Translate.toString(transform), transition }
 
@@ -83,20 +89,43 @@ function InlineChildBlock({ block, onUpdate, onDelete }) {
         <span className="text-fg-ghost text-xs select-none">⠿</span>
         <Icon size={12} className="text-fg-secondary shrink-0" />
         <span className="text-xs font-medium text-fg-secondary flex-1 select-none">{BLOCK_LABELS[block.type]}</span>
-        <button
-          onClick={() => setEditOpen(v => !v)}
-          onPointerDown={e => e.stopPropagation()}
-          className="text-xs text-fg-muted hover:text-primary px-2 py-0.5 rounded hover:bg-primary-subtle/50 transition"
-        >
-          {editOpen ? 'Done' : 'Edit'}
-        </button>
-        <button
-          onClick={onDelete}
-          onPointerDown={e => e.stopPropagation()}
-          className="text-xs text-fg-ghost hover:text-red-400 p-0.5 rounded transition"
-        >
-          ✕
-        </button>
+        {confirmDelete ? (
+          <>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              onPointerDown={e => e.stopPropagation()}
+              className="text-xs text-fg-muted hover:text-fg-secondary px-1.5 py-0.5 rounded transition"
+            >
+              Keep
+            </button>
+            <button
+              onClick={onDelete}
+              onPointerDown={e => e.stopPropagation()}
+              className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded transition font-medium"
+            >
+              Remove
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => setEditOpen(v => !v)}
+              onPointerDown={e => e.stopPropagation()}
+              className={`text-xs px-2 py-0.5 rounded transition ${
+                editOpen ? 'text-primary-dim hover:bg-primary-subtle/50' : 'text-fg-muted hover:text-primary hover:bg-primary-subtle/50'
+              }`}
+            >
+              {editOpen ? '✓ Done' : '✏ Edit'}
+            </button>
+            <button
+              onClick={() => setConfirmDelete(true)}
+              onPointerDown={e => e.stopPropagation()}
+              className="text-xs text-fg-ghost hover:text-red-400 px-1.5 py-0.5 rounded transition"
+            >
+              ✕
+            </button>
+          </>
+        )}
       </div>
 
       {/* Block content: visual preview OR editing form */}

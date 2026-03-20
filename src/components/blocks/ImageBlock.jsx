@@ -1,6 +1,7 @@
 import { inputClass } from '../../lib/theme'
 import { useT } from '../../lib/i18n'
 import ImageUpload from '../ui/ImageUpload'
+import CollapsibleSection from '../ui/CollapsibleSection'
 import ImageXPVariant from './image/ImageXPVariant'
 
 // Tape strip — same construction as the post-it tape in TextBlock
@@ -18,39 +19,139 @@ function Tape({ style }) {
   )
 }
 
+function VariantCard({ label, selected, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border-2 transition ${
+        selected
+          ? 'border-primary bg-primary/10'
+          : 'border-overlay bg-surface hover:border-subtle'
+      }`}
+    >
+      <div className="w-full h-12 flex items-center justify-center overflow-hidden rounded">
+        {children}
+      </div>
+      <span className={`text-xs leading-tight text-center w-full truncate ${
+        selected ? 'text-primary-dim font-medium' : 'text-fg-muted'
+      }`}>
+        {label}
+      </span>
+    </button>
+  )
+}
+
+function DefaultPreview() {
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: 'linear-gradient(145deg, #3a4453, #2a3340)',
+      borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
+        <rect x="1" y="1" width="20" height="16" rx="2" stroke="#6b7280" strokeWidth="1.5" />
+        <circle cx="7" cy="7" r="2" fill="#6b7280" />
+        <path d="M1 13l5-4 4 3 4-5 7 6" stroke="#6b7280" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    </div>
+  )
+}
+
+function PolaroidPreview() {
+  return (
+    <div style={{
+      background: '#faf9f6', padding: '5px 5px 14px', borderRadius: 2,
+      boxShadow: '0 3px 10px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)',
+      display: 'inline-block',
+    }}>
+      <div style={{
+        width: 36, height: 36, background: 'linear-gradient(145deg, #3a4453, #2a3340)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="14" height="11" viewBox="0 0 22 18" fill="none">
+          <rect x="1" y="1" width="20" height="16" rx="2" stroke="#6b7280" strokeWidth="2" />
+          <circle cx="7" cy="7" r="2" fill="#6b7280" />
+          <path d="M1 13l5-4 4 3 4-5 7 6" stroke="#6b7280" strokeWidth="2" strokeLinejoin="round" />
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+function XPPreview() {
+  return (
+    <div style={{ border: '2px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{
+        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
+        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700,
+        display: 'flex', alignItems: 'center', gap: 3,
+      }}>
+        <span>🖼</span> Photo Viewer
+      </div>
+      <div style={{
+        background: '#f0f0f0', height: 28,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{ width: 24, height: 20, background: '#c8d8e8', border: '1px solid #aaa' }} />
+      </div>
+    </div>
+  )
+}
+
 export default function ImageBlock({ block, isEditing, onChange }) {
   const { src, alt, caption, variant = 'default', align = 'center' } = block
   const { t } = useT()
 
   if (isEditing) {
+    const VARIANTS = [
+      { value: 'default',  label: t('image.variantDefault'),  Preview: DefaultPreview },
+      { value: 'polaroid', label: t('image.variantPolaroid'), Preview: PolaroidPreview },
+      { value: 'xp',       label: t('image.variantXp'),       Preview: XPPreview },
+    ]
+
     return (
-      <div className="space-y-2">
-        <select
-          className={inputClass}
-          value={variant}
-          onChange={e => onChange({ variant: e.target.value })}
-        >
-          <option value="default">{t('image.variantDefault')}</option>
-          <option value="polaroid">{t('image.variantPolaroid')}</option>
-          <option value="xp">{t('image.variantXp')}</option>
-        </select>
+      <div className="space-y-3">
+        {/* Upload / image area first */}
         <ImageUpload
           value={src}
           onChange={url => onChange({ src: url })}
           previewClass="mt-1 rounded max-h-40 object-cover"
         />
+
+        {/* Caption */}
         <input
           className={inputClass}
           placeholder={t('image.caption')}
           value={caption}
           onChange={e => onChange({ caption: e.target.value })}
         />
-        <input
-          className={inputClass}
-          placeholder={t('image.altText')}
-          value={alt}
-          onChange={e => onChange({ alt: e.target.value })}
-        />
+
+        {/* Frame style */}
+        <div>
+          <p className="text-xs text-fg-muted mb-2">{t('image.frameStyle')}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {VARIANTS.map(({ value, label, Preview }) => (
+              <VariantCard
+                key={value}
+                label={label}
+                selected={variant === value}
+                onClick={() => onChange({ variant: value })}
+              >
+                <Preview />
+              </VariantCard>
+            ))}
+          </div>
+        </div>
+
+        {/* Accessibility — collapsed */}
+        <CollapsibleSection title={t('image.accessibility')}>
+          <input
+            className={inputClass}
+            placeholder={t('image.altText')}
+            value={alt}
+            onChange={e => onChange({ alt: e.target.value })}
+          />
+        </CollapsibleSection>
       </div>
     )
   }
