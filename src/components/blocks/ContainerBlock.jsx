@@ -1,25 +1,71 @@
 import { useState } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import BlockRenderer from './BlockRenderer'
 import BackgroundChooser from '../ui/BackgroundChooser'
 import { BLOCK_TYPES, BLOCK_ICONS, BLOCK_LABELS, createBlock } from '../../lib/blockDefaults'
 
-function ChildBlockEditor({ block, onUpdate, onDelete }) {
+function SortableChildBlock({ block, onUpdate, onDelete }) {
   const [expanded, setExpanded] = useState(false)
   const Icon = BLOCK_ICONS[block.type]
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: block.id,
+  })
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  }
+
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="rounded-xl border-2 border-dashed border-primary bg-surface h-12"
+      />
+    )
+  }
+
   return (
-    <div className={`rounded-xl border transition ${expanded ? 'border-primary/60 bg-base' : 'border-overlay bg-surface'}`}>
-      <div className="flex items-center gap-2 px-3 py-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`rounded-xl border transition ${expanded ? 'border-primary/60 bg-base' : 'border-overlay bg-surface'}`}
+    >
+      {/* Header — drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center gap-2 px-3 py-2 cursor-grab active:cursor-grabbing touch-none"
+      >
+        <span className="text-fg-ghost select-none">⠿</span>
         <Icon size={14} className="text-fg-secondary shrink-0" />
         <span className="text-sm font-medium text-fg-secondary flex-1 select-none">{BLOCK_LABELS[block.type]}</span>
         <button
           onClick={() => setExpanded(v => !v)}
+          onPointerDown={e => e.stopPropagation()}
           className="text-xs text-fg-muted hover:text-primary-dim px-3 py-2 rounded hover:bg-primary-subtle/50 transition"
         >
           {expanded ? 'Done' : 'Edit'}
         </button>
         <button
           onClick={onDelete}
+          onPointerDown={e => e.stopPropagation()}
           className="text-xs text-fg-ghost hover:text-red-400 p-2 rounded transition"
           title="Remove block"
         >
@@ -43,6 +89,19 @@ function ChildBlockEditor({ block, onUpdate, onDelete }) {
 export default function ContainerBlock({ block, isEditing, onChange }) {
   const [showAddMenu, setShowAddMenu] = useState(false)
   const children = block.children || []
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+  )
+
+  function handleDragEnd(event) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIdx = children.findIndex(c => c.id === active.id)
+    const newIdx = children.findIndex(c => c.id === over.id)
+    onChange({ children: arrayMove(children, oldIdx, newIdx) })
+  }
 
   if (!isEditing) {
     return (
@@ -73,24 +132,32 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
         />
       </div>
 
-      {/* Children */}
+      {/* Sortable children */}
       {children.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2">Blocks inside</p>
-          <div className="space-y-2">
-            {children.map((child, idx) => (
-              <ChildBlockEditor
-                key={child.id}
-                block={child}
-                onUpdate={updated => {
-                  const next = [...children]
-                  next[idx] = updated
-                  onChange({ children: next })
-                }}
-                onDelete={() => onChange({ children: children.filter((_, i) => i !== idx) })}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={children.map(c => c.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {children.map((child, idx) => (
+                  <SortableChildBlock
+                    key={child.id}
+                    block={child}
+                    onUpdate={updated => {
+                      const next = [...children]
+                      next[idx] = updated
+                      onChange({ children: next })
+                    }}
+                    onDelete={() => onChange({ children: children.filter((_, i) => i !== idx) })}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
 
