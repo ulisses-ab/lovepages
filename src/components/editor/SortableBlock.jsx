@@ -82,7 +82,9 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget 
           <div className="pt-3">
             <BlockRenderer block={block} isEditing onChange={handleChange} />
           </div>
-          <BlockStyleControls block={block} onChange={handleChange} />
+          {block.type !== 'container' && (
+            <BlockStyleControls block={block} onChange={handleChange} />
+          )}
         </div>
       )}
     </div>

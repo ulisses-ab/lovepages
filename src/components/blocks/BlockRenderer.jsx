@@ -5,6 +5,7 @@ import SongBlock from './SongBlock'
 import LinkBlock from './LinkBlock'
 import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
+import ContainerBlock from './ContainerBlock'
 
 export default function BlockRenderer({ block, isEditing = false, onChange }) {
   function renderBlock() {
@@ -16,6 +17,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
       case 'link':      return <LinkBlock {...props} />
       case 'countdown': return <CountdownBlock {...props} />
       case 'carousel':  return <CarouselBlock {...props} />
+      case 'container': return <ContainerBlock {...props} />
       default:          return <p className="text-fg-muted text-sm">Unknown block</p>
     }
   }
@@ -120,7 +122,9 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
         <div style={layer1} />
         <div className="relative">
           {block.fullBleed
-            ? <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
+            ? block.type === 'container'
+              ? <div style={contentScaleStyle}>{renderBlock()}</div>
+              : <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
             : <div className="p-4" style={contentScaleStyle}>{renderBlock()}</div>
           }
         </div>
@@ -149,9 +153,11 @@ export default function BlockRenderer({ block, isEditing = false, onChange }) {
   if (block.fullBleed) {
     return (
       <div ref={wrapperRef} className={wrapperClass} style={wrapperStyle}>
-        <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>
-          {renderBlock()}
-        </div>
+        {block.type === 'container' ? (
+          <div style={contentScaleStyle}>{renderBlock()}</div>
+        ) : (
+          <div className="max-w-3xl mx-auto p-4" style={contentScaleStyle}>{renderBlock()}</div>
+        )}
       </div>
     )
   }

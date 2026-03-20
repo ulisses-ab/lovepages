@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | link | countdown | carousel`
+Block types: `text | image | song | link | countdown | carousel | container`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -77,7 +77,8 @@ src/
 │   │   ├── SongBlock.jsx            ← YouTube audio player (hidden iframe via YT IFrame API, custom play/pause UI); autoplay mutually exclusive across song blocks
 │   │   ├── LinkBlock.jsx            ← styled button with color picker
 │   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
-│   │   └── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
+│   │   ├── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
+│   │   └── ContainerBlock.jsx       ← layout wrapper that holds child blocks; edit mode shows BackgroundChooser + child block list + add-block menu; preview renders children in flex-wrap inside the container's background section
 │   └── editor/
 │       ├── EditorTopBar.jsx         ← title input, preview toggle, publish button, back arrow (→ /dashboard), sign-out icon; shows subtle "Saving…" indicator during autosave
 │       ├── PublishModal.jsx         ← publish modal: slug input with availability check, publish/unpublish, shows live URL
@@ -191,6 +192,12 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 
 // countdown
 { "targetDate": "datetime-local string (e.g. 2026-06-15T14:00)", "label": "string", "expiredMessage": "string", "variant": "flip | minimal | aero", "clockColor": "dark | beige" }
+
+// container
+{ "children": "[array of full block objects]", "fullBleed": true }
+// Always renders full-width (fullBleed:true by default). Background (bgColor/bgImage/bgFade etc.) is set via BackgroundChooser in edit mode.
+// Children are any non-container block types; each child renders with its own BlockRenderer instance inside the container's background section.
+// Containers cannot be nested inside other containers.
 // flip (default): a realistic physical flip clock — mechanical flip panels with 3D card animation, rubber feet. Dark/moody aesthetic.
 //   clockColor: "dark" (default) — dark anodised aluminium housing, light digits; "beige" — warm cream housing, dark digits.
 // minimal: large serif numbers, hairline dividers, small uppercase unit labels, dot separators. Clean white-space editorial look. Minimalist aesthetic.
