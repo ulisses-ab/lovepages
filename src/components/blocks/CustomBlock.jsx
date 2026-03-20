@@ -106,12 +106,6 @@ export default function CustomBlock({ block, isEditing, onChange }) {
         onChange={e => onChange({ html: e.target.value })}
         spellCheck={false}
       />
-      {block.html?.trim() && (
-        <div>
-          <p className="text-xs text-fg-muted mb-2">Preview</p>
-          <HtmlFrame html={block.html} className="rounded-lg overflow-hidden border border-overlay" />
-        </div>
-      )}
     </div>
   )
 }
