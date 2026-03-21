@@ -9,37 +9,15 @@ import {
 } from '@dnd-kit/core'
 import {
   SortableContext,
-  useSortable,
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { ChevronDown } from 'lucide-react'
 import BlockRenderer from './BlockRenderer'
+import SortableBlock from '../editor/SortableBlock'
 import BackgroundChooser from '../ui/BackgroundChooser'
-import BlockStyleControls from '../editor/BlockStyleControls'
-import CollapsibleSection from '../ui/CollapsibleSection'
 import { BLOCK_TYPES, BLOCK_ICONS, BLOCK_LABELS, createBlock } from '../../lib/blockDefaults'
-import { HelpCircle } from 'lucide-react'
 
-function getIcon(type) {
-  return BLOCK_ICONS[type] ?? HelpCircle
-}
-
-// Context-aware size style for container children.
-// In a row container, size:'full' participates in the row (flex:1 1 auto) instead of
-// forcing width:100% which would cause every child to stack onto its own line.
-function getSizeStyle(size, flexDirection) {
-  switch (size) {
-    case 'half':  return { flex: '1 1 calc(50% - 8px)', minWidth: '200px', maxWidth: '100%' }
-    case 'third': return { flex: '1 1 calc(33.33% - 11px)', minWidth: '150px', maxWidth: '100%' }
-    case 'auto':  return { flexShrink: 0 }
-    default:      // 'full'
-      return flexDirection === 'column'
-        ? { width: '100%' }
-        : { flex: '1 1 auto', minWidth: '120px', maxWidth: '100%' }
-  }
-}
 
 // Layout presets map friendly names → flex property sets
 const LAYOUT_PRESETS = {
@@ -160,117 +138,6 @@ function LayoutPresetCard({ id, selected, onClick }) {
   )
 }
 
-function SegmentedControl({ label, value, options, onChange }) {
-  return (
-    <div>
-      <p className="text-xs text-fg-muted mb-1">{label}</p>
-      <div className="flex rounded-lg overflow-hidden border border-overlay">
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
-            title={opt.label}
-            className={`flex-1 py-1.5 text-xs transition flex items-center justify-center gap-1 ${
-              value === opt.value
-                ? 'bg-primary text-white font-medium'
-                : 'bg-surface text-fg-muted hover:bg-overlay'
-            }`}
-          >
-            {opt.icon ?? opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// A child block rendered inline inside the container's live visual area.
-function InlineChildBlock({ block, onUpdate, onDelete, flexDirection }) {
-  const [editOpen, setEditOpen] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: block.id })
-  const Icon = getIcon(block.type)
-  const sizeStyle = getSizeStyle(block.size ?? 'full', flexDirection)
-  const style = { transform: CSS.Translate.toString(transform), transition }
-
-  if (isDragging) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={{ ...style, ...sizeStyle }}
-        className="rounded-lg border-2 border-dashed border-primary/50 bg-primary-subtle/20 min-h-[48px]"
-      />
-    )
-  }
-
-  return (
-    <div ref={setNodeRef} style={{ ...style, ...sizeStyle }} className="min-w-0">
-      {/* Drag handle toolbar */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="flex items-center gap-1 px-2 py-1 bg-base/90 backdrop-blur-sm border border-overlay rounded-t-lg cursor-grab active:cursor-grabbing touch-none"
-      >
-        <span className="text-fg-ghost text-xs select-none">⠿</span>
-        <Icon size={12} className="text-fg-secondary shrink-0" />
-        <span className="text-xs font-medium text-fg-secondary flex-1 select-none">{BLOCK_LABELS[block.type]}</span>
-        {confirmDelete ? (
-          <>
-            <button
-              onClick={() => setConfirmDelete(false)}
-              onPointerDown={e => e.stopPropagation()}
-              className="text-xs text-fg-muted hover:text-fg-secondary px-1.5 py-0.5 rounded transition"
-            >
-              Keep
-            </button>
-            <button
-              onClick={onDelete}
-              onPointerDown={e => e.stopPropagation()}
-              className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded transition font-medium"
-            >
-              Remove
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setEditOpen(v => !v)}
-              onPointerDown={e => e.stopPropagation()}
-              className={`text-xs px-2 py-0.5 rounded transition ${
-                editOpen ? 'text-primary-dim hover:bg-primary-subtle/50' : 'text-fg-muted hover:text-primary hover:bg-primary-subtle/50'
-              }`}
-            >
-              {editOpen ? '✓ Done' : '✏ Edit'}
-            </button>
-            <button
-              onClick={() => setConfirmDelete(true)}
-              onPointerDown={e => e.stopPropagation()}
-              className="text-xs text-fg-ghost hover:text-red-400 px-1.5 py-0.5 rounded transition"
-            >
-              ✕
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Block content: visual preview OR editing form */}
-      <div className="border border-t-0 border-overlay rounded-b-lg overflow-hidden">
-        {editOpen ? (
-          <div className="px-3 py-3 bg-base space-y-3">
-            <BlockRenderer block={block} isEditing onChange={patch => onUpdate({ ...block, ...patch })} />
-            {block.type !== 'container' && (
-              <CollapsibleSection title="How wide?">
-                <BlockStyleControls block={block} onChange={patch => onUpdate({ ...block, ...patch })} />
-              </CollapsibleSection>
-            )}
-          </div>
-        ) : (
-          <BlockRenderer block={block} noSizeWrapper />
-        )}
-      </div>
-    </div>
-  )
-}
 
 export default function ContainerBlock({ block, isEditing, onChange }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -323,7 +190,7 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     const children_el = (
       <>
         {children.map(child => (
-          <div key={child.id} style={getSizeStyle(child.size ?? 'full', flexDirection)} className="min-w-0">
+          <div key={child.id} className="min-w-0" style={child.flexGrow ? { flexGrow: child.flexGrowFactor ?? 1 } : undefined}>
             <BlockRenderer block={child} noSizeWrapper />
           </div>
         ))}
@@ -473,50 +340,6 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
               </div>
             </div>
 
-            {/* Advanced layout — collapsible for power users */}
-            <CollapsibleSection title="Advanced layout">
-              <SegmentedControl
-                label="Direction"
-                value={flexDirection}
-                onChange={v => onChange({ flexDirection: v })}
-                options={[
-                  { value: 'row',    label: 'Row',    icon: '→' },
-                  { value: 'column', label: 'Column', icon: '↓' },
-                ]}
-              />
-              <SegmentedControl
-                label="Wrap"
-                value={flexWrap}
-                onChange={v => onChange({ flexWrap: v })}
-                options={[
-                  { value: 'wrap',   label: 'Wrap' },
-                  { value: 'nowrap', label: 'No wrap' },
-                ]}
-              />
-              <SegmentedControl
-                label="Justify (main axis)"
-                value={justifyContent}
-                onChange={v => onChange({ justifyContent: v })}
-                options={[
-                  { value: 'flex-start',    label: 'Start',   icon: '⇤' },
-                  { value: 'center',        label: 'Center',  icon: '⇔' },
-                  { value: 'flex-end',      label: 'End',     icon: '⇥' },
-                  { value: 'space-between', label: 'Between', icon: '↔' },
-                  { value: 'space-evenly',  label: 'Even',    icon: '⟺' },
-                ]}
-              />
-              <SegmentedControl
-                label="Align (cross axis)"
-                value={alignItems}
-                onChange={v => onChange({ alignItems: v })}
-                options={[
-                  { value: 'flex-start', label: 'Start',   icon: '⇡' },
-                  { value: 'center',     label: 'Center',  icon: '⊙' },
-                  { value: 'flex-end',   label: 'End',     icon: '⇣' },
-                  { value: 'stretch',    label: 'Stretch', icon: '↕' },
-                ]}
-              />
-            </CollapsibleSection>
           </div>
         </div>
       )}
@@ -525,18 +348,15 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
       <div style={{ ...bgStyle, width: '100%' }} onPointerDown={e => e.stopPropagation()}>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={children.map(c => c.id)} strategy={verticalListSortingStrategy}>
-            <div style={{ display: 'flex', flexDirection, flexWrap, justifyContent, alignItems, gap, padding }}>
-              {children.map((child, idx) => (
-                <InlineChildBlock
+            <div className="space-y-3 p-3">
+              {children.map((child) => (
+                <SortableBlock
                   key={child.id}
                   block={child}
-                  flexDirection={flexDirection}
-                  onUpdate={updated => {
-                    const next = [...children]
-                    next[idx] = updated
-                    onChange({ children: next })
+                  onUpdate={(id, patch) => {
+                    onChange({ children: children.map(c => c.id === id ? { ...c, ...patch } : c) })
                   }}
-                  onDelete={() => onChange({ children: children.filter((_, i) => i !== idx) })}
+                  onDelete={(id) => onChange({ children: children.filter(c => c.id !== id) })}
                 />
               ))}
               {children.length === 0 && (
