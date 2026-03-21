@@ -14,7 +14,7 @@ function VariantCard({ label, selected, onClick, children }) {
           : 'border-overlay bg-surface hover:border-subtle'
       }`}
     >
-      <div className="w-full h-11 flex items-center justify-center overflow-hidden rounded">
+      <div className="w-full h-24 overflow-hidden rounded">
         {children}
       </div>
       <span className={`text-xs leading-tight text-center w-full truncate ${
@@ -26,41 +26,20 @@ function VariantCard({ label, selected, onClick, children }) {
   )
 }
 
-function DefaultButtonPreview() {
+function ScaledPreview({ children, scale = 0.45 }) {
   return (
-    <div style={{
-      background: colors.primary, borderRadius: 999, padding: '5px 14px',
-      color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: 9, fontWeight: 700,
-      letterSpacing: 0.3,
-    }}>
-      Click here →
-    </div>
-  )
-}
-
-function XPButtonPreview() {
-  return (
-    <div style={{
-      background: '#f0f0f0', border: '2px solid #999', borderRadius: 2,
-      padding: '4px 6px', width: '100%', boxSizing: 'border-box',
-    }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
-        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
-        color: 'white', padding: '1px 4px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700, marginBottom: 4,
+        position: 'absolute',
+        width: '260px',
+        left: '50%',
+        top: 0,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: 'top center',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        Open Link
-      </div>
-      <div style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
-        {['Open', 'Cancel'].map(l => (
-          <div key={l} style={{
-            background: '#e0e0e0',
-            border: '1px solid #888',
-            borderRadius: 1,
-            padding: '2px 6px',
-            fontFamily: 'Tahoma, sans-serif',
-            fontSize: 7,
-          }}>{l}</div>
-        ))}
+        {children}
       </div>
     </div>
   )
@@ -71,9 +50,22 @@ export default function LinkBlock({ block, isEditing, onChange }) {
   const { t } = useT()
 
   if (isEditing) {
+    const previewLabel = label || 'Click here →'
     const VARIANTS = [
-      { value: 'default', label: t('link.variantDefault'), Preview: DefaultButtonPreview },
-      { value: 'xp',      label: t('link.variantXp'),      Preview: XPButtonPreview },
+      { value: 'default', label: t('link.variantDefault'), preview: (
+        <ScaledPreview>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+            <span style={{ background: color || colors.primary, borderRadius: 999, padding: '12px 32px', color: '#fff', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600 }}>
+              {previewLabel}
+            </span>
+          </div>
+        </ScaledPreview>
+      )},
+      { value: 'xp', label: t('link.variantXp'), preview: (
+        <ScaledPreview scale={0.42}>
+          <LinkXPVariant href="#" label={previewLabel} showFlag={block.showFlag !== false} baseColor={block.baseColor} />
+        </ScaledPreview>
+      )},
     ]
 
     return (
@@ -96,14 +88,14 @@ export default function LinkBlock({ block, isEditing, onChange }) {
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('link.buttonStyle')}</p>
           <div className="grid grid-cols-2 gap-2">
-            {VARIANTS.map(({ value, label: vLabel, Preview }) => (
+            {VARIANTS.map(({ value, label: vLabel, preview }) => (
               <VariantCard
                 key={value}
                 label={vLabel}
                 selected={variant === value}
                 onClick={() => onChange({ variant: value })}
               >
-                <Preview />
+                {preview}
               </VariantCard>
             ))}
           </div>

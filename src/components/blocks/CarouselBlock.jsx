@@ -18,7 +18,7 @@ function ModeCard({ label, selected, onClick, children }) {
           : 'border-overlay bg-surface hover:border-subtle'
       }`}
     >
-      <div className="w-full h-12 flex items-center justify-center overflow-hidden rounded">
+      <div className="w-full h-24 overflow-hidden rounded">
         {children}
       </div>
       <span className={`text-xs leading-tight text-center w-full truncate ${
@@ -30,59 +30,20 @@ function ModeCard({ label, selected, onClick, children }) {
   )
 }
 
-function SliderPreview() {
+function ScaledPreview({ children, scale = 0.45 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: '90%' }}>
-      <div style={{ color: '#6b7280', fontSize: 12, flexShrink: 0 }}>‹</div>
-      <div style={{ flex: 1, aspectRatio: '4/3', background: '#3a4453', borderRadius: 3, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 4 }}>
-        <div style={{ display: 'flex', gap: 2 }}>
-          {[1, 0, 0].map((a, i) => (
-            <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: a ? colors.primary : '#4b5563' }} />
-          ))}
-        </div>
-      </div>
-      <div style={{ color: '#6b7280', fontSize: 12, flexShrink: 0 }}>›</div>
-    </div>
-  )
-}
-
-function AlbumPreview() {
-  return (
-    <div style={{ display: 'flex', width: '80%', height: 40 }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
-        flex: 1, background: '#2c1a2e', borderRadius: '3px 0 0 3px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 7, color: '#f5e8d0', fontFamily: 'Georgia, serif',
+        position: 'absolute',
+        width: '260px',
+        left: '50%',
+        top: 0,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: 'top center',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        cover
-      </div>
-      <div style={{
-        flex: 1, background: '#f4edd8', borderRadius: '0 3px 3px 0',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 4,
-      }}>
-        <div style={{ width: '80%', aspectRatio: '1', background: '#fff', border: '1px solid #ddd' }} />
-      </div>
-    </div>
-  )
-}
-
-function XPCarouselPreview() {
-  return (
-    <div style={{ border: '2px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%' }}>
-      <div style={{
-        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
-        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700,
-      }}>
-        My Pictures
-      </div>
-      <div style={{ background: '#ece9d8', padding: 4, display: 'flex', gap: 3, alignItems: 'center' }}>
-        <div style={{ width: 30, height: 24, background: '#d0d8e0', border: '1px solid #aaa' }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {[70, 50].map((w, i) => (
-            <div key={i} style={{ height: 4, background: '#bbb', borderRadius: 2, width: `${w}%` }} />
-          ))}
-        </div>
+        {children}
       </div>
     </div>
   )
@@ -113,10 +74,23 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
 
   // ── Edit mode ──────────────────────────────────────────────────────────────
   if (isEditing) {
+    const previewImages = images.length > 0 ? images : [{ src: '', caption: '' }]
     const MODES = [
-      { value: 'slider', label: 'Slideshow', Preview: SliderPreview },
-      { value: 'album',  label: 'Photo album', Preview: AlbumPreview },
-      { value: 'xp',     label: 'Retro XP',  Preview: XPCarouselPreview },
+      { value: 'slider', label: 'Slideshow', preview: (
+        <ScaledPreview scale={0.42}>
+          <CarouselSliderVariant images={previewImages} />
+        </ScaledPreview>
+      )},
+      { value: 'album', label: 'Photo album', preview: (
+        <ScaledPreview scale={0.28}>
+          <CarouselAlbumVariant block={{ ...block, images: previewImages }} />
+        </ScaledPreview>
+      )},
+      { value: 'xp', label: 'Retro XP', preview: (
+        <ScaledPreview scale={0.38}>
+          <CarouselXPVariant block={{ ...block, images: previewImages }} />
+        </ScaledPreview>
+      )},
     ]
 
     return (
@@ -125,9 +99,9 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('carousel.displayStyle')}</p>
           <div className="grid grid-cols-3 gap-2">
-            {MODES.map(({ value, label: mLabel, Preview }) => (
+            {MODES.map(({ value, label: mLabel, preview }) => (
               <ModeCard key={value} label={mLabel} selected={mode === value} onClick={() => onChange({ mode: value })}>
-                <Preview />
+                {preview}
               </ModeCard>
             ))}
           </div>

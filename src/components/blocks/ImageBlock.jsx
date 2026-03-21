@@ -30,7 +30,7 @@ function VariantCard({ label, selected, onClick, children }) {
           : 'border-overlay bg-surface hover:border-subtle'
       }`}
     >
-      <div className="w-full h-12 flex items-center justify-center overflow-hidden rounded">
+      <div className="w-full h-24 overflow-hidden rounded">
         {children}
       </div>
       <span className={`text-xs leading-tight text-center w-full truncate ${
@@ -42,57 +42,20 @@ function VariantCard({ label, selected, onClick, children }) {
   )
 }
 
-function DefaultPreview() {
+function ScaledPreview({ children, scale = 0.45 }) {
   return (
-    <div style={{
-      width: '100%', height: '100%', background: 'linear-gradient(145deg, #3a4453, #2a3340)',
-      borderRadius: 3, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
-        <rect x="1" y="1" width="20" height="16" rx="2" stroke="#6b7280" strokeWidth="1.5" />
-        <circle cx="7" cy="7" r="2" fill="#6b7280" />
-        <path d="M1 13l5-4 4 3 4-5 7 6" stroke="#6b7280" strokeWidth="1.5" strokeLinejoin="round" />
-      </svg>
-    </div>
-  )
-}
-
-function PolaroidPreview() {
-  return (
-    <div style={{
-      background: '#faf9f6', padding: '5px 5px 14px', borderRadius: 2,
-      boxShadow: '0 3px 10px rgba(0,0,0,0.3)', transform: 'rotate(-2deg)',
-      display: 'inline-block',
-    }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
-        width: 36, height: 36, background: 'linear-gradient(145deg, #3a4453, #2a3340)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'absolute',
+        width: '260px',
+        left: '50%',
+        top: 0,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: 'top center',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        <svg width="14" height="11" viewBox="0 0 22 18" fill="none">
-          <rect x="1" y="1" width="20" height="16" rx="2" stroke="#6b7280" strokeWidth="2" />
-          <circle cx="7" cy="7" r="2" fill="#6b7280" />
-          <path d="M1 13l5-4 4 3 4-5 7 6" stroke="#6b7280" strokeWidth="2" strokeLinejoin="round" />
-        </svg>
-      </div>
-    </div>
-  )
-}
-
-function XPPreview() {
-  return (
-    <div style={{ border: '2px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
-        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700,
-        display: 'flex', alignItems: 'center', gap: 3,
-      }}>
-        <span>🖼</span> Photo Viewer
-      </div>
-      <div style={{
-        background: '#f0f0f0', height: 28,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <div style={{ width: 24, height: 20, background: '#c8d8e8', border: '1px solid #aaa' }} />
+        {children}
       </div>
     </div>
   )
@@ -103,10 +66,48 @@ export default function ImageBlock({ block, isEditing, onChange }) {
   const { t } = useT()
 
   if (isEditing) {
+    const seed = (block.id ?? '').split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+    const polaroidRot = ((seed % 9) - 4) * 0.55
+    const tapeRot = ((seed % 5) - 2) * 1.2
+
     const VARIANTS = [
-      { value: 'default',  label: t('image.variantDefault'),  Preview: DefaultPreview },
-      { value: 'polaroid', label: t('image.variantPolaroid'), Preview: PolaroidPreview },
-      { value: 'xp',       label: t('image.variantXp'),       Preview: XPPreview },
+      { value: 'default', label: t('image.variantDefault'), preview: (
+        <ScaledPreview>
+          {src ? (
+            <img src={src} alt={alt} style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: '100%', aspectRatio: '4/3', background: 'linear-gradient(145deg, #3a4453, #2a3340)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', fontSize: 28 }}>
+              🖼
+            </div>
+          )}
+        </ScaledPreview>
+      )},
+      { value: 'polaroid', label: t('image.variantPolaroid'), preview: (
+        <ScaledPreview scale={0.38}>
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 22, paddingBottom: 6 }}>
+            <div style={{ position: 'relative', display: 'inline-block', transform: `rotate(${polaroidRot}deg)`, transformOrigin: 'center 15%' }}>
+              <Tape style={{ position: 'absolute', top: -13, left: '50%', transform: `translateX(-50%) rotate(${tapeRot}deg)`, zIndex: 4 }} />
+              <div style={{ background: 'linear-gradient(170deg, #faf9f6 0%, #f5f3ee 100%)', padding: '10px 10px 48px', boxShadow: '0 6px 24px rgba(0,0,0,0.28)', maxWidth: 300 }}>
+                {src ? (
+                  <img src={src} alt={alt} style={{ display: 'block', width: '100%', aspectRatio: '1/1', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: 'linear-gradient(145deg, #e2ddd5, #d8d2c8)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b0a898', fontSize: 13 }}>photo</div>
+                )}
+                {caption && (
+                  <div style={{ paddingTop: 10, textAlign: 'center' }}>
+                    <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, fontWeight: 600, color: '#3a3028', margin: 0 }}>{caption}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </ScaledPreview>
+      )},
+      { value: 'xp', label: t('image.variantXp'), preview: (
+        <ScaledPreview scale={0.42}>
+          <ImageXPVariant src={src} alt={alt} caption={caption} />
+        </ScaledPreview>
+      )},
     ]
 
     return (
@@ -130,14 +131,14 @@ export default function ImageBlock({ block, isEditing, onChange }) {
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('image.frameStyle')}</p>
           <div className="grid grid-cols-3 gap-2">
-            {VARIANTS.map(({ value, label, Preview }) => (
+            {VARIANTS.map(({ value, label, preview }) => (
               <VariantCard
                 key={value}
                 label={label}
                 selected={variant === value}
                 onClick={() => onChange({ variant: value })}
               >
-                <Preview />
+                {preview}
               </VariantCard>
             ))}
           </div>

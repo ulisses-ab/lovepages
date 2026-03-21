@@ -18,7 +18,7 @@ function VariantCard({ label, selected, onClick, children }) {
           : 'border-overlay bg-surface hover:border-subtle'
       }`}
     >
-      <div className="w-full h-12 flex items-center justify-center overflow-hidden rounded">
+      <div className="w-full h-24 overflow-hidden rounded">
         {children}
       </div>
       <span className={`text-xs leading-tight text-center w-full truncate ${
@@ -30,88 +30,20 @@ function VariantCard({ label, selected, onClick, children }) {
   )
 }
 
-function FlipPreview() {
+function ScaledPreview({ children, scale = 0.45 }) {
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
-      {['0', '0'].map((d, i) => (
-        <div key={i} style={{
-          width: 18, height: 24, borderRadius: 2,
-          background: 'linear-gradient(180deg, #282828 50%, #111 50%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#ddd7c8',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-          position: 'relative',
-        }}>
-          {d}
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'rgba(0,0,0,0.5)' }} />
-        </div>
-      ))}
-      <div style={{ color: '#555', fontWeight: 700, fontSize: 14, alignSelf: 'center' }}>:</div>
-      {['0', '0'].map((d, i) => (
-        <div key={i} style={{
-          width: 18, height: 24, borderRadius: 2,
-          background: 'linear-gradient(180deg, #282828 50%, #111 50%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#ddd7c8',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.5)',
-          position: 'relative',
-        }}>
-          {d}
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1, background: 'rgba(0,0,0,0.5)' }} />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function MinimalPreview() {
-  return (
-    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-      {[['00', 'days'], ['00', 'hrs']].map(([n, u], i) => (
-        <div key={i} style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: 16, fontWeight: 700, color: '#f3f4f6', lineHeight: 1 }}>{n}</div>
-          <div style={{ fontSize: 7, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 }}>{u}</div>
-          {i < 1 && <div style={{ width: 1, height: 14, background: '#3a4453', position: 'absolute' }} />}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function AeroPreview() {
-  return (
-    <div style={{
-      background: 'linear-gradient(180deg, #ddf1ff 0%, #7ec5ee 100%)',
-      borderRadius: 14, padding: '4px 10px', border: '1px solid rgba(255,255,255,0.7)',
-    }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
-        background: 'linear-gradient(180deg, #0c3a88, #07235a)',
-        borderRadius: 10, padding: '3px 8px',
-        fontFamily: 'monospace', fontSize: 9, color: '#b4dcff',
-        textShadow: '0 0 6px #4af', letterSpacing: 1,
+        position: 'absolute',
+        width: '260px',
+        left: '50%',
+        top: 0,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: 'top center',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        00:00:00
-      </div>
-    </div>
-  )
-}
-
-function XPCountdownPreview() {
-  return (
-    <div style={{ border: '2px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%' }}>
-      <div style={{
-        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
-        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700,
-      }}>
-        Date and Time
-      </div>
-      <div style={{ background: '#ece9d8', padding: '4px 5px', display: 'flex', justifyContent: 'center', gap: 3 }}>
-        {['00', '00', '00'].map((v, i) => (
-          <div key={i} style={{
-            background: '#fff', border: '1px inset #999',
-            fontFamily: 'monospace', fontSize: 9, padding: '1px 3px', color: '#000',
-          }}>{v}</div>
-        ))}
+        {children}
       </div>
     </div>
   )
@@ -148,11 +80,36 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
   }, [])
 
   if (isEditing) {
+    const PREVIEW_TIME = { days: 5, hours: 12, minutes: 30, seconds: 45 }
     const VARIANTS = [
-      { value: 'flip',    label: t('countdown.variantFlip'),    Preview: FlipPreview },
-      { value: 'minimal', label: t('countdown.variantMinimal'), Preview: MinimalPreview },
-      { value: 'aero',    label: t('countdown.variantAero'),    Preview: AeroPreview },
-      { value: 'xp',      label: t('countdown.variantXp'),      Preview: XPCountdownPreview },
+      { value: 'flip', label: t('countdown.variantFlip'), preview: (
+        <ScaledPreview scale={0.35}>
+          <div style={{ padding: '8px 0' }}>
+            <CountdownFlipVariant {...PREVIEW_TIME} clockColor={clockColor} />
+          </div>
+        </ScaledPreview>
+      )},
+      { value: 'minimal', label: t('countdown.variantMinimal'), preview: (
+        <ScaledPreview>
+          <div className="py-2">
+            <CountdownMinimalVariant {...PREVIEW_TIME} label="" />
+          </div>
+        </ScaledPreview>
+      )},
+      { value: 'aero', label: t('countdown.variantAero'), preview: (
+        <ScaledPreview scale={0.4}>
+          <div className="py-2">
+            <CountdownAeroVariant {...PREVIEW_TIME} label="" />
+          </div>
+        </ScaledPreview>
+      )},
+      { value: 'xp', label: t('countdown.variantXp'), preview: (
+        <ScaledPreview scale={0.4}>
+          <div className="py-2">
+            <CountdownXPVariant {...PREVIEW_TIME} label="" />
+          </div>
+        </ScaledPreview>
+      )},
     ]
     return (
       <div className="space-y-3">
@@ -183,9 +140,9 @@ export default function CountdownBlock({ block, isEditing, onChange }) {
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('countdown.clockStyle')}</p>
           <div className="grid grid-cols-2 gap-2">
-            {VARIANTS.map(({ value, label: vLabel, Preview }) => (
+            {VARIANTS.map(({ value, label: vLabel, preview }) => (
               <VariantCard key={value} label={vLabel} selected={variant === value} onClick={() => onChange({ variant: value })}>
-                <Preview />
+                {preview}
               </VariantCard>
             ))}
           </div>

@@ -22,7 +22,7 @@ function VariantCard({ label, selected, onClick, children }) {
           : 'border-overlay bg-surface hover:border-subtle'
       }`}
     >
-      <div className="w-full h-11 flex items-center justify-center overflow-hidden rounded">
+      <div className="w-full h-24 overflow-hidden rounded">
         {children}
       </div>
       <span className={`text-xs leading-tight text-center w-full truncate ${
@@ -34,80 +34,20 @@ function VariantCard({ label, selected, onClick, children }) {
   )
 }
 
-function BarPreview() {
+function ScaledPreview({ children, scale = 0.45 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5, width: '90%', background: '#1a202a', borderRadius: 6, padding: '5px 8px' }}>
-      <div style={{ width: 16, height: 16, borderRadius: '50%', background: colors.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <div style={{ width: 0, height: 0, borderTop: '4px solid transparent', borderBottom: '4px solid transparent', borderLeft: '6px solid #fff', marginLeft: 1 }} />
-      </div>
-      <div style={{ flex: 1, height: 3, background: '#3a4453', borderRadius: 999, overflow: 'hidden' }}>
-        <div style={{ width: '40%', height: '100%', background: colors.primary, borderRadius: 999 }} />
-      </div>
-    </div>
-  )
-}
-
-function CoverPreview() {
-  return (
-    <div style={{ display: 'flex', gap: 5, alignItems: 'center', width: '90%' }}>
-      <div style={{ width: 30, height: 30, background: '#3a4453', borderRadius: 3, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 12 }}>♪</span>
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ height: 4, background: '#3a4453', borderRadius: 2, marginBottom: 4, width: '80%' }} />
-        <div style={{ height: 3, background: '#3a4453', borderRadius: 2, marginBottom: 5, width: '55%' }} />
-        <div style={{ height: 2, background: '#3a4453', borderRadius: 999, overflow: 'hidden' }}>
-          <div style={{ width: '35%', height: '100%', background: colors.primary }} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function VinylPreview() {
-  return (
-    <div style={{ position: 'relative', width: 36, height: 36 }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'repeating-radial-gradient(circle at center, #1c1c1c 0px, #1c1c1c 3px, #0d0d0d 3px, #0d0d0d 6px)', border: '1px solid #333' }} />
-      <div style={{ position: 'absolute', inset: '30%', borderRadius: '50%', background: '#2a2a2a', border: '1px solid #444' }} />
-      <div style={{ position: 'absolute', inset: '44%', borderRadius: '50%', background: '#555' }} />
-    </div>
-  )
-}
-
-function AeroPreview() {
-  return (
-    <div style={{
-      background: 'linear-gradient(180deg, #ddf1ff 0%, #7ec5ee 100%)',
-      borderRadius: 12, padding: '4px 8px', width: '90%',
-      border: '1px solid rgba(255,255,255,0.7)',
-    }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       <div style={{
-        background: 'linear-gradient(180deg, #0c3a88, #07235a)',
-        borderRadius: 8, padding: '3px 5px',
-        fontFamily: 'monospace', fontSize: 9, color: '#b4dcff',
-        textShadow: '0 0 6px #4af',
-        textAlign: 'center', letterSpacing: 1,
+        position: 'absolute',
+        width: '260px',
+        left: '50%',
+        top: 0,
+        transform: `translateX(-50%) scale(${scale})`,
+        transformOrigin: 'top center',
+        pointerEvents: 'none',
+        userSelect: 'none',
       }}>
-        00:00
-      </div>
-    </div>
-  )
-}
-
-function XPSongPreview() {
-  return (
-    <div style={{ border: '2px solid #999', borderRadius: 2, overflow: 'hidden', width: '100%' }}>
-      <div style={{
-        background: 'linear-gradient(180deg, #3a6ea5, #245cb5)',
-        color: 'white', padding: '2px 5px', fontFamily: 'Tahoma, sans-serif', fontSize: 7, fontWeight: 700,
-      }}>
-        Windows Media Player
-      </div>
-      <div style={{ background: '#ece9d8', padding: '3px 5px', display: 'flex', alignItems: 'center', gap: 3 }}>
-        <div style={{ width: 12, height: 12, background: '#c8d8e8', border: '1px solid #aaa' }} />
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 2, background: '#aaa', borderRadius: 999 }} />
-        </div>
+        {children}
       </div>
     </div>
   )
@@ -127,16 +67,29 @@ export default function SongBlock({ block, isEditing, onChange }) {
   const { playing, ready, progress, volume, setVolume, togglePlay, handleSeek, mountRef } =
     useSongPlayer(block)
 
-  const VARIANTS = [
-    { value: 'default', label: t('song.variantBar'),   Preview: BarPreview },
-    { value: 'cover',   label: t('song.variantCover'), Preview: CoverPreview },
-    { value: 'vinyl',   label: t('song.variantVinyl'), Preview: VinylPreview },
-    { value: 'aero',    label: t('song.variantAero'),  Preview: AeroPreview },
-    { value: 'xp',      label: t('song.variantXp'),    Preview: XPSongPreview },
-  ]
-
   // ── Edit mode ──────────────────────────────────────────────────────────────
   if (isEditing) {
+    const mockBlock = { ...block, title: title || 'Song Title', artist: artist || 'Artist' }
+    const mockShared = { block: mockBlock, playing: false, ready: true, progress: 0.3, togglePlay: () => {}, handleSeek: () => {}, accent, textCol }
+
+    const VARIANTS = [
+      { value: 'default', label: t('song.variantBar'), preview: (
+        <ScaledPreview><SongBarVariant {...mockShared} /></ScaledPreview>
+      )},
+      { value: 'cover', label: t('song.variantCover'), preview: (
+        <ScaledPreview><SongCoverVariant {...mockShared} /></ScaledPreview>
+      )},
+      { value: 'vinyl', label: t('song.variantVinyl'), preview: (
+        <ScaledPreview><SongVinylVariant {...mockShared} volume={70} setVolume={() => {}} /></ScaledPreview>
+      )},
+      { value: 'aero', label: t('song.variantAero'), preview: (
+        <ScaledPreview><SongAeroVariant {...mockShared} /></ScaledPreview>
+      )},
+      { value: 'xp', label: t('song.variantXp'), preview: (
+        <ScaledPreview><SongXPVariant {...mockShared} /></ScaledPreview>
+      )},
+    ]
+
     return (
       <div className="space-y-3">
         {/* URL first */}
@@ -165,16 +118,16 @@ export default function SongBlock({ block, isEditing, onChange }) {
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('song.playerStyle')}</p>
           <div className="grid grid-cols-3 gap-2">
-            {VARIANTS.slice(0, 3).map(({ value, label: vLabel, Preview }) => (
+            {VARIANTS.slice(0, 3).map(({ value, label: vLabel, preview }) => (
               <VariantCard key={value} label={vLabel} selected={variant === value} onClick={() => onChange({ variant: value })}>
-                <Preview />
+                {preview}
               </VariantCard>
             ))}
           </div>
           <div className="grid grid-cols-2 gap-2 mt-2">
-            {VARIANTS.slice(3).map(({ value, label: vLabel, Preview }) => (
+            {VARIANTS.slice(3).map(({ value, label: vLabel, preview }) => (
               <VariantCard key={value} label={vLabel} selected={variant === value} onClick={() => onChange({ variant: value })}>
-                <Preview />
+                {preview}
               </VariantCard>
             ))}
           </div>
