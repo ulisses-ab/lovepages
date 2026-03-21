@@ -1,18 +1,80 @@
 import { useState } from 'react'
 import { Upload, ArrowDown } from 'lucide-react'
-import { colors, inputClass } from '../../lib/theme'
+import { inputClass } from '../../lib/theme'
 import { supabase } from '../../lib/supabase'
 import { useT } from '../../lib/i18n'
 import ColorPicker from './ColorPicker'
 
 /**
- * Unified background chooser — Color, Image (with fit), or Fade (two-stop blend).
+ * Unified background chooser — Presets, Color, Image (with fit), or Fade (two-stop blend).
  *
  * Props:
  *   bgColor, bgImage, bgImageFit   — primary background
  *   bgFade, bgColor2, bgImage2, bgImageFit2 — fade second stop
+ *   bgShader                       — ShaderGradient props object (overrides all others)
  *   onChange(patch)                — merges patch into parent state
  */
+
+const CLEAR_SHADER = { bgShader: null }
+const CLEAR_ALL    = { bgShader: null, bgFade: false, bgColor: '', bgImage: '', bgImageFit: '', bgColor2: '', bgImage2: '', bgImageFit2: '' }
+
+const PRESETS = [
+  // Light / pastel
+  { label: 'White',    bg: '#ffffff', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#ffffff', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Cream',    bg: '#f5f0e8', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#f5f0e8', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Blush',    bg: '#fce4ec', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#fce4ec', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Lavender', bg: '#f3e5f5', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#f3e5f5', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Sky',      bg: '#dbeafe', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#dbeafe', bgImage: '', bgColor2: '', bgImage2: '' } },
+  // Dark / moody
+  { label: 'Charcoal', bg: '#1c1c1c', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#1c1c1c', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Midnight', bg: '#1a1a2e', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#1a1a2e', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Plum',     bg: '#2c1a2e', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#2c1a2e', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Navy',     bg: '#0f172a', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#0f172a', bgImage: '', bgColor2: '', bgImage2: '' } },
+  { label: 'Black',    bg: '#000000', patch: { ...CLEAR_SHADER, bgFade: false, bgColor: '#000000', bgImage: '', bgColor2: '', bgImage2: '' } },
+  // Gradients
+  { label: 'Peach',    bg: 'linear-gradient(to bottom,#fed7aa,#fda4af)', patch: { ...CLEAR_SHADER, bgFade: true, bgColor: '#fed7aa', bgImage: '', bgColor2: '#fda4af', bgImage2: '' } },
+  { label: 'Bloom',    bg: 'linear-gradient(to bottom,#f8b4d9,#e9d5ff)', patch: { ...CLEAR_SHADER, bgFade: true, bgColor: '#f8b4d9', bgImage: '', bgColor2: '#e9d5ff', bgImage2: '' } },
+  { label: 'Sunset',   bg: 'linear-gradient(to bottom,#ff6b8a,#ff9a3c)', patch: { ...CLEAR_SHADER, bgFade: true, bgColor: '#ff6b8a', bgImage: '', bgColor2: '#ff9a3c', bgImage2: '' } },
+  { label: 'Dusk',     bg: 'linear-gradient(to bottom,#3b0764,#1e1b4b)', patch: { ...CLEAR_SHADER, bgFade: true, bgColor: '#3b0764', bgImage: '', bgColor2: '#1e1b4b', bgImage2: '' } },
+  { label: 'Ocean',    bg: 'linear-gradient(to bottom,#0c4a6e,#0f172a)', patch: { ...CLEAR_SHADER, bgFade: true, bgColor: '#0c4a6e', bgImage: '', bgColor2: '#0f172a', bgImage2: '' } },
+]
+
+// Animated shader gradient presets.
+// `bg` is a CSS gradient approximation used for the swatch preview.
+// `shaderProps` are passed directly to <ShaderGradient />.
+const SHADER_PRESETS = [
+  {
+    label: 'Aurora',
+    bg: 'linear-gradient(135deg,#52ff89,#dbba95,#d0bce1)',
+    shaderProps: { color1: '#52ff89', color2: '#dbba95', color3: '#d0bce1', type: 'plane', animate: 'on', uSpeed: 0.3, uStrength: 2, uFrequency: 5.5, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'off' },
+  },
+  {
+    label: 'Ember',
+    bg: 'linear-gradient(135deg,#ff3131,#ff9a00,#2c1a2e)',
+    shaderProps: { color1: '#ff3131', color2: '#ff9a00', color3: '#2c1a2e', type: 'plane', animate: 'on', uSpeed: 0.3, uStrength: 3, uFrequency: 5.5, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'on' },
+  },
+  {
+    label: 'Cosmic',
+    bg: 'linear-gradient(135deg,#6366f1,#1e1b4b,#0f172a)',
+    shaderProps: { color1: '#6366f1', color2: '#1e1b4b', color3: '#0f172a', type: 'sphere', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 5.5, cDistance: 5, cPolarAngle: 110, lightType: '3d', grain: 'on' },
+  },
+  {
+    label: 'Rose',
+    bg: 'linear-gradient(135deg,#f9a8d4,#e879f9,#fce7f3)',
+    shaderProps: { color1: '#f9a8d4', color2: '#e879f9', color3: '#fce7f3', type: 'plane', animate: 'on', uSpeed: 0.2, uStrength: 2.5, uFrequency: 4, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'off' },
+  },
+  {
+    label: 'Mint',
+    bg: 'linear-gradient(135deg,#d0f4de,#a0c4ff,#caffbf)',
+    shaderProps: { color1: '#d0f4de', color2: '#a0c4ff', color3: '#caffbf', type: 'waterPlane', animate: 'on', uSpeed: 0.15, uStrength: 1.5, uFrequency: 5.5, cDistance: 4, cPolarAngle: 80, lightType: '3d', grain: 'off' },
+  },
+  {
+    label: 'Velvet',
+    bg: 'linear-gradient(135deg,#7c3aed,#1e1b4b,#831843)',
+    shaderProps: { color1: '#7c3aed', color2: '#1e1b4b', color3: '#831843', type: 'plane', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 3, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'on' },
+  },
+]
+
 export default function BackgroundChooser({
   bgColor = '',
   bgImage = '',
@@ -21,6 +83,7 @@ export default function BackgroundChooser({
   bgColor2 = '',
   bgImage2 = '',
   bgImageFit2 = 'cover',
+  bgShader = null,
   onChange,
 }) {
   const { t } = useT()
@@ -29,21 +92,21 @@ export default function BackgroundChooser({
   const [mode, setMode] = useState(() => {
     if (bgFade) return 'fade'
     if (bgImage) return 'image'
-    return 'color'
+    return 'presets'
   })
 
-  // Per-slot type for fade mode: 'color' | 'image'
   const [slot1Type, setSlot1Type] = useState(() => bgImage  ? 'image' : 'color')
   const [slot2Type, setSlot2Type] = useState(() => bgImage2 ? 'image' : 'color')
 
   function switchMode(m) {
     setMode(m)
+    if (m === 'presets') return
     if (m === 'color') {
-      onChange({ bgImage: '', bgImageFit: '', bgFade: false, bgColor2: '', bgImage2: '', bgImageFit2: '' })
+      onChange({ ...CLEAR_ALL, bgColor })
     } else if (m === 'image') {
-      onChange({ bgColor: '', bgFade: false, bgColor2: '', bgImage2: '', bgImageFit2: '' })
-    } else {
-      onChange({ bgFade: true })
+      onChange({ ...CLEAR_ALL })
+    } else if (m === 'fade') {
+      onChange({ bgShader: null, bgFade: true })
     }
   }
 
@@ -61,12 +124,17 @@ export default function BackgroundChooser({
     }
   }
 
-  // One fade slot: color/image toggle + the relevant control
+  const TABS = [
+    { key: 'presets', label: t('style.presets') },
+    { key: 'color',   label: t('pageOptions.bgColor') },
+    { key: 'image',   label: t('pageOptions.bgImage') },
+    { key: 'fade',    label: t('style.fade') },
+  ]
+
   function FadeSlot({ label, slotType, setSlotType, colorField, colorVal, imageField, imageVal, fitField, fitVal }) {
     const isUploading = uploading === imageField
     return (
       <div className="space-y-2">
-        {/* Label + type toggle */}
         <div className="flex items-center justify-between">
           <p className="text-xs text-fg-ghost">{label}</p>
           <div className="flex rounded overflow-hidden border border-overlay text-xs">
@@ -89,8 +157,6 @@ export default function BackgroundChooser({
             ))}
           </div>
         </div>
-
-        {/* Color control */}
         {slotType === 'color' && (
           <ColorPicker
             value={colorVal}
@@ -101,8 +167,6 @@ export default function BackgroundChooser({
             alpha
           />
         )}
-
-        {/* Image control */}
         {slotType === 'image' && (
           <div className="space-y-2">
             {imageVal ? (
@@ -117,22 +181,13 @@ export default function BackgroundChooser({
               <label className={`flex items-center gap-2 px-3 py-2.5 rounded bg-overlay border border-dashed border-subtle text-sm text-fg-muted cursor-pointer hover:bg-subtle hover:text-fg-secondary transition select-none ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <Upload size={12} />
                 {isUploading ? t('imageUpload.uploading') : t('imageUpload.upload')}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(imageField, f) }}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(imageField, f) }} className="hidden" />
               </label>
             )}
             {imageVal && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-fg-muted shrink-0">{t('pageOptions.bgFit')}</span>
-                <select
-                  value={fitVal || 'cover'}
-                  onChange={e => onChange({ [fitField]: e.target.value })}
-                  className={inputClass + ' flex-1 py-1'}
-                >
+                <select value={fitVal || 'cover'} onChange={e => onChange({ [fitField]: e.target.value })} className={inputClass + ' flex-1 py-1'}>
                   <option value="cover">{t('pageOptions.bgFitCover')}</option>
                   <option value="contain">{t('pageOptions.bgFitContain')}</option>
                   <option value="tile">{t('pageOptions.bgFitTile')}</option>
@@ -146,21 +201,17 @@ export default function BackgroundChooser({
   }
 
   return (
-    <div className="space-y-3">
-      {/* Mode tabs */}
-      <div className="flex rounded overflow-hidden border border-overlay text-xs">
-        {[
-          { key: 'color', label: t('pageOptions.bgColor') },
-          { key: 'image', label: t('pageOptions.bgImage') },
-          { key: 'fade',  label: t('style.fade') },
-        ].map(({ key, label }) => (
+    <div>
+      {/* Tab bar */}
+      <div className="flex border-b border-overlay mb-3">
+        {TABS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => switchMode(key)}
-            className={`flex-1 px-2 py-2 transition ${
+            className={`px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
               mode === key
-                ? 'bg-primary text-white'
-                : 'bg-overlay text-fg-muted hover:text-fg-secondary'
+                ? 'text-fg border-primary'
+                : 'text-fg-ghost border-transparent hover:text-fg-muted hover:border-overlay'
             }`}
           >
             {label}
@@ -168,7 +219,67 @@ export default function BackgroundChooser({
         ))}
       </div>
 
-      {/* Color mode */}
+      {/* Presets */}
+      {mode === 'presets' && (
+        <div className="space-y-4">
+          {/* Solid / gradient swatches */}
+          <div className="grid grid-cols-5 gap-1.5">
+            {/* Clear / none */}
+            <button
+              onClick={() => onChange(CLEAR_ALL)}
+              className="flex flex-col items-center gap-1 group"
+              title="None"
+            >
+              <div className="w-full aspect-square rounded border-2 border-dashed border-overlay group-hover:border-subtle transition relative overflow-hidden">
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom right, transparent calc(50% - 0.5px), rgba(150,70,70,0.5) calc(50% - 0.5px), rgba(150,70,70,0.5) calc(50% + 0.5px), transparent calc(50% + 0.5px))' }} />
+              </div>
+              <span className="text-[9px] text-fg-ghost leading-none">None</span>
+            </button>
+            {PRESETS.map(({ label, bg, patch }) => (
+              <button
+                key={label}
+                onClick={() => onChange(patch)}
+                className="flex flex-col items-center gap-1 group"
+                title={label}
+              >
+                <div
+                  className="w-full aspect-square rounded border border-overlay group-hover:scale-110 group-hover:shadow-lg transition-transform"
+                  style={{ background: bg }}
+                />
+                <span className="text-[9px] text-fg-ghost leading-none">{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Animated shader gradients */}
+          <div>
+            <p className="text-[10px] font-semibold text-fg-ghost uppercase tracking-wider mb-2">
+              Animated gradients
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {SHADER_PRESETS.map(({ label, bg, shaderProps }) => (
+                <button
+                  key={label}
+                  onClick={() => onChange({ bgShader: shaderProps, bgColor: '', bgImage: '', bgFade: false, bgColor2: '', bgImage2: '' })}
+                  className="flex flex-col items-center gap-1 group"
+                  title={label}
+                >
+                  <div
+                    className="w-full rounded border border-overlay group-hover:scale-105 group-hover:shadow-lg transition-transform relative overflow-hidden"
+                    style={{ aspectRatio: '3/2', background: bg }}
+                  >
+                    {/* Pulsing dot — signals it's animated */}
+                    <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
+                  </div>
+                  <span className="text-[9px] text-fg-ghost leading-none">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Color */}
       {mode === 'color' && (
         <ColorPicker
           value={bgColor}
@@ -180,7 +291,7 @@ export default function BackgroundChooser({
         />
       )}
 
-      {/* Image mode */}
+      {/* Image */}
       {mode === 'image' && (
         <div className="space-y-2">
           {bgImage ? (
@@ -195,22 +306,13 @@ export default function BackgroundChooser({
             <label className={`flex items-center gap-2 px-3 py-2.5 rounded bg-overlay border border-dashed border-subtle text-sm text-fg-muted cursor-pointer hover:bg-subtle hover:text-fg-secondary transition select-none ${uploading === 'bgImage' ? 'opacity-50 pointer-events-none' : ''}`}>
               <Upload size={12} />
               {uploading === 'bgImage' ? t('imageUpload.uploading') : t('imageUpload.upload')}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage('bgImage', f) }}
-                className="hidden"
-              />
+              <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage('bgImage', f) }} className="hidden" />
             </label>
           )}
           {bgImage && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-fg-muted shrink-0">{t('pageOptions.bgFit')}</span>
-              <select
-                value={bgImageFit || 'cover'}
-                onChange={e => onChange({ bgImageFit: e.target.value })}
-                className={inputClass + ' flex-1 py-1'}
-              >
+              <select value={bgImageFit || 'cover'} onChange={e => onChange({ bgImageFit: e.target.value })} className={inputClass + ' flex-1 py-1'}>
                 <option value="cover">{t('pageOptions.bgFitCover')}</option>
                 <option value="contain">{t('pageOptions.bgFitContain')}</option>
                 <option value="tile">{t('pageOptions.bgFitTile')}</option>
@@ -220,25 +322,25 @@ export default function BackgroundChooser({
         </div>
       )}
 
-      {/* Fade mode — two slots, each with color/image toggle */}
+      {/* Fade */}
       {mode === 'fade' && (
         <div className="space-y-3">
           <FadeSlot
             label={t('style.from')}
-            slotType={slot1Type}      setSlotType={setSlot1Type}
-            colorField="bgColor"     colorVal={bgColor}
-            imageField="bgImage"     imageVal={bgImage}
-            fitField="bgImageFit"    fitVal={bgImageFit}
+            slotType={slot1Type}   setSlotType={setSlot1Type}
+            colorField="bgColor"   colorVal={bgColor}
+            imageField="bgImage"   imageVal={bgImage}
+            fitField="bgImageFit"  fitVal={bgImageFit}
           />
           <div className="flex items-center justify-center">
             <ArrowDown size={12} className="text-fg-ghost" />
           </div>
           <FadeSlot
             label={t('style.to')}
-            slotType={slot2Type}      setSlotType={setSlot2Type}
-            colorField="bgColor2"    colorVal={bgColor2}
-            imageField="bgImage2"    imageVal={bgImage2}
-            fitField="bgImageFit2"   fitVal={bgImageFit2}
+            slotType={slot2Type}    setSlotType={setSlot2Type}
+            colorField="bgColor2"   colorVal={bgColor2}
+            imageField="bgImage2"   imageVal={bgImage2}
+            fitField="bgImageFit2"  fitVal={bgImageFit2}
           />
         </div>
       )}
