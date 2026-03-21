@@ -188,6 +188,9 @@ export const translations = {
     // CarouselBlock label
     'block.carousel': 'Photos',
 
+    // ContainerBlock
+    'block.container': 'Add container',
+
     // CountdownBlock
     'block.countdown': 'Countdown',
     'countdown.variantFlip': 'Flip clock',
@@ -409,6 +412,9 @@ export const translations = {
 
     // CarouselBlock label
     'block.carousel': 'Fotos',
+
+    // ContainerBlock
+    'block.container': 'Adicionar container',
 
     // CountdownBlock
     'block.countdown': 'Contagem regressiva',
