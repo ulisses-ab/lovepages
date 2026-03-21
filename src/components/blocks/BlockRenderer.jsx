@@ -7,16 +7,32 @@ import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
 import CustomBlock from './CustomBlock'
 
-// Maps block.size → flex child style.
-// The parent container (page column or ContainerBlock) uses display:flex + flex-wrap:wrap.
-// Each block's size determines how much of that row it claims.
-function getSizeStyle(size) {
-  switch (size) {
-    case 'half':  return { flex: '1 1 calc(50% - 8px)', minWidth: '200px', maxWidth: '100%' }
-    case 'third': return { flex: '1 1 calc(33.33% - 11px)', minWidth: '150px', maxWidth: '100%' }
-    case 'auto':  return { flexShrink: 0 }
-    default:      return { width: '100%' }  // 'full'
-  }
+function BlockTransformWrapper({ block, children }) {
+  const rotate       = block.rotate       ?? 0
+  const scaleDesktop = block.scaleDesktop ?? 1
+  const scaleMobile  = block.scaleMobile  ?? 1
+
+  const hasTransform = rotate !== 0 || scaleDesktop !== 1 || scaleMobile !== 1
+  if (!hasTransform) return children
+
+  const cls = `btr-${block.id}`
+
+  const desktopParts = []
+  if (rotate !== 0)       desktopParts.push(`rotate(${rotate}deg)`)
+  if (scaleDesktop !== 1) desktopParts.push(`scale(${scaleDesktop})`)
+  const desktopTransform = desktopParts.join(' ') || 'none'
+
+  const mobileParts = []
+  if (rotate !== 0)      mobileParts.push(`rotate(${rotate}deg)`)
+  if (scaleMobile !== 1) mobileParts.push(`scale(${scaleMobile})`)
+  const mobileTransform = mobileParts.join(' ') || 'none'
+
+  return (
+    <div className={cls} style={{ transformOrigin: 'center center' }}>
+      <style>{`.${cls}{transform:${desktopTransform}}@media(max-width:767px){.${cls}{transform:${mobileTransform}}}`}</style>
+      {children}
+    </div>
+  )
 }
 
 export default function BlockRenderer({ block, isEditing = false, onChange, isHighlighted = false, noSizeWrapper = false }) {
@@ -40,20 +56,22 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
   }
 
   if (noSizeWrapper) {
-    return <>{renderBlock()}</>
+    return <BlockTransformWrapper block={block}>{renderBlock()}</BlockTransformWrapper>
   }
 
   return (
-    <div style={{ ...getSizeStyle(block.size ?? 'full'), position: 'relative' }} className="rounded-lg">
-      {/* Hover highlight overlay — fades in when this block is hovered in the editor */}
-      <div
-        className="absolute inset-0 rounded-lg pointer-events-none z-10 transition-opacity duration-150"
-        style={{
-          opacity: isHighlighted ? 1 : 0,
-          background: 'rgba(255, 80, 80, 0.35)',
-        }}
-      />
-      {renderBlock()}
-    </div>
+    <BlockTransformWrapper block={block}>
+      <div style={{ position: 'relative' }}>
+        {/* Hover highlight overlay — fades in when this block is hovered in the editor */}
+        <div
+          className="absolute inset-0 rounded-lg pointer-events-none z-10 transition-opacity duration-150"
+          style={{
+            opacity: isHighlighted ? 1 : 0,
+            background: 'rgba(255, 80, 80, 0.35)',
+          }}
+        />
+        {renderBlock()}
+      </div>
+    </BlockTransformWrapper>
   )
 }

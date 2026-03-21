@@ -2,8 +2,8 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useState, useEffect, useRef } from 'react'
 import BlockRenderer from '../blocks/BlockRenderer'
-import BlockStyleControls from './BlockStyleControls'
 import CollapsibleSection from '../ui/CollapsibleSection'
+import BlockStyleControls from './BlockStyleControls'
 import { BLOCK_ICONS, BLOCK_LABELS } from '../../lib/blockDefaults'
 import { HelpCircle } from 'lucide-react'
 import { useT } from '../../lib/i18n'
@@ -198,12 +198,12 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
       {/* Expanded editor */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-overlay">
-          <div className="pt-3">
+          <div className="pt-3 space-y-4">
             <BlockRenderer block={block} isEditing onChange={handleChange} />
+            <div className="border-t border-overlay/60 pt-3">
+              <BlockStyleControls block={block} onChange={handleChange} />
+            </div>
           </div>
-          <CollapsibleSection title={t('style.howWide')}>
-            <BlockStyleControls block={block} onChange={handleChange} />
-          </CollapsibleSection>
         </div>
       )}
     </div>
