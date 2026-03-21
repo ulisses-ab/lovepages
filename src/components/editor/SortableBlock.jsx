@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useState, useEffect, useRef } from 'react'
 import BlockRenderer from '../blocks/BlockRenderer'
-import CollapsibleSection from '../ui/CollapsibleSection'
+import ContainerBlock, { ContainerSettingsPanel } from '../blocks/ContainerBlock'
 import BlockStyleControls from './BlockStyleControls'
 import { BLOCK_ICONS, BLOCK_LABELS } from '../../lib/blockDefaults'
 import { HelpCircle } from 'lucide-react'
@@ -87,57 +87,6 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
   const isContainerDropTarget = isDropTarget && block.type === 'container'
   const blockLabel = BLOCK_LABELS[block.type] ?? t(`block.${block.type}`)
 
-  // ── Container blocks ─────────────────────────────────────────────────────────
-  if (block.type === 'container') {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="relative w-full"
-        onMouseEnter={() => onHoverBlock?.(block.id)}
-        onMouseLeave={() => onHoverBlock?.(null)}
-      >
-        {isDropTarget && !isContainerDropTarget && (
-          <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary rounded-full z-20 pointer-events-none" />
-        )}
-        {isContainerDropTarget && (
-          <div className="absolute inset-0 rounded-xl bg-primary/5 pointer-events-none z-10 flex items-center justify-center">
-            <span className="text-xs text-primary font-medium bg-surface/80 px-2 py-0.5 rounded-full">Drop inside container</span>
-          </div>
-        )}
-        {/* Drag handle bar */}
-        <div
-          {...attributes}
-          {...listeners}
-          className="flex items-center gap-2 px-3 py-1.5 bg-surface rounded-t-xl border border-b-0 border-overlay cursor-grab active:cursor-grabbing touch-none"
-        >
-          <span className="text-fg-ghost text-xs select-none" title={t('sortable.dragToReorder')}>⠿</span>
-          {(() => { const Icon = getIcon(block.type); return <Icon size={14} className="text-fg-secondary shrink-0" /> })()}
-          <span className="text-sm font-medium text-fg-secondary flex-1 select-none">{blockLabel}</span>
-
-          <div ref={menuRef} className="relative">
-            <button
-              onClick={() => setMenuOpen(v => !v)}
-              onPointerDown={e => e.stopPropagation()}
-              className="text-fg-ghost hover:text-fg-muted w-7 h-7 flex items-center justify-center rounded transition text-lg leading-none"
-              title={t('sortable.more')}
-            >
-              ⋯
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 z-30 bg-surface border border-overlay rounded-lg shadow-xl min-w-[150px]">
-                <DeleteMenu onDelete={() => { onDelete(block.id); setMenuOpen(false) }} onClose={() => setMenuOpen(false)} t={t} />
-              </div>
-            )}
-          </div>
-        </div>
-        {/* Container body — always visible */}
-        <BlockRenderer block={block} isEditing onChange={handleChange} />
-      </div>
-    )
-  }
-
-  // ── All other block types ─────────────────────────────────────────────────────
   return (
     <div
       ref={setNodeRef}
@@ -154,6 +103,11 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
     >
       {isDropTarget && !isContainerDropTarget && (
         <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary rounded-full z-20 pointer-events-none" />
+      )}
+      {isContainerDropTarget && (
+        <div className="absolute inset-0 rounded-xl bg-primary/5 pointer-events-none z-10 flex items-center justify-center">
+          <span className="text-xs text-primary font-medium bg-surface/80 px-2 py-0.5 rounded-full">Drop inside container</span>
+        </div>
       )}
 
       {/* Block header */}
@@ -199,11 +153,21 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
       {expanded && (
         <div className="px-4 pb-4 border-t border-overlay">
           <div className="pt-3 space-y-4">
-            <BlockRenderer block={block} isEditing onChange={handleChange} />
+            {block.type === 'container'
+              ? <ContainerSettingsPanel block={block} onChange={handleChange} />
+              : <BlockRenderer block={block} isEditing onChange={handleChange} />
+            }
             <div className="border-t border-overlay/60 pt-3">
               <BlockStyleControls block={block} onChange={handleChange} />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Container children — always visible for container blocks */}
+      {block.type === 'container' && (
+        <div className="border-t border-overlay overflow-hidden rounded-b-xl" onPointerDown={e => e.stopPropagation()}>
+          <ContainerBlock block={block} isEditing onChange={handleChange} />
         </div>
       )}
     </div>

@@ -70,7 +70,7 @@ export default function Canvas({
           ) : (
             <div
               key={i}
-              className="flex flex-wrap max-w-3xl mx-auto"
+              className="flex flex-col max-w-3xl mx-auto"
               style={{ gap: colGap, padding: colPadding }}
             >
               {seg.blocks.map(block => (

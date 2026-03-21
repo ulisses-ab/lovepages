@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
+
+const ShaderBgLayer = lazy(() => import('../ui/ShaderBgLayer'))
 import {
   DndContext,
   closestCenter,
@@ -12,7 +14,6 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
-import { ChevronDown } from 'lucide-react'
 import BlockRenderer from './BlockRenderer'
 import SortableBlock from '../editor/SortableBlock'
 import BackgroundChooser from '../ui/BackgroundChooser'
@@ -138,9 +139,82 @@ function LayoutPresetCard({ id, selected, onClick }) {
   )
 }
 
+// ── Settings panel (background + layout) — rendered by SortableBlock when expanded ──
+export function ContainerSettingsPanel({ block, onChange }) {
+  const flexDirection  = block.flexDirection  ?? 'row'
+  const flexWrap       = block.flexWrap       ?? 'wrap'
+  const justifyContent = block.justifyContent ?? 'center'
+  const gap            = block.gap            ?? 16
+  const padding        = block.padding        ?? 24
+  const activePreset   = detectPreset(flexDirection, flexWrap, justifyContent)
+
+  function applyPreset(id) {
+    const { flexDirection, flexWrap, justifyContent, alignItems } = LAYOUT_PRESETS[id]
+    onChange({ flexDirection, flexWrap, justifyContent, alignItems })
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">Background</p>
+        <BackgroundChooser
+          bgColor={block.bgColor}
+          bgImage={block.bgImage}
+          bgImageFit={block.bgImageFit}
+          bgFade={block.bgFade}
+          bgColor2={block.bgColor2}
+          bgImage2={block.bgImage2}
+          onChange={onChange}
+        />
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">How items are arranged</p>
+        <div className="grid grid-cols-3 gap-1.5 mb-3">
+          {Object.keys(LAYOUT_PRESETS).map(id => (
+            <LayoutPresetCard key={id} id={id} selected={activePreset === id} onClick={() => applyPreset(id)} />
+          ))}
+        </div>
+        <div className="flex gap-4 mb-3">
+          <div className="flex-1">
+            <p className="text-xs text-fg-muted mb-1.5">
+              Space between items <span className="text-fg-faint">{gap}px</span>
+            </p>
+            <input type="range" min={0} max={64} step={4} value={gap}
+              onChange={e => onChange({ gap: Number(e.target.value) })}
+              className="w-full accent-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-fg-muted mb-1.5">
+              Padding around edges <span className="text-fg-faint">{padding}px</span>
+            </p>
+            <input type="range" min={0} max={80} step={4} value={padding}
+              onChange={e => onChange({ padding: Number(e.target.value) })}
+              className="w-full accent-primary" />
+          </div>
+        </div>
+        <label className="flex items-center gap-3 cursor-pointer select-none group">
+          <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-colors shrink-0 ${
+            flexWrap === 'wrap'
+              ? 'bg-primary border-primary'
+              : 'bg-transparent border-overlay group-hover:border-subtle'
+          }`}>
+            {flexWrap === 'wrap' && (
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none" style={{ display: 'block' }}>
+                <path d="M1 3.5L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+          <input type="checkbox" checked={flexWrap === 'wrap'}
+            onChange={e => onChange({ flexWrap: e.target.checked ? 'wrap' : 'nowrap' })}
+            className="sr-only" />
+          <span className="text-sm text-fg-muted group-hover:text-fg-secondary transition-colors">Stack items if space is limited</span>
+        </label>
+      </div>
+    </div>
+  )
+}
 
 export default function ContainerBlock({ block, isEditing, onChange }) {
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
   const children = block.children || []
 
@@ -150,8 +224,6 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
   const alignItems     = block.alignItems     ?? 'center'
   const gap            = block.gap            ?? 16
   const padding        = block.padding        ?? 24
-
-  const activePreset = detectPreset(flexDirection, flexWrap, justifyContent)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -164,11 +236,6 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     const oldIdx = children.findIndex(c => c.id === active.id)
     const newIdx = children.findIndex(c => c.id === over.id)
     onChange({ children: arrayMove(children, oldIdx, newIdx) })
-  }
-
-  function applyPreset(id) {
-    const { flexDirection, flexWrap, justifyContent, alignItems } = LAYOUT_PRESETS[id]
-    onChange({ flexDirection, flexWrap, justifyContent, alignItems })
   }
 
   const fit1 = block.bgImageFit  || 'cover'
@@ -199,6 +266,19 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
         )}
       </>
     )
+
+    if (block.bgShader) {
+      return (
+        <div style={{ position: 'relative', width: '100%' }}>
+          <Suspense fallback={null}>
+            <ShaderBgLayer shaderProps={block.bgShader} pos="absolute" />
+          </Suspense>
+          <div style={{ position: 'relative', zIndex: 1, ...flexStyle }}>
+            {children_el}
+          </div>
+        </div>
+      )
+    }
 
     if (block.bgFade) {
       const hasImage = block.bgImage || block.bgImage2
@@ -252,158 +332,66 @@ export default function ContainerBlock({ block, isEditing, onChange }) {
     )
   }
 
-  // ── Edit mode — background style for the container body ───────────────────
-  let bgStyle = {}
-  if (block.bgFade && !block.bgImage && !block.bgImage2) {
-    bgStyle = { background: `linear-gradient(to bottom, ${block.bgColor || 'transparent'}, ${block.bgColor2 || 'transparent'})` }
-  } else if (!block.bgFade) {
-    bgStyle = {
-      backgroundColor: block.bgColor || undefined,
-      backgroundImage: block.bgImage ? `url(${block.bgImage})` : undefined,
-      backgroundSize: block.bgImage ? (fit1 === 'tile' ? 'var(--bg-tile-size)' : fit1) : undefined,
-      backgroundRepeat: block.bgImage ? (fit1 === 'tile' ? 'repeat' : 'no-repeat') : undefined,
-      backgroundPosition: 'center',
-    }
-  }
-
+  // ── Edit mode — children management only (settings rendered by SortableBlock) ──
   return (
-    <div className="w-full rounded-b-xl overflow-hidden border border-overlay border-t-0">
-
-      {/* Settings toggle bar */}
-      <button
-        onClick={() => setSettingsOpen(v => !v)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-overlay/40 hover:bg-overlay/70 border-b border-overlay transition"
-      >
-        <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">
-          Background &amp; Layout
-        </span>
-        <ChevronDown size={14} className={`text-fg-muted transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {/* Collapsible settings panel */}
-      {settingsOpen && (
-        <div className="px-4 py-4 bg-surface border-b border-overlay space-y-5">
-
-          {/* Background */}
-          <div>
-            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">Background</p>
-            <BackgroundChooser
-              bgColor={block.bgColor}
-              bgImage={block.bgImage}
-              bgImageFit={block.bgImageFit}
-              bgFade={block.bgFade}
-              bgColor2={block.bgColor2}
-              bgImage2={block.bgImage2}
-              onChange={onChange}
-            />
+    <div style={{ width: '100%' }}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={children.map(c => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-3 p-3">
+            {children.map((child) => (
+              <SortableBlock
+                key={child.id}
+                block={child}
+                onUpdate={(id, patch) => {
+                  onChange({ children: children.map(c => c.id === id ? { ...c, ...patch } : c) })
+                }}
+                onDelete={(id) => onChange({ children: children.filter(c => c.id !== id) })}
+              />
+            ))}
+            {children.length === 0 && (
+              <p className="text-fg-faint text-sm w-full text-center py-8">
+                Empty — add blocks below
+              </p>
+            )}
           </div>
+        </SortableContext>
+      </DndContext>
 
-          {/* Layout */}
-          <div>
-            <p className="text-xs font-semibold text-fg-muted uppercase tracking-wide mb-2.5">How items are arranged</p>
-
-            {/* Visual preset cards */}
-            <div className="grid grid-cols-3 gap-1.5 mb-3">
-              {Object.keys(LAYOUT_PRESETS).map(id => (
-                <LayoutPresetCard
-                  key={id}
-                  id={id}
-                  selected={activePreset === id}
-                  onClick={() => applyPreset(id)}
-                />
-              ))}
+      {/* Add block inside */}
+      <div className="px-3 pb-3">
+        {showAddMenu ? (
+          <div className="bg-overlay/90 rounded-xl overflow-hidden border border-overlay/60">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-overlay">
+              <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">Add a block</span>
+              <button onClick={() => setShowAddMenu(false)} className="text-fg-muted text-lg leading-none hover:text-fg-secondary transition">×</button>
             </div>
-
-            {/* Space & Padding sliders */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <p className="text-xs text-fg-muted mb-1.5">
-                  Space between items <span className="text-fg-faint">{gap}px</span>
-                </p>
-                <input
-                  type="range" min={0} max={64} step={4}
-                  value={gap}
-                  onChange={e => onChange({ gap: Number(e.target.value) })}
-                  className="w-full accent-primary"
-                />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-fg-muted mb-1.5">
-                  Padding around edges <span className="text-fg-faint">{padding}px</span>
-                </p>
-                <input
-                  type="range" min={0} max={80} step={4}
-                  value={padding}
-                  onChange={e => onChange({ padding: Number(e.target.value) })}
-                  className="w-full accent-primary"
-                />
-              </div>
+            <div className="grid grid-cols-2 p-2 gap-1">
+              {Object.values(BLOCK_TYPES).map(type => {
+                const Icon = BLOCK_ICONS[type]
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      onChange({ children: [...children, createBlock(type)] })
+                      setShowAddMenu(false)
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-fg-secondary hover:bg-primary-subtle/40 hover:text-fg transition text-left"
+                  >
+                    <Icon size={14} className="shrink-0 text-fg-muted" />
+                    {BLOCK_LABELS[type]}
+                  </button>
+                )
+              })}
             </div>
-
           </div>
-        </div>
-      )}
-
-      {/* Container visual body — children rendered live with editing controls */}
-      <div style={{ ...bgStyle, width: '100%' }} onPointerDown={e => e.stopPropagation()}>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={children.map(c => c.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3 p-3">
-              {children.map((child) => (
-                <SortableBlock
-                  key={child.id}
-                  block={child}
-                  onUpdate={(id, patch) => {
-                    onChange({ children: children.map(c => c.id === id ? { ...c, ...patch } : c) })
-                  }}
-                  onDelete={(id) => onChange({ children: children.filter(c => c.id !== id) })}
-                />
-              ))}
-              {children.length === 0 && (
-                <p className="text-fg-faint text-sm w-full text-center py-8">
-                  Empty — add blocks below
-                </p>
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
-
-        {/* Add block inside */}
-        <div className="px-3 pb-3">
-          {showAddMenu ? (
-            <div className="bg-overlay/90 rounded-xl overflow-hidden border border-overlay/60">
-              <div className="flex items-center justify-between px-3 py-2 border-b border-overlay">
-                <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">Add a block</span>
-                <button onClick={() => setShowAddMenu(false)} className="text-fg-muted text-lg leading-none hover:text-fg-secondary transition">×</button>
-              </div>
-              <div className="grid grid-cols-2 p-2 gap-1">
-                {Object.values(BLOCK_TYPES).map(type => {
-                  const Icon = BLOCK_ICONS[type]
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        onChange({ children: [...children, createBlock(type)] })
-                        setShowAddMenu(false)
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-fg-secondary hover:bg-primary-subtle/40 hover:text-fg transition text-left"
-                    >
-                      <Icon size={14} className="shrink-0 text-fg-muted" />
-                      {BLOCK_LABELS[type]}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowAddMenu(true)}
-              className="w-full py-2.5 rounded-xl border-2 border-dashed border-overlay text-fg-muted text-sm hover:border-primary hover:text-primary transition"
-            >
-              + Add a block
-            </button>
-          )}
-        </div>
+        ) : (
+          <button
+            onClick={() => setShowAddMenu(true)}
+            className="w-full py-2.5 rounded-xl border-2 border-dashed border-overlay text-fg-muted text-sm hover:border-primary hover:text-primary transition"
+          >
+            + Add a block
+          </button>
+        )}
       </div>
     </div>
   )
