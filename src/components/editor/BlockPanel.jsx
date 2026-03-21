@@ -28,7 +28,6 @@ const CONTENT_BLOCK_TYPES = Object.values(BLOCK_TYPES).filter(t => t !== BLOCK_T
 
 export default function BlockPanel({ onAddBlock, onOpenAi }) {
   const { t } = useT()
-  const ContainerIcon = BLOCK_ICONS[BLOCK_TYPES.CONTAINER]
 
   return (
     <div className="p-4 flex flex-col gap-4">
@@ -50,14 +49,8 @@ export default function BlockPanel({ onAddBlock, onOpenAi }) {
         </div>
       </div>
 
-      <div className="border-t border-overlay pt-4">
-        <button
-          onClick={() => onAddBlock(createBlock(BLOCK_TYPES.CONTAINER))}
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-fg-muted hover:bg-overlay hover:text-fg border border-dashed border-overlay hover:border-fg-muted transition text-left"
-        >
-          <ContainerIcon size={15} className="shrink-0" />
-          <span>Add container</span>
-        </button>
+      <div className="border-t border-overlay pt-3">
+        <DraggableBlockItem type={BLOCK_TYPES.CONTAINER} onAddBlock={onAddBlock} t={t} />
       </div>
     </div>
   )
