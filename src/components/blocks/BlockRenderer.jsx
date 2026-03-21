@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -15,21 +16,30 @@ function BlockTransformWrapper({ block, children }) {
   const hasTransform = rotate !== 0 || scaleDesktop !== 1 || scaleMobile !== 1
   if (!hasTransform) return children
 
-  const cls = `btr-${block.id}`
+  // Measure container width so narrow context works in any container
+  // (editor preview panel, mobile preview frame, or real viewport).
+  const wrapperRef = useRef(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  useEffect(() => {
+    if (!wrapperRef.current) return
+    const ro = new ResizeObserver(entries => {
+      setContainerWidth(entries[0].contentRect.width)
+    })
+    ro.observe(wrapperRef.current)
+    return () => ro.disconnect()
+  }, [])
 
-  const desktopParts = []
-  if (rotate !== 0)       desktopParts.push(`rotate(${rotate}deg)`)
-  if (scaleDesktop !== 1) desktopParts.push(`scale(${scaleDesktop})`)
-  const desktopTransform = desktopParts.join(' ') || 'none'
+  // Fall back to window.innerWidth on first render before ResizeObserver fires
+  const isNarrow = (containerWidth || window.innerWidth) < 768
 
-  const mobileParts = []
-  if (rotate !== 0)      mobileParts.push(`rotate(${rotate}deg)`)
-  if (scaleMobile !== 1) mobileParts.push(`scale(${scaleMobile})`)
-  const mobileTransform = mobileParts.join(' ') || 'none'
+  const scale = isNarrow ? scaleMobile : scaleDesktop
+  const parts = []
+  if (rotate !== 0) parts.push(`rotate(${rotate}deg)`)
+  if (scale !== 1)  parts.push(`scale(${scale})`)
+  const transform = parts.join(' ') || 'none'
 
   return (
-    <div className={cls} style={{ transformOrigin: 'center center' }}>
-      <style>{`.${cls}{transform:${desktopTransform}}@media(max-width:767px){.${cls}{transform:${mobileTransform}}}`}</style>
+    <div ref={wrapperRef} style={{ transform, transformOrigin: 'center center' }}>
       {children}
     </div>
   )
