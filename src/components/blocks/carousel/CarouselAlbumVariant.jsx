@@ -281,9 +281,8 @@ export default function CarouselAlbumVariant({ block }) {
   const { images = [], albumTitle = '', coverColor = '', coverTitleStyle = 'sticker' } = block
   const bookRef      = useRef()
   const containerRef = useRef()
-  const [page, setPage]             = useState(0)
-  const [shadowPage, setShadowPage] = useState(0)
-  const [pageSize, setPageSize]     = useState(null)
+  const [page, setPage]         = useState(0)
+  const [pageSize, setPageSize] = useState(null)
 
   const STRIP  = 24
   const [mobile, setMobile] = useState(false)
@@ -305,13 +304,18 @@ export default function CarouselAlbumVariant({ block }) {
     return () => observer.disconnect()
   }, [])
 
-  const paddedImages = images.length % 2 !== 0 ? [...images, null] : images
+  // On mobile only the left page is visible; place each photo on a left page (even index)
+  // by interleaving null right-page placeholders.
+  const displayImages = mobile
+    ? images.flatMap(img => [null, img])
+    : (images.length % 2 !== 0 ? [...images, null] : images)
+  const paddedImages = displayImages
   const totalPages   = paddedImages.length + 2
   const mobileOffset = (mobile && pageSize) ? -(pageSize.width - STRIP) : 0
 
-  function onFlip(e) { setPage(e.data); setShadowPage(e.data) }
-  function flipPrev() { bookRef.current?.pageFlip().flipPrev(); setShadowPage(s => Math.max(0, s - 1)) }
-  function flipNext() { bookRef.current?.pageFlip().flipNext(); setShadowPage(s => Math.min(totalPages - 1, s + 1)) }
+  function onFlip(e) { setPage(e.data) }
+  function flipPrev() { bookRef.current?.pageFlip().flipPrev() }
+  function flipNext() { bookRef.current?.pageFlip().flipNext() }
 
   const coverBg = coverColor || AL.cover
 
@@ -321,15 +325,6 @@ export default function CarouselAlbumVariant({ block }) {
         <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible' } : {}}>
           <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              {/* Shadow sized to the visible book area only */}
-              <div style={{
-                position: 'absolute', zIndex: 0, pointerEvents: 'none',
-                top: 0, bottom: 0,
-                left:  shadowPage === 0             ? '50%' : 0,
-                right: shadowPage === totalPages - 1 ? '50%' : 0,
-                boxShadow: '0 4px 12px rgba(20,10,5,0.45), 0 16px 40px rgba(20,10,5,0.35), 0 32px 64px rgba(0,0,0,0.2)',
-              }} />
-              <div style={{ position: 'relative', zIndex: 1 }}>
               <HTMLFlipBook
                 key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
                 ref={bookRef}
@@ -351,7 +346,6 @@ export default function CarouselAlbumVariant({ block }) {
                 ))}
                 <AlbumBackCover coverColor={coverColor} />
               </HTMLFlipBook>
-              </div>
             </div>
           </div>
         </div>
@@ -377,7 +371,7 @@ export default function CarouselAlbumVariant({ block }) {
             <ChevronLeft size={14} />
           </button>
           <span style={{ color: 'rgba(200,170,120,0.65)', fontFamily: 'Georgia, serif', fontSize: 11, letterSpacing: '0.08em', userSelect: 'none' }}>
-            {page + 1} / {totalPages}
+            {page / 2 + 1} / {totalPages / 2}
           </span>
           <button
             onClick={flipNext}
