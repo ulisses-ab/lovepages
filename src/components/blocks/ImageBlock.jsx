@@ -144,15 +144,6 @@ export default function ImageBlock({ block, isEditing, onChange }) {
           </div>
         </div>
 
-        {/* Accessibility — collapsed */}
-        <CollapsibleSection title={t('image.accessibility')}>
-          <input
-            className={inputClass}
-            placeholder={t('image.altText')}
-            value={alt}
-            onChange={e => onChange({ alt: e.target.value })}
-          />
-        </CollapsibleSection>
       </div>
     )
   }

@@ -15,18 +15,10 @@ export const BLOCK_TYPES = {
 
 export const TEXT_VARIANTS = ['plain', 'typewriter', 'postit', 'ransom']
 
-// size: how the block participates in its parent container's flex layout
-// 'full'  → flex: 0 0 100% (takes the whole row)
-// 'half'  → flex: 1 1 calc(50% - gap/2) (two per row)
-// 'third' → flex: 1 1 calc(33% - gap)   (three per row)
-// 'auto'  → flex: 0 0 auto              (shrinks to content width)
-export const SIZE_OPTIONS = ['full', 'half', 'third', 'auto']
-
 export function createBlock(type) {
   const base = {
     id: nanoid(),
     type,
-    size: 'full',
     align: 'center',
   }
 
