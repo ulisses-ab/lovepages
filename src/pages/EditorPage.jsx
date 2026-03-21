@@ -279,9 +279,11 @@ export default function EditorPage() {
               <div className="shrink-0 w-[390px] h-[844px] rounded-[44px] border-[6px] border-surface shadow-2xl overflow-hidden relative" style={{ transform: 'translateZ(0)' }}>
                 {/* notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-surface rounded-b-2xl z-10" />
-                <PageBgWrapper settings={pageSettings} className="absolute inset-0 overflow-y-auto" viewportFixed style={{ transform: 'translateZ(0)' }}>
-                  <div className="pt-7">
-                    <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+                <PageBgWrapper settings={pageSettings} className="absolute inset-0 overflow-hidden">
+                  <div className="absolute inset-0 overflow-y-auto">
+                    <div className="pt-7">
+                      <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+                    </div>
                   </div>
                 </PageBgWrapper>
                 {/* home indicator */}
@@ -289,9 +291,11 @@ export default function EditorPage() {
               </div>
             </div>
           ) : (
-            /* Full preview — transform contains fixed bg layers to this panel */
-            <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
-              <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+            /* Full preview — PageBgWrapper is non-scrolling; Canvas scrolls inside it */
+            <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
+              <div className="absolute inset-0 overflow-y-auto">
+                <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
+              </div>
             </PageBgWrapper>
           )
         ) : (
@@ -342,9 +346,11 @@ export default function EditorPage() {
                 <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
                   {t('editor.previewLabel')}
                 </div>
-                {/* transform contains fixed bg layers to the preview panel */}
-                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-y-auto" style={{ transform: 'translateZ(0)' }} viewportFixed>
-                  <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
+                {/* PageBgWrapper is non-scrolling; Canvas scrolls inside it */}
+                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
+                  <div className="absolute inset-0 overflow-y-auto">
+                    <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
+                  </div>
                 </PageBgWrapper>
               </div>
             </div>
