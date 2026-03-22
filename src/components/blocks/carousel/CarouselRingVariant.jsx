@@ -10,8 +10,8 @@ const H             = 400   // inner stage height (px)
  * Matches the original ThreeDImageRing formula exactly.
  */
 function getBgPos(index, rotation, angle, sc) {
-  const effectiveRot    = rotation - 180 - index * angle
-  const parallaxOffset  = ((effectiveRot % 360) + 360) % 360 / 360
+  const effectiveRot   = rotation - index * angle
+  const parallaxOffset = ((effectiveRot % 360) + 360) % 360 / 360
   return `${-(parallaxOffset * (IMAGE_DIST * sc / 1.5))}px 0px`
 }
 
@@ -22,7 +22,7 @@ export default function CarouselRingVariant({ block }) {
   const ringRef       = useRef(null)
 
   // All mutable runtime state lives in refs to avoid re-renders during drag
-  const rotationRef   = useRef(180)
+  const rotationRef   = useRef(0)
   const scaleRef      = useRef(1)
   const angleRef      = useRef(360 / Math.max(images.length, 1))
   const isDragging    = useRef(false)
@@ -150,7 +150,7 @@ export default function CarouselRingVariant({ block }) {
       style={{
         width: '100%',
         height: Math.round(H * scale + 40),
-        overflow: 'hidden',
+        overflow: 'clip',
         position: 'relative',
         cursor: 'grab',
         userSelect: 'none',
