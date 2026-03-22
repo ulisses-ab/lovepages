@@ -315,7 +315,7 @@ export default function SongVinylVariant({ block, playing, ready, togglePlay, vo
       if (w > 10) {
         setContainerW(w)
         setVinylScale(w < 500
-          ? (w / PLAT) * 0.60
+          ? (w / PLAT) * 0.72
           : (w / VINYL_BASE_W) * 0.92
         )
       }
