@@ -8,47 +8,13 @@ import LangToggle from '../components/LangToggle'
 import PageBgWrapper from '../components/ui/PageBgWrapper'
 import BlockRenderer from '../components/blocks/BlockRenderer'
 
-// ── Mini page preview ─────────────────────────────────────────────────────────
-// Renders the actual block components (BlockRenderer) at mobile width, then
-// CSS-scales to thumbnail size. Song blocks are the one exception — they load
-// a YouTube iframe per instance so we use a static placeholder for those.
-
 const RENDER_W = 390
 const THUMB_W  = 88
 const THUMB_H  = 148
 const SCALE    = THUMB_W / RENDER_W
 const RENDER_H = Math.round(THUMB_H / SCALE)
 
-// Song blocks would fire up the YouTube IFrame API for every page in the list,
-// so we render a static visual instead.
-function SongPreview({ block }) {
-  return (
-    <div style={{
-      width: '100%', height: 72, borderRadius: 10,
-      background: block.bgColor || 'rgba(255,255,255,0.1)',
-      display: 'flex', alignItems: 'center', gap: 14, padding: '0 18px',
-    }}>
-      {block.coverUrl
-        ? <img src={block.coverUrl} alt="" style={{ width: 46, height: 46, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
-        : <div style={{ width: 46, height: 46, borderRadius: 6, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
-      }
-      <div style={{ flex: 1 }}>
-        <div style={{ height: 11, borderRadius: 4, background: 'rgba(255,255,255,0.35)', width: '65%', marginBottom: 8 }} />
-        <div style={{ height: 9,  borderRadius: 4, background: 'rgba(255,255,255,0.2)',  width: '40%' }} />
-      </div>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: block.accentColor || 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-    </div>
-  )
-}
-
-function PreviewBlock({ block }) {
-  if (block.type === 'song') return <SongPreview block={block} />
-  return <BlockRenderer block={block} />
-}
-
 function MiniPagePreview({ page }) {
-  // Strip bgShader (WebGL) and bgEffect (canvas animation) — too heavy for a list of thumbnails.
-  // bgColor is kept as fallback for shader pages.
   const settings = { ...(page.settings || {}), bgShader: undefined, bgEffect: undefined }
   const blocks   = page.blocks || []
   const gap      = settings.columnGap     ?? 16
@@ -72,7 +38,7 @@ function MiniPagePreview({ page }) {
         <PageBgWrapper settings={settings} style={{ minHeight: RENDER_H }}>
           <div style={{ padding, display: 'flex', flexDirection: 'column', gap }}>
             {blocks.slice(0, 14).map((block, i) => (
-              <PreviewBlock key={block.id || i} block={block} />
+              <BlockRenderer key={block.id || i} block={block} />
             ))}
           </div>
         </PageBgWrapper>
