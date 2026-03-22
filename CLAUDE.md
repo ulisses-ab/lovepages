@@ -305,7 +305,7 @@ Currently the mapping looks like this (variants per block type):
 - **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — rectangular aqua-blue media player body), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
 - **Link**: `default` (neutral — rounded pill button), `xp` (retro — Windows XP "Open Link" dialog box with globe icon and 3D raised Open/Cancel buttons)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar), `xp` (retro — Windows XP "Date and Time Properties" control panel dialog with tabbed chrome, sunken digit panels, OK/Cancel/Apply buttons)
-- **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover), `xp` (retro — Windows XP "My Pictures" Windows Explorer window with task pane sidebar, image viewport, and filmstrip)
+- **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover), `xp` (retro — Windows XP "My Pictures" Windows Explorer window with task pane sidebar, image viewport, and filmstrip), `ring` (soft/aero — draggable 3D rotating ring of photos; drag-to-spin with inertia, parallax background-position per image, staggered opacity entrance)
 
 As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
 

@@ -6,6 +6,7 @@ import ColorPicker from '../ui/ColorPicker'
 import CarouselAlbumVariant, { AL } from './carousel/CarouselAlbumVariant'
 import CarouselSliderVariant from './carousel/CarouselSliderVariant'
 import CarouselXPVariant from './carousel/CarouselXPVariant'
+import CarouselRingVariant from './carousel/CarouselRingVariant'
 
 function ModeCard({ label, selected, onClick, children }) {
   return (
@@ -50,7 +51,7 @@ function ScaledPreview({ children, scale = 0.45 }) {
 }
 
 export default function CarouselBlock({ block, isEditing, onChange }) {
-  const { images = [], mode = 'slider', albumTitle = '' } = block
+  const { images = [], mode = 'slider', albumTitle = '', ringTitle = '' } = block
   const { t } = useT()
 
   function updateImages(next) { onChange({ images: next }) }
@@ -91,6 +92,11 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
           <CarouselXPVariant block={{ ...block, images: previewImages }} />
         </ScaledPreview>
       )},
+      { value: 'ring', label: '3D Ring', preview: (
+        <ScaledPreview scale={0.38}>
+          <CarouselRingVariant block={{ ...block, images: previewImages }} />
+        </ScaledPreview>
+      )},
     ]
 
     return (
@@ -98,7 +104,7 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
         {/* Display style first */}
         <div>
           <p className="text-xs text-fg-muted mb-2">{t('carousel.displayStyle')}</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {MODES.map(({ value, label: mLabel, preview }) => (
               <ModeCard key={value} label={mLabel} selected={mode === value} onClick={() => onChange({ mode: value })}>
                 {preview}
@@ -211,5 +217,6 @@ export default function CarouselBlock({ block, isEditing, onChange }) {
   // ── Variant dispatch ───────────────────────────────────────────────────────
   if (mode === 'xp')    return <CarouselXPVariant block={block} />
   if (mode === 'album') return <CarouselAlbumVariant block={block} />
+  if (mode === 'ring')  return <CarouselRingVariant block={block} />
   return <CarouselSliderVariant images={images} />
 }
