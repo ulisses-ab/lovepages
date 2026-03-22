@@ -5,10 +5,13 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { useT } from '../lib/i18n'
 import LangToggle from '../components/LangToggle'
+import PageBgWrapper from '../components/ui/PageBgWrapper'
+import BlockRenderer from '../components/blocks/BlockRenderer'
+
 // ── Mini page preview ─────────────────────────────────────────────────────────
-// Renders a scaled-down static version of the page (no WebGL, no iframes).
-// RENDER_W × RENDER_H is the simulated mobile viewport, then CSS-scaled to
-// THUMB_W × THUMB_H for the dashboard thumbnail.
+// Renders the actual block components (BlockRenderer) at mobile width, then
+// CSS-scales to thumbnail size. Song blocks are the one exception — they load
+// a YouTube iframe per instance so we use a static placeholder for those.
 
 const RENDER_W = 390
 const THUMB_W  = 88
@@ -16,137 +19,40 @@ const THUMB_H  = 148
 const SCALE    = THUMB_W / RENDER_W
 const RENDER_H = Math.round(THUMB_H / SCALE)
 
-const FONT_SIZES = { sm: 13, base: 16, lg: 20, xl: 24, '2xl': 30, '3xl': 38, '4xl': 48 }
-const FONT_FAMILIES = { sans: 'sans-serif', serif: 'Georgia,serif', mono: 'monospace', cursive: 'cursive' }
-
-function MiniBlock({ block, gap = 16 }) {
-  const bg = block.bgColor ? { backgroundColor: block.bgColor } : {}
-  const imgStyle = block.bgImage
-    ? { backgroundImage: `url(${block.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : {}
-
-  if (block.type === 'image') {
-    if (!block.src) return null
-    return (
-      <div style={{ width: '100%', borderRadius: 6, overflow: 'hidden', ...bg, ...imgStyle }}>
-        <img src={block.src} alt="" draggable={false}
-          style={{ display: 'block', width: '100%', objectFit: 'cover', maxHeight: 260 }} />
+// Song blocks would fire up the YouTube IFrame API for every page in the list,
+// so we render a static visual instead.
+function SongPreview({ block }) {
+  return (
+    <div style={{
+      width: '100%', height: 72, borderRadius: 10,
+      background: block.bgColor || 'rgba(255,255,255,0.1)',
+      display: 'flex', alignItems: 'center', gap: 14, padding: '0 18px',
+    }}>
+      {block.coverUrl
+        ? <img src={block.coverUrl} alt="" style={{ width: 46, height: 46, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+        : <div style={{ width: 46, height: 46, borderRadius: 6, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
+      }
+      <div style={{ flex: 1 }}>
+        <div style={{ height: 11, borderRadius: 4, background: 'rgba(255,255,255,0.35)', width: '65%', marginBottom: 8 }} />
+        <div style={{ height: 9,  borderRadius: 4, background: 'rgba(255,255,255,0.2)',  width: '40%' }} />
       </div>
-    )
-  }
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: block.accentColor || 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+    </div>
+  )
+}
 
-  if (block.type === 'carousel') {
-    const src = block.images?.[0]?.src
-    if (!src) return null
-    return (
-      <div style={{ width: '100%', borderRadius: 6, overflow: 'hidden' }}>
-        <img src={src} alt="" draggable={false}
-          style={{ display: 'block', width: '100%', height: 200, objectFit: 'cover' }} />
-      </div>
-    )
-  }
-
-  if (block.type === 'text') {
-    const fontSize   = FONT_SIZES[block.fontSize] || (block.variant === 'heading' ? 32 : 16)
-    const fontFamily = FONT_FAMILIES[block.fontFamily] || 'sans-serif'
-    const color      = block.color || '#fff'
-    const textAlign  = block.align || 'left'
-    return (
-      <div style={{ width: '100%', padding: '2px 0', ...bg, ...imgStyle }}>
-        <p style={{ margin: 0, fontSize, fontFamily, color, textAlign, lineHeight: 1.35, wordBreak: 'break-word' }}>
-          {block.content || ''}
-        </p>
-      </div>
-    )
-  }
-
-  if (block.type === 'link') {
-    return (
-      <div style={{ display: 'flex', justifyContent: block.align === 'right' ? 'flex-end' : block.align === 'center' ? 'center' : 'flex-start' }}>
-        <div style={{
-          display: 'inline-block', padding: '12px 28px', borderRadius: 9999,
-          background: block.color || '#6d4aff', color: '#fff', fontSize: 18, fontWeight: 600,
-        }}>
-          {block.label || 'Link'}
-        </div>
-      </div>
-    )
-  }
-
-  if (block.type === 'song') {
-    return (
-      <div style={{
-        width: '100%', height: 72, borderRadius: 10,
-        background: block.bgColor || 'rgba(255,255,255,0.1)',
-        display: 'flex', alignItems: 'center', gap: 14, padding: '0 18px',
-        ...imgStyle,
-      }}>
-        {block.coverUrl
-          ? <img src={block.coverUrl} alt="" draggable={false} style={{ width: 46, height: 46, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
-          : <div style={{ width: 46, height: 46, borderRadius: 6, background: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
-        }
-        <div style={{ flex: 1 }}>
-          <div style={{ height: 11, borderRadius: 4, background: 'rgba(255,255,255,0.35)', width: '65%', marginBottom: 8 }} />
-          <div style={{ height: 9,  borderRadius: 4, background: 'rgba(255,255,255,0.2)',  width: '40%' }} />
-        </div>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: block.accentColor || 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-      </div>
-    )
-  }
-
-  if (block.type === 'countdown') {
-    return (
-      <div style={{ width: '100%', padding: '18px 0', textAlign: 'center', ...bg, ...imgStyle }}>
-        <div style={{ fontSize: 40, fontWeight: 700, color: '#fff', letterSpacing: '0.08em', fontVariantNumeric: 'tabular-nums' }}>
-          00:00:00:00
-        </div>
-        {block.label && (
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>{block.label}</div>
-        )}
-      </div>
-    )
-  }
-
-  if (block.type === 'drawing') {
-    const src = block.drawings?.[0]?.src
-    return src
-      ? <img src={src} alt="" draggable={false} style={{ width: '100%', borderRadius: 6 }} />
-      : <div style={{ width: '100%', height: 60, borderRadius: 6, background: 'rgba(255,255,255,0.07)' }} />
-  }
-
-  if (block.type === 'container') {
-    return (
-      <div style={{
-        width: '100%', borderRadius: 8, padding: 20,
-        display: 'flex', flexDirection: 'column', gap,
-        ...bg, ...imgStyle,
-      }}>
-        {(block.children || []).map((child, i) => (
-          <MiniBlock key={child.id || i} block={child} gap={gap} />
-        ))}
-      </div>
-    )
-  }
-
-  // Fallback for unknown types
-  return <div style={{ width: '100%', height: 44, borderRadius: 6, background: 'rgba(255,255,255,0.07)' }} />
+function PreviewBlock({ block }) {
+  if (block.type === 'song') return <SongPreview block={block} />
+  return <BlockRenderer block={block} />
 }
 
 function MiniPagePreview({ page }) {
-  const settings = page.settings || {}
-  const blocks   = page.blocks   || []
+  // Strip bgShader (WebGL) and bgEffect (canvas animation) — too heavy for a list of thumbnails.
+  // bgColor is kept as fallback for shader pages.
+  const settings = { ...(page.settings || {}), bgShader: undefined, bgEffect: undefined }
+  const blocks   = page.blocks || []
   const gap      = settings.columnGap     ?? 16
   const padding  = settings.columnPadding ?? 24
-
-  // Background — no WebGL/shader; fall back to colour or gradient placeholder
-  let bgStyle = { backgroundColor: '#1a0f2e' }
-  if (settings.bgImage) {
-    bgStyle = { backgroundImage: `url(${settings.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-  } else if (settings.bgColor) {
-    bgStyle = { backgroundColor: settings.bgColor }
-  } else if (settings.bgShader) {
-    bgStyle = { background: 'linear-gradient(135deg, #7c3aed 0%, #3b1f7a 50%, #1a0f3a 100%)' }
-  }
 
   return (
     <div style={{
@@ -161,12 +67,15 @@ function MiniPagePreview({ page }) {
         transformOrigin: 'top left',
         position: 'absolute', top: 0, left: 0,
         pointerEvents: 'none', userSelect: 'none',
-        padding, display: 'flex', flexDirection: 'column', gap,
-        ...bgStyle,
+        overflow: 'hidden',
       }}>
-        {blocks.slice(0, 14).map((block, i) => (
-          <MiniBlock key={block.id || i} block={block} gap={gap} />
-        ))}
+        <PageBgWrapper settings={settings} style={{ minHeight: RENDER_H }}>
+          <div style={{ padding, display: 'flex', flexDirection: 'column', gap }}>
+            {blocks.slice(0, 14).map((block, i) => (
+              <PreviewBlock key={block.id || i} block={block} />
+            ))}
+          </div>
+        </PageBgWrapper>
       </div>
     </div>
   )
