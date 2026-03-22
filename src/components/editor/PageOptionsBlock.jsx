@@ -74,8 +74,8 @@ export default function PageOptionsBlock({ pageSettings, onChange }) {
             <p className="text-xs text-fg-muted mb-2">{t('pageOptions.effect')}</p>
             <div className="flex gap-1.5">
               {[
-                { value: '',        label: t('pageOptions.effectNone') },
-                { value: 'bubbles', label: t('pageOptions.effectBubbles') },
+                { value: '',             label: t('pageOptions.effectNone') },
+                { value: 'soap-bubbles', label: t('pageOptions.effectSoapBubbles') },
               ].map(opt => (
                 <button
                   key={opt.value}
@@ -90,6 +90,27 @@ export default function PageOptionsBlock({ pageSettings, onChange }) {
                 </button>
               ))}
             </div>
+            {pageSettings.bgEffect === 'soap-bubbles' && (
+              <div className="flex gap-1.5 mt-2">
+                {[
+                  { value: 'normal',  label: t('pageOptions.effectVariantNormal') },
+                  { value: 'rainbow', label: t('pageOptions.effectVariantRainbow') },
+                  { value: 'blue',    label: t('pageOptions.effectVariantBlue') },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => onChange({ bgEffectVariant: opt.value })}
+                    className={`px-3 py-1 text-xs rounded-full border transition ${
+                      (pageSettings.bgEffectVariant || 'normal') === opt.value
+                        ? 'bg-primary border-primary text-white'
+                        : 'bg-overlay border-subtle text-fg-muted hover:border-primary-dim'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

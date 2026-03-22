@@ -154,7 +154,10 @@ export const translations = {
     'pageOptions.bgFitTile': 'Tile',
     'pageOptions.effect': 'Effect',
     'pageOptions.effectNone': 'None',
-    'pageOptions.effectBubbles': 'Bubbles',
+    'pageOptions.effectSoapBubbles': 'Soap Bubbles',
+    'pageOptions.effectVariantNormal': 'Normal',
+    'pageOptions.effectVariantRainbow': 'Rainbow',
+    'pageOptions.effectVariantBlue': 'Blue',
 
     // ImageUpload (shared component)
     'imageUpload.upload': 'Upload image',
@@ -380,7 +383,10 @@ export const translations = {
     'pageOptions.bgFitTile': 'Ladrilho',
     'pageOptions.effect': 'Efeito',
     'pageOptions.effectNone': 'Nenhum',
-    'pageOptions.effectBubbles': 'Bolhas',
+    'pageOptions.effectSoapBubbles': 'Bolhas de Sabão',
+    'pageOptions.effectVariantNormal': 'Normal',
+    'pageOptions.effectVariantRainbow': 'Arco-íris',
+    'pageOptions.effectVariantBlue': 'Azul',
 
     // ImageUpload (shared component)
     'imageUpload.upload': 'Enviar imagem',

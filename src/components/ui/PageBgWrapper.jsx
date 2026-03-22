@@ -34,7 +34,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
         <Suspense fallback={null}>
           <ShaderBgLayer shaderProps={settings.bgShader} pos={bgPos} />
         </Suspense>
-        <BgEffect effect={settings?.bgEffect} pos={bgPos} />
+        <BgEffect effect={settings?.bgEffect} variant={settings?.bgEffectVariant} pos={bgPos} />
         <div style={contentStyle}>{children}</div>
       </div>
     )
@@ -65,7 +65,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
       <div className={className} style={{ position: 'relative', ...style }}>
         <div style={layer2} />
         <div style={layer1} />
-        <BgEffect effect={settings?.bgEffect} pos={bgPos} />
+        <BgEffect effect={settings?.bgEffect} variant={settings?.bgEffectVariant} pos={bgPos} />
         <div style={contentStyle}>{children}</div>
       </div>
     )
@@ -86,7 +86,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
     return (
       <div className={className} style={{ position: 'relative', ...style }}>
         <div style={bgLayer} />
-        <BgEffect effect={settings?.bgEffect} pos="fixed" />
+        <BgEffect effect={settings?.bgEffect} variant={settings?.bgEffectVariant} pos="fixed" />
         <div style={contentStyle}>{children}</div>
       </div>
     )
@@ -98,7 +98,7 @@ export default function PageBgWrapper({ settings, className = '', style = {}, ch
   const bgStyle = getPageBgStyle(settings)
   return (
     <div className={className} style={{ position: 'relative', ...bgStyle, ...style }}>
-      <BgEffect effect={settings?.bgEffect} pos="absolute" />
+      <BgEffect effect={settings?.bgEffect} variant={settings?.bgEffectVariant} pos="absolute" />
       <div style={contentStyle}>{children}</div>
     </div>
   )
