@@ -29,8 +29,10 @@ export default function BlockStyleControls({ block, onChange }) {
   const legacy       = block.scale ?? 1
   const scaleDesktop = block.scaleDesktop ?? legacy
   const scaleMobile  = block.scaleMobile  ?? legacy
+  const marginTop    = block.marginTop    ?? 0
+  const marginBottom = block.marginBottom ?? 0
 
-  const isDefault = rotate === 0 && scaleDesktop === 1 && scaleMobile === 1
+  const isDefault = rotate === 0 && scaleDesktop === 1 && scaleMobile === 1 && marginTop === 0 && marginBottom === 0
 
   return (
     <div className="space-y-3">
@@ -69,9 +71,23 @@ export default function BlockStyleControls({ block, onChange }) {
               onChange={v => onChange({ scaleMobile: v, scale: undefined })}
               displayFn={v => `${v.toFixed(2)}×`}
             />
+            <SliderRow
+              label="Margin top"
+              value={marginTop}
+              min={-100} max={100} step={1}
+              onChange={v => onChange({ marginTop: v })}
+              displayFn={v => `${v}px`}
+            />
+            <SliderRow
+              label="Margin bottom"
+              value={marginBottom}
+              min={-100} max={100} step={1}
+              onChange={v => onChange({ marginBottom: v })}
+              displayFn={v => `${v}px`}
+            />
             {!isDefault && (
               <button
-                onClick={() => onChange({ rotate: 0, scaleDesktop: 1, scaleMobile: 1, scale: undefined })}
+                onClick={() => onChange({ rotate: 0, scaleDesktop: 1, scaleMobile: 1, scale: undefined, marginTop: 0, marginBottom: 0 })}
                 className="text-xs text-fg-ghost hover:text-fg-muted transition mt-1"
               >
                 Reset transforms

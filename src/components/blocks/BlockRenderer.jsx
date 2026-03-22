@@ -29,17 +29,22 @@ function BlockTransformWrapper({ block, children }) {
   const scaleMobile  = block.scaleMobile  ?? legacy
   const scale        = containerW < 500 ? scaleMobile : scaleDesktop
 
+  const marginTop    = block.marginTop    ?? 0
+  const marginBottom = block.marginBottom ?? 0
+
   const hasTransform = rotate !== 0 || scale !== 1
+  const hasMargin    = marginTop !== 0 || marginBottom !== 0
 
   const parts = []
   if (rotate !== 0) parts.push(`rotate(${rotate}deg)`)
   if (scale !== 1)  parts.push(`scale(${scale})`)
 
+  const wrapperStyle = {}
+  if (hasTransform) { wrapperStyle.transform = parts.join(' '); wrapperStyle.transformOrigin = 'center center' }
+  if (hasMargin)    { wrapperStyle.marginTop = marginTop; wrapperStyle.marginBottom = marginBottom }
+
   return (
-    <div
-      ref={wrapperRef}
-      style={hasTransform ? { transform: parts.join(' '), transformOrigin: 'center center' } : undefined}
-    >
+    <div ref={wrapperRef} style={Object.keys(wrapperStyle).length ? wrapperStyle : undefined}>
       {children}
     </div>
   )
