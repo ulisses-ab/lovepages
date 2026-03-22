@@ -79,8 +79,10 @@ const PAPER_POSITIONS = [
   { left: '31%', top:  '9%', rot:  5, zIndex: 3, width: '35%' },
   { left: '57%', top: '18%', rot: -4, zIndex: 2, width: '33%' },
 ]
+// Each paper reacts to scroll shake with a different multiplier
+const SHAKE_MULTIPLIERS = [-1.1, 0.75, 1.2]
 
-function ScatteredPaper({ pos, drawing }) {
+function ScatteredPaper({ pos, drawing, shakeExtra = 0 }) {
   const shadow = pos.rot > 0
     ? '5px 7px 20px rgba(0,0,0,0.38)'
     : '-5px 7px 20px rgba(0,0,0,0.38)'
@@ -89,7 +91,7 @@ function ScatteredPaper({ pos, drawing }) {
       position: 'absolute',
       left: pos.left, top: pos.top, width: pos.width,
       zIndex: pos.zIndex,
-      transform: `rotate(${pos.rot}deg)`,
+      transform: `rotate(${pos.rot + shakeExtra}deg)`,
       transformOrigin: 'center center',
     }}>
       <div style={{
@@ -118,7 +120,38 @@ function ScatteredPaper({ pos, drawing }) {
 
 function PreviewView({ drawings, boardTitle, onClick }) {
   const [hovered, setHovered] = useState(false)
+  const [shake, setShake] = useState(0)
+  const shakeRef = useRef(0)
+  const prevScrollY = useRef(typeof window !== 'undefined' ? window.scrollY : 0)
+  const rafRef = useRef(null)
   const count = drawings.length
+
+  useEffect(() => {
+    function tick() {
+      shakeRef.current *= 0.80
+      setShake(shakeRef.current)
+      if (Math.abs(shakeRef.current) > 0.04) {
+        rafRef.current = requestAnimationFrame(tick)
+      } else {
+        shakeRef.current = 0
+        setShake(0)
+        rafRef.current = null
+      }
+    }
+
+    function onScroll() {
+      const delta = window.scrollY - prevScrollY.current
+      prevScrollY.current = window.scrollY
+      shakeRef.current = Math.max(-10, Math.min(10, shakeRef.current + delta * 0.07))
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(tick)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
 
   return (
     <div
@@ -140,7 +173,7 @@ function PreviewView({ drawings, boardTitle, onClick }) {
 
       {/* Papers */}
       {PAPER_POSITIONS.map((pos, i) => (
-        <ScatteredPaper key={i} pos={pos} drawing={drawings[i] ?? null} />
+        <ScatteredPaper key={i} pos={pos} drawing={drawings[i] ?? null} shakeExtra={shake * SHAKE_MULTIPLIERS[i]} />
       ))}
 
       {/* Board title */}
