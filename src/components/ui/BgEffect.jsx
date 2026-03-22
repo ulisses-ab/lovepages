@@ -1,7 +1,4 @@
 import { useMemo, useRef, useEffect } from 'react'
-import normalFrag  from './bubbles/normal.glsl?raw'
-import rainbowFrag from './bubbles/rainbow.glsl?raw'
-import blueFrag    from './bubbles/blue.glsl?raw'
 
 // Deterministic pseudo-random — same seed always gives the same layout
 function sr(n) {
@@ -62,11 +59,7 @@ const VERT_SRC = `
   void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
 `
 
-const FRAG_SRCS = {
-  normal:  normalFrag,
-  rainbow: rainbowFrag,
-  blue:    blueFrag,
-}
+const FRAG_SRCS = { normal: normalFrag, rainbow: rainbowFrag, blue: blueFrag }
 
 function compileShader(gl, type, src) {
   const sh = gl.createShader(type)
@@ -76,83 +69,75 @@ function compileShader(gl, type, src) {
 }
 
 function SoapBubbles({ pos = 'fixed', variant = 'normal' }) {
-  const canvasRef = useRef(null)
+    const canvasRef = useRef(null)
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const gl = canvas.getContext('webgl', { premultipliedAlpha: false })
-      || canvas.getContext('experimental-webgl', { premultipliedAlpha: false })
-    if (!gl) return
+    useEffect(() => {
+      const canvas = canvasRef.current
+      if (!canvas) return
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      if (!gl) return
 
-    const fragSrc = FRAG_SRCS[variant] || normalFrag
-
-    const vert = compileShader(gl, gl.VERTEX_SHADER,   VERT_SRC)
-    const frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSrc)
-    const prog = gl.createProgram()
-    gl.attachShader(prog, vert)
-    gl.attachShader(prog, frag)
-    gl.linkProgram(prog)
-    gl.useProgram(prog)
-
-    // Full-screen quad
-    const buf = gl.createBuffer()
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf)
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
-    const loc = gl.getAttribLocation(prog, 'a_pos')
-    gl.enableVertexAttribArray(loc)
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
-
-    const uTime      = gl.getUniformLocation(prog, 'iTime')
-    const uRes       = gl.getUniformLocation(prog, 'iResolution')
-    const uSpeed     = gl.getUniformLocation(prog, 'u_speed')
-    const uCount     = gl.getUniformLocation(prog, 'u_bubbleCount')
-    const uSize      = gl.getUniformLocation(prog, 'u_bubbleSize')
-    const uIntensity = gl.getUniformLocation(prog, 'u_animationIntensity')
-
-    gl.uniform1f(uSpeed,     1.0)
-    gl.uniform1f(uCount,     1.0)
-    gl.uniform1f(uSize,      1.0)
-    gl.uniform1f(uIntensity, 1.0)
-
-    gl.enable(gl.BLEND)
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-    gl.clearColor(0, 0, 0, 0)
-
-    let raf
-    let start = null
-
-    function resize() {
-      const w = canvas.clientWidth  || canvas.offsetWidth  || 300
-      const h = canvas.clientHeight || canvas.offsetHeight || 300
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width  = w
-        canvas.height = h
-        gl.viewport(0, 0, w, h)
+      const vert = compileShader(gl, gl.VERTEX_SHADER,   VERT_SRC)
+      const frag = compileShader(gl, gl.FRAGMENT_SHADER, FRAG_SRCS[variant] || normalFrag)
+      const prog = gl.createProgram()
+      gl.attachShader(prog, vert)
+      gl.attachShader(prog, frag)
+      gl.linkProgram(prog)
+      gl.useProgram(prog)
+  
+      // Full-screen quad
+      const buf = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW)
+      const loc = gl.getAttribLocation(prog, 'a_pos')
+      gl.enableVertexAttribArray(loc)
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
+  
+      const uTime      = gl.getUniformLocation(prog, 'iTime')
+      const uRes       = gl.getUniformLocation(prog, 'iResolution')
+      const uSpeed     = gl.getUniformLocation(prog, 'u_speed')
+      const uCount     = gl.getUniformLocation(prog, 'u_bubbleCount')
+      const uSize      = gl.getUniformLocation(prog, 'u_bubbleSize')
+      const uIntensity = gl.getUniformLocation(prog, 'u_animationIntensity')
+  
+      gl.uniform1f(uSpeed,     1.0)
+      gl.uniform1f(uCount,     1.0)
+      gl.uniform1f(uSize,      1.0)
+      gl.uniform1f(uIntensity, 1.0)
+  
+      let raf
+      let start = null
+  
+      function resize() {
+        const w = canvas.clientWidth  || canvas.offsetWidth  || 300
+        const h = canvas.clientHeight || canvas.offsetHeight || 300
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width  = w
+          canvas.height = h
+          gl.viewport(0, 0, w, h)
+        }
       }
-    }
-
-    function frame(ts) {
+  
+      function frame(ts) {
+        raf = requestAnimationFrame(frame)
+        if (!start) start = ts
+        resize()
+        gl.uniform1f(uTime, (ts - start) / 1000)
+        gl.uniform2f(uRes, canvas.width, canvas.height)
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+      }
+  
       raf = requestAnimationFrame(frame)
-      if (!start) start = ts
-      resize()
-      gl.clear(gl.COLOR_BUFFER_BIT)
-      gl.uniform1f(uTime, (ts - start) / 1000)
-      gl.uniform2f(uRes, canvas.width, canvas.height)
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-    }
-
-    raf = requestAnimationFrame(frame)
-    return () => cancelAnimationFrame(raf)
-  }, [variant])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: pos, inset: 0, pointerEvents: 'none', zIndex: 0, background: 'transparent' }}
-    />
-  )
-}
+      return () => cancelAnimationFrame(raf)
+    }, [variant])
+  
+    return (
+      <canvas
+        ref={canvasRef}
+        style={{ position: pos, inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+      />
+    )
+  }
 
 export default function BgEffect({ effect, variant = 'normal', pos = 'fixed' }) {
   if (effect === 'bubbles')      return <Bubbles     pos={pos} />
