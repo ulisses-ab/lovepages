@@ -79,10 +79,8 @@ const PAPER_POSITIONS = [
   { left: '31%', top:  '9%', rot:  5, zIndex: 3, width: '35%' },
   { left: '57%', top: '18%', rot: -4, zIndex: 2, width: '33%' },
 ]
-// Each paper reacts to scroll shake with a different multiplier
-const SHAKE_MULTIPLIERS = [-1.1, 0.75, 1.2]
 
-function ScatteredPaper({ pos, drawing, shakeExtra = 0 }) {
+function ScatteredPaper({ pos, drawing, shake }) {
   const shadow = pos.rot > 0
     ? '5px 7px 20px rgba(0,0,0,0.38)'
     : '-5px 7px 20px rgba(0,0,0,0.38)'
@@ -91,8 +89,9 @@ function ScatteredPaper({ pos, drawing, shakeExtra = 0 }) {
       position: 'absolute',
       left: pos.left, top: pos.top, width: pos.width,
       zIndex: pos.zIndex,
-      transform: `rotate(${pos.rot + shakeExtra}deg)`,
+      transform: `rotate(${pos.rot + shake}deg)`,
       transformOrigin: 'center center',
+      transition: 'transform 0.12s ease-out',
     }}>
       <div style={{
         background: '#f7f3ec',
@@ -118,53 +117,43 @@ function ScatteredPaper({ pos, drawing, shakeExtra = 0 }) {
   )
 }
 
+// Each paper shakes with a slightly different magnitude and sign so they
+// don't all move identically. Values are multipliers on the base shake.
+const SHAKE_FACTORS = [1, -0.7, 0.9]
+
 function PreviewView({ drawings, boardTitle, onClick }) {
   const [hovered, setHovered] = useState(false)
   const [shake, setShake] = useState(0)
   const shakeRef = useRef(0)
-  const prevScrollY = useRef(0)
   const rafRef = useRef(null)
-  const containerRef = useRef(null)
   const count = drawings.length
 
   useEffect(() => {
-    // Find the nearest scrollable ancestor
-    function getScrollParent(el) {
-      while (el && el !== document.body) {
-        const { overflow, overflowY } = getComputedStyle(el)
-        if (/auto|scroll/.test(overflow + overflowY)) return el
-        el = el.parentElement
-      }
-      return window
-    }
+    let lastY = window.scrollY
 
-    const scroller = getScrollParent(containerRef.current)
-    const getScrollTop = () => scroller === window ? window.scrollY : scroller.scrollTop
-    prevScrollY.current = getScrollTop()
-
-    function tick() {
+    function decay() {
       shakeRef.current *= 0.80
       setShake(shakeRef.current)
       if (Math.abs(shakeRef.current) > 0.04) {
-        rafRef.current = requestAnimationFrame(tick)
+        rafRef.current = requestAnimationFrame(decay)
       } else {
         shakeRef.current = 0
         setShake(0)
-        rafRef.current = null
       }
     }
 
     function onScroll() {
-      const current = getScrollTop()
-      const delta = current - prevScrollY.current
-      prevScrollY.current = current
-      shakeRef.current = Math.max(-10, Math.min(10, shakeRef.current + delta * 0.07))
-      if (!rafRef.current) rafRef.current = requestAnimationFrame(tick)
+      const delta = window.scrollY - lastY
+      lastY = window.scrollY
+      // Cap shake at ±2.5°, scale by scroll speed
+      shakeRef.current = Math.max(-2.5, Math.min(2.5, delta * 0.18))
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(decay)
     }
 
-    scroller.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      scroller.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])
@@ -174,7 +163,6 @@ function PreviewView({ drawings, boardTitle, onClick }) {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      ref={containerRef}
       style={{ position: 'relative', width: '100%', height: 260, cursor: 'pointer', userSelect: 'none' }}
     >
       {/* Art materials */}
@@ -190,7 +178,7 @@ function PreviewView({ drawings, boardTitle, onClick }) {
 
       {/* Papers */}
       {PAPER_POSITIONS.map((pos, i) => (
-        <ScatteredPaper key={i} pos={pos} drawing={drawings[i] ?? null} shakeExtra={shake * SHAKE_MULTIPLIERS[i]} />
+        <ScatteredPaper key={i} pos={pos} drawing={drawings[i] ?? null} shake={shake * SHAKE_FACTORS[i]} />
       ))}
 
       {/* Board title */}
