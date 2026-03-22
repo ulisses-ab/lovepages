@@ -24,9 +24,13 @@ export default function BlockStyleControls({ block, onChange }) {
   const { t } = useT()
   const [advancedOpen, setAdvancedOpen] = useState(false)
 
-  const rotate = block.rotate ?? 0
-  // Support legacy scaleDesktop/scaleMobile fields by falling back to them
-  const scale  = block.scale ?? block.scaleDesktop ?? 1
+  const rotate       = block.rotate ?? 0
+  // Legacy: if only `scale` is set, use it as the default for both axes
+  const legacy       = block.scale ?? 1
+  const scaleDesktop = block.scaleDesktop ?? legacy
+  const scaleMobile  = block.scaleMobile  ?? legacy
+
+  const isDefault = rotate === 0 && scaleDesktop === 1 && scaleMobile === 1
 
   return (
     <div className="space-y-3">
@@ -52,15 +56,22 @@ export default function BlockStyleControls({ block, onChange }) {
               displayFn={v => `${v}°`}
             />
             <SliderRow
-              label="Scale"
-              value={scale}
+              label="Scale (wide)"
+              value={scaleDesktop}
               min={0.1} max={3} step={0.05}
-              onChange={v => onChange({ scale: v })}
+              onChange={v => onChange({ scaleDesktop: v, scale: undefined })}
               displayFn={v => `${v.toFixed(2)}×`}
             />
-            {(rotate !== 0 || scale !== 1) && (
+            <SliderRow
+              label="Scale (narrow)"
+              value={scaleMobile}
+              min={0.1} max={3} step={0.05}
+              onChange={v => onChange({ scaleMobile: v, scale: undefined })}
+              displayFn={v => `${v.toFixed(2)}×`}
+            />
+            {!isDefault && (
               <button
-                onClick={() => onChange({ rotate: 0, scale: 1 })}
+                onClick={() => onChange({ rotate: 0, scaleDesktop: 1, scaleMobile: 1, scale: undefined })}
                 className="text-xs text-fg-ghost hover:text-fg-muted transition mt-1"
               >
                 Reset transforms

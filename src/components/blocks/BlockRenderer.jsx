@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -8,20 +9,33 @@ import ContainerBlock from './ContainerBlock'
 import CustomBlock from './CustomBlock'
 
 function BlockTransformWrapper({ block, children }) {
+  const wrapperRef = useRef(null)
+  const [containerWidth, setContainerWidth] = useState(null)
+
+  useEffect(() => {
+    if (!wrapperRef.current) return
+    const ro = new ResizeObserver(entries => setContainerWidth(entries[0].contentRect.width))
+    ro.observe(wrapperRef.current)
+    return () => ro.disconnect()
+  }, [])
+
   const rotate = block.rotate ?? 0
-  // Support legacy scaleDesktop/scaleMobile by falling back to them
-  const scale  = block.scale ?? block.scaleDesktop ?? 1
+  // Legacy: `scale` was a single field; now we have separate desktop/mobile values
+  const legacy       = block.scale ?? 1
+  const scaleDesktop = block.scaleDesktop ?? legacy
+  const scaleMobile  = block.scaleMobile  ?? legacy
+  const isNarrow     = (containerWidth ?? window.innerWidth) < 768
+  const scale        = isNarrow ? scaleMobile : scaleDesktop
 
   const hasTransform = rotate !== 0 || scale !== 1
-  if (!hasTransform) return children
+  if (!hasTransform) return <div ref={wrapperRef}>{children}</div>
 
   const parts = []
   if (rotate !== 0) parts.push(`rotate(${rotate}deg)`)
   if (scale !== 1)  parts.push(`scale(${scale})`)
-  const transform = parts.join(' ') || 'none'
 
   return (
-    <div style={{ transform, transformOrigin: 'center center' }}>
+    <div ref={wrapperRef} style={{ transform: parts.join(' '), transformOrigin: 'center center' }}>
       {children}
     </div>
   )
