@@ -65,8 +65,8 @@ const SHADER_PRESETS = [
   },
   {
     label: 'Mint',
-    bg: 'linear-gradient(135deg,#d0f4de,#a0c4ff,#caffbf)',
-    shaderProps: { color1: '#d0f4de', color2: '#a0c4ff', color3: '#caffbf', type: 'waterPlane', animate: 'on', uSpeed: 0.15, uStrength: 1.5, uFrequency: 5.5, cDistance: 4, cPolarAngle: 80, lightType: '3d', grain: 'off' },
+    bg: 'linear-gradient(135deg,#94ffd1,#6bf5ff,#ffffff)',
+    shaderProps: { animate: 'on', brightness: 1.2, cAzimuthAngle: 170, cDistance: 4.4, cPolarAngle: 70, cameraZoom: 1, color1: '#94ffd1', color2: '#6bf5ff', color3: '#ffffff', envPreset: 'city', grain: 'off', lightType: '3d', positionY: 0.9, positionZ: -0.3, reflection: 0.1, rotationX: 45, type: 'waterPlane', uDensity: 1.2, uSpeed: 0.2, uStrength: 3.4 },
   },
   {
     label: 'Velvet',
@@ -76,7 +76,7 @@ const SHADER_PRESETS = [
   {
     label: 'Nebula',
     bg: 'linear-gradient(135deg,#809bd6,#910aff,#af38ff)',
-    shaderProps: { animate: 'on', brightness: 1.5, cAzimuthAngle: 250, cDistance: 1.5, cPolarAngle: 140, cameraZoom: 12.5, color1: '#809bd6', color2: '#910aff', color3: '#af38ff', envPreset: 'city', grain: 'on', lightType: '3d', reflection: 0.5, rotationZ: 140, type: 'sphere', uAmplitude: 7, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.4 },
+    shaderProps: { animate: 'on', positionX: 0, positionY: 0, brightness: 1.5, cAzimuthAngle: 250, cDistance: 1.5, cPolarAngle: 140, cameraZoom: 12.5, color1: '#809bd6', color2: '#910aff', color3: '#af38ff', envPreset: 'city', grain: 'on', lightType: '3d', reflection: 0.5, rotationZ: 140, type: 'sphere', uAmplitude: 7, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.4 },
   },
 ]
 
