@@ -5,6 +5,62 @@ import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { useT } from '../lib/i18n'
 import LangToggle from '../components/LangToggle'
+import { colors } from '../lib/theme'
+
+// Recursively find the first image URL in a blocks array
+function findFirstImage(blocks = []) {
+  for (const block of blocks) {
+    if (block.type === 'image' && block.src) return block.src
+    if (block.type === 'carousel' && block.images?.[0]?.src) return block.images[0].src
+    if (block.type === 'song' && block.coverUrl) return block.coverUrl
+    if (block.type === 'container' && block.children) {
+      const found = findFirstImage(block.children)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+function PageThumbnail({ page }) {
+  const settings  = page.settings  || {}
+  const blocks    = page.blocks    || []
+  const firstImg  = findFirstImage(blocks)
+
+  // Background: image > color > shader placeholder > default
+  let bgStyle = { backgroundColor: colors.overlay }
+  if (settings.bgImage) {
+    bgStyle = { backgroundImage: `url(${settings.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  } else if (settings.bgColor) {
+    bgStyle = { backgroundColor: settings.bgColor }
+  } else if (settings.bgShader) {
+    bgStyle = { background: 'linear-gradient(135deg, #6e3fa3 0%, #3a1f6b 50%, #1a0f3a 100%)' }
+  }
+
+  return (
+    <div style={{
+      width: 44, height: 62, borderRadius: 6, flexShrink: 0,
+      overflow: 'hidden', position: 'relative',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
+      border: `1px solid rgba(255,255,255,0.07)`,
+      ...bgStyle,
+    }}>
+      {/* First image as overlay if background isn't already an image */}
+      {firstImg && !settings.bgImage && (
+        <img
+          src={firstImg}
+          alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
+        />
+      )}
+      {/* Subtle bottom vignette */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.45) 100%)',
+        pointerEvents: 'none',
+      }} />
+    </div>
+  )
+}
 
 function isActivePage(page) {
   return page.expires_at && new Date(page.expires_at) > new Date()
@@ -12,7 +68,12 @@ function isActivePage(page) {
 
 function PageRow({ page, showStatus, confirmId, deletingId, onOpen, onDelete, onConfirm, onCancelConfirm, formatDate, t }) {
   return (
-    <li className="bg-surface border border-overlay rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+    <li className="bg-surface border border-overlay rounded-2xl px-4 py-3 flex flex-row items-center gap-4">
+      {/* Thumbnail */}
+      <button onClick={onOpen} className="shrink-0 transition-opacity hover:opacity-80" tabIndex={-1} aria-hidden>
+        <PageThumbnail page={page} />
+      </button>
+
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -38,7 +99,7 @@ function PageRow({ page, showStatus, confirmId, deletingId, onOpen, onDelete, on
 
       {/* Actions */}
       {confirmId === page.id ? (
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
           <span className="text-fg-muted text-xs">{t('dashboard.deleteConfirm')}</span>
           <button
             onClick={onDelete}
@@ -55,7 +116,7 @@ function PageRow({ page, showStatus, confirmId, deletingId, onOpen, onDelete, on
           </button>
         </div>
       ) : (
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
           <button
             onClick={onOpen}
             className="bg-primary hover:bg-primary-hover text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors"

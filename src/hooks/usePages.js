@@ -13,7 +13,7 @@ export function usePages(userId) {
     try {
       const { data, error: fetchError } = await supabase
         .from('pages')
-        .select('id, title, created_at, updated_at, published, expires_at, slug')
+        .select('id, title, created_at, updated_at, published, expires_at, slug, settings, blocks')
         .eq('user_id', userId)
         .order('updated_at', { ascending: false })
 
