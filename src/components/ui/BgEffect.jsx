@@ -1,4 +1,8 @@
 import { useMemo, useRef, useEffect } from 'react'
+import normalFrag from './bubbles/normal.glsl?raw';
+import rainbowFrag from './bubbles/rainbow.glsl?raw';
+import blueFrag from './bubbles/blue.glsl?raw';
+
 
 // Deterministic pseudo-random — same seed always gives the same layout
 function sr(n) {
@@ -109,8 +113,8 @@ function SoapBubbles({ pos = 'fixed', variant = 'normal' }) {
       let start = null
   
       function resize() {
-        const w = canvas.clientWidth  || canvas.offsetWidth  || 300
-        const h = canvas.clientHeight || canvas.offsetHeight || 300
+        const w = canvas.clientWidth  || canvas.offsetWidth  || window.innerWidth  || 300
+        const h = canvas.clientHeight || canvas.offsetHeight || window.innerHeight || 300
         if (canvas.width !== w || canvas.height !== h) {
           canvas.width  = w
           canvas.height = h
@@ -134,7 +138,7 @@ function SoapBubbles({ pos = 'fixed', variant = 'normal' }) {
     return (
       <canvas
         ref={canvasRef}
-        style={{ position: pos, inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+        style={{ position: pos, inset: 0, pointerEvents: 'none', zIndex: 0 }}
       />
     )
   }
