@@ -7,6 +7,7 @@ import CountdownBlock from './CountdownBlock'
 import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
 import CustomBlock from './CustomBlock'
+import DrawingBlock from './DrawingBlock'
 
 function BlockTransformWrapper({ block, children }) {
   const wrapperRef = useRef(null)
@@ -62,6 +63,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
       case 'carousel':  return <CarouselBlock {...props} />
       case 'container': return <ContainerBlock {...props} />
       case 'custom':    return <CustomBlock {...props} />
+      case 'drawing':   return <DrawingBlock {...props} />
       default:          return <p className="text-fg-muted text-sm">Unknown block</p>
     }
   }

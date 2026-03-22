@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | link | countdown | carousel | container`
+Block types: `text | image | song | link | countdown | carousel | container | drawing`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -78,7 +78,8 @@ src/
 │   │   ├── LinkBlock.jsx            ← styled button with color picker
 │   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
 │   │   ├── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
-│   │   └── ContainerBlock.jsx       ← layout wrapper that holds child blocks; edit mode shows BackgroundChooser + child block list + add-block menu; preview renders children in flex-wrap inside the container's background section
+│   │   ├── ContainerBlock.jsx       ← layout wrapper that holds child blocks; edit mode shows BackgroundChooser + child block list + add-block menu; preview renders children in flex-wrap inside the container's background section
+│   │   └── DrawingBlock.jsx         ← corkboard with pinned paper drawings; edit mode has inline canvas-based drawing tool (palette, brush sizes, eraser) + caption per drawing; public view shows cork-textured board with deterministically-tilted papers and push pins
 │   └── editor/
 │       ├── EditorTopBar.jsx         ← title input, preview toggle, publish button, back arrow (→ /dashboard), sign-out icon; shows subtle "Saving…" indicator during autosave
 │       ├── PublishModal.jsx         ← publish modal: slug input with availability check, publish/unpublish, shows live URL
@@ -206,6 +207,13 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 
 // container
 { "children": "[array of full block objects]", "fullBleed": true }
+
+// drawing
+{ "drawings": [{ "id": "nanoid", "dataUrl": "data:image/png;base64,...", "caption": "string", "pinColor": "#hex" }], "boardTitle": "string" }
+// drawings: array of user-created freehand drawings stored as PNG data URLs
+// boardTitle: optional title displayed at the top of the corkboard
+// pinColor: deterministically chosen push pin color per drawing (8 color options)
+// Canvas size: 460×320px, paper bg #faf5e4; stored as full base64 PNG in block JSON
 // Always renders full-width (fullBleed:true by default). Background (bgColor/bgImage/bgFade etc.) is set via BackgroundChooser in edit mode.
 // Children are any block types, including other containers (nesting is supported).
 // In edit mode, ContainerBlock renders its visual body inline on the canvas (not as a side-panel list):

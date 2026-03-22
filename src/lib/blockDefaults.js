@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 import { colors } from './theme'
-import { Type, ImageIcon, Music, Link, Timer, Images, Box, Code } from 'lucide-react'
+import { Type, ImageIcon, Music, Link, Timer, Images, Box, Code, PenLine } from 'lucide-react'
 
 export const BLOCK_TYPES = {
   TEXT: 'text',
@@ -11,6 +11,7 @@ export const BLOCK_TYPES = {
   CAROUSEL: 'carousel',
   CONTAINER: 'container',
   CUSTOM: 'custom',
+  DRAWING: 'drawing',
 }
 
 export const TEXT_VARIANTS = ['plain', 'typewriter', 'postit', 'ransom']
@@ -49,6 +50,8 @@ export function createBlock(type) {
       }
     case BLOCK_TYPES.CUSTOM:
       return { ...base, html: '' }
+    case BLOCK_TYPES.DRAWING:
+      return { ...base, drawings: [], boardTitle: '' }
     default:
       return base
   }
@@ -70,6 +73,7 @@ export const BLOCK_LABELS = {
   carousel: 'Photos',
   container: 'Container',
   custom: 'Custom HTML',
+  drawing: 'Drawing Board',
 }
 
 export const BLOCK_ICONS = {
@@ -81,4 +85,5 @@ export const BLOCK_ICONS = {
   carousel: Images,
   container: Box,
   custom: Code,
+  drawing: PenLine,
 }

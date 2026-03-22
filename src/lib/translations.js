@@ -51,6 +51,7 @@ export const translations = {
     'block.video': 'Video',
     'block.link': 'Link',
     'block.custom': 'Custom HTML',
+    'block.drawing': 'Drawing Board',
 
     // SortableBlock
     'sortable.dragToReorder': 'Drag to reorder',
@@ -280,6 +281,7 @@ export const translations = {
     'block.video': 'V\u00eddeo',
     'block.link': 'Link',
     'block.custom': 'HTML Personalizado',
+    'block.drawing': 'Quadro de Desenhos',
 
     // SortableBlock
     'sortable.dragToReorder': 'Arrastar para reordenar',
