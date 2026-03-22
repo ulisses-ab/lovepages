@@ -73,6 +73,11 @@ const SHADER_PRESETS = [
     bg: 'linear-gradient(135deg,#7c3aed,#1e1b4b,#831843)',
     shaderProps: { color1: '#7c3aed', color2: '#1e1b4b', color3: '#831843', type: 'plane', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 3, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'on' },
   },
+  {
+    label: 'Nebula',
+    bg: 'linear-gradient(135deg,#809bd6,#910aff,#af38ff)',
+    shaderProps: { animate: 'on', brightness: 1.5, cAzimuthAngle: 250, cDistance: 1.5, cPolarAngle: 140, cameraZoom: 12.5, color1: '#809bd6', color2: '#910aff', color3: '#af38ff', envPreset: 'city', grain: 'on', lightType: '3d', reflection: 0.5, rotationZ: 140, type: 'sphere', uAmplitude: 7, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.4 },
+  },
 ]
 
 export default function BackgroundChooser({
