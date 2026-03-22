@@ -80,7 +80,7 @@ const PAPER_POSITIONS = [
   { left: '57%', top: '18%', rot: -4, zIndex: 2, width: '33%' },
 ]
 
-function ScatteredPaper({ pos, drawing, shake }) {
+function ScatteredPaper({ pos, drawing, shake, hovered }) {
   const shadow = pos.rot > 0
     ? '5px 7px 20px rgba(0,0,0,0.38)'
     : '-5px 7px 20px rgba(0,0,0,0.38)'
@@ -89,9 +89,9 @@ function ScatteredPaper({ pos, drawing, shake }) {
       position: 'absolute',
       left: pos.left, top: pos.top, width: pos.width,
       zIndex: pos.zIndex,
-      transform: `rotate(${pos.rot + shake}deg)`,
+      transform: `rotate(${pos.rot + shake}deg) translateY(${hovered ? -4 : 0}px) scale(${hovered ? 1.03 : 1})`,
       transformOrigin: 'center center',
-      transition: 'transform 0.12s ease-out',
+      transition: 'transform 0.2s ease-out',
     }}>
       <div style={{
         background: '#f7f3ec',
@@ -173,7 +173,13 @@ function PreviewView({ drawings, boardTitle, onClick }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       ref={containerRef}
-      style={{ position: 'relative', width: '100%', height: 260, cursor: 'pointer', userSelect: 'none' }}
+      style={{
+        position: 'relative', width: '100%', height: 260,
+        cursor: 'pointer', userSelect: 'none',
+        borderRadius: 14,
+        border: `2px dashed ${hovered ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
+        transition: 'border-color 0.2s',
+      }}
     >
       {/* Art materials */}
       <div style={{ position: 'absolute', left: 6, bottom: '10%', transform: 'rotate(-13deg)', pointerEvents: 'none', zIndex: 1 }}>
@@ -186,9 +192,12 @@ function PreviewView({ drawings, boardTitle, onClick }) {
         <PaintBlobs />
       </div>
 
-      {/* Papers */}
+      {/* Papers — lift slightly on hover */}
       {PAPER_POSITIONS.map((pos, i) => (
-        <ScatteredPaper key={i} pos={pos} drawing={drawings[i] ?? null} shake={shake * SHAKE_FACTORS[i]} />
+        <ScatteredPaper
+          key={i} pos={pos} drawing={drawings[i] ?? null}
+          shake={shake * SHAKE_FACTORS[i]} hovered={hovered}
+        />
       ))}
 
       {/* Board title */}
@@ -205,35 +214,23 @@ function PreviewView({ drawings, boardTitle, onClick }) {
         </div>
       )}
 
-      {/* Drawing count */}
-      {count > 0 && (
-        <div style={{
-          position: 'absolute', bottom: 8, right: 10,
-          background: 'rgba(30,38,52,0.75)', backdropFilter: 'blur(4px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 10, padding: '2px 9px',
-          fontFamily: "'Caveat', cursive", fontSize: 13, color: '#d1d5db',
-          zIndex: 9, pointerEvents: 'none',
-        }}>
-          {count} drawing{count === 1 ? '' : 's'}
-        </div>
-      )}
-
-      {/* Hover CTA */}
-      {hovered && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{
-            background: 'rgba(255,255,255,0.95)', borderRadius: 24, padding: '8px 22px',
-            fontFamily: "'Caveat', cursive", fontSize: 18, fontWeight: 700,
-            color: '#1a202a', boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-          }}>
-            {count > 0 ? `See ${count} drawing${count === 1 ? '' : 's'}` : 'Start drawing'}
-          </div>
-        </div>
-      )}
+      {/* Always-visible CTA at the bottom */}
+      <div style={{
+        position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
+        zIndex: 9, pointerEvents: 'none',
+        display: 'flex', alignItems: 'center', gap: 6,
+        background: hovered ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.78)',
+        backdropFilter: 'blur(6px)',
+        borderRadius: 20, padding: '5px 16px',
+        boxShadow: hovered ? '0 4px 20px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.2)',
+        fontFamily: "'Caveat', cursive", fontSize: 15, fontWeight: 700,
+        color: '#1a202a',
+        whiteSpace: 'nowrap',
+        transition: 'background 0.2s, box-shadow 0.2s',
+      }}>
+        <Plus size={14} strokeWidth={2.5} />
+        {count > 0 ? `See ${count} drawing${count === 1 ? '' : 's'}` : 'Start drawing'}
+      </div>
     </div>
   )
 }
