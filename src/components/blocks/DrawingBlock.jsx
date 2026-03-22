@@ -93,17 +93,11 @@ function ScatteredPaper({ pos, drawing }) {
       transformOrigin: 'center center',
     }}>
       <div style={{
-        background: 'linear-gradient(160deg, #fefdf9 0%, #f7f3ec 100%)',
-        boxShadow: `${shadow}, inset 0 0 0 1px rgba(0,0,0,0.05)`,
+        background: '#f7f3ec',
+        boxShadow: shadow,
         padding: '8px 8px 22px',
         position: 'relative',
       }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'repeating-linear-gradient(transparent, transparent 17px, rgba(180,190,220,0.22) 17px, rgba(180,190,220,0.22) 18px)',
-          backgroundPosition: '0 22px',
-          pointerEvents: 'none',
-        }} />
         {drawing ? (
           <img src={drawing.src} alt={drawing.caption || ''}
             style={{ display: 'block', width: '100%', aspectRatio: '23/16', objectFit: 'cover', position: 'relative', zIndex: 1 }}
