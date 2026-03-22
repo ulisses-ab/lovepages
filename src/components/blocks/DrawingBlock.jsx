@@ -95,7 +95,6 @@ function ScatteredPaper({ pos, drawing }) {
       <div style={{
         background: '#f7f3ec',
         boxShadow: shadow,
-        padding: '8px 8px 22px',
         position: 'relative',
       }}>
         {drawing ? (
