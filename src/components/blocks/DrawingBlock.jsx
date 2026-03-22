@@ -73,29 +73,136 @@ function PaintBlobs({ style }) {
   )
 }
 
+// ── Realistic wood grain canvas ───────────────────────────────────────────────
+function WoodCanvas() {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const W = canvas.width
+    const H = canvas.height
+    const ctx = canvas.getContext('2d')
+
+    // 1. Base warm gradient — light at top, darker mid, warm bottom
+    const base = ctx.createLinearGradient(0, 0, 0, H)
+    base.addColorStop(0,    '#d4a870')
+    base.addColorStop(0.18, '#b07840')
+    base.addColorStop(0.42, '#c49058')
+    base.addColorStop(0.62, '#9a6030')
+    base.addColorStop(0.80, '#b08048')
+    base.addColorStop(1,    '#c89860')
+    ctx.fillStyle = base
+    ctx.fillRect(0, 0, W, H)
+
+    // 2. Grain lines — wavy, varied darkness
+    for (let i = 0; i < 110; i++) {
+      const t = i / 110
+      const baseY = t * H
+
+      // Growth ring pattern: every ~10 lines a pair of darker lines
+      const ring = Math.abs(Math.sin(i / 9.8 * Math.PI))
+      const isDark = ring > 0.75
+      const isLight = Math.sin(i * 2.7 + 0.9) > 0.72
+
+      let strokeColor
+      if (isLight) {
+        strokeColor = `rgba(255, 215, 130, ${0.06 + ring * 0.04})`
+      } else if (isDark) {
+        strokeColor = `rgba(35, 12, 0, ${0.08 + ring * 0.10})`
+      } else {
+        strokeColor = `rgba(25, 8, 0, ${0.02 + Math.abs(Math.sin(i * 1.4)) * 0.04})`
+      }
+
+      ctx.strokeStyle = strokeColor
+      ctx.lineWidth = isDark ? 1.0 + Math.abs(Math.sin(i * 0.8)) * 0.8 : 0.5
+
+      ctx.beginPath()
+      ctx.moveTo(0, baseY)
+      for (let x = 0; x <= W; x += 5) {
+        // Three overlapping sine waves for natural organic shape
+        const y = baseY
+          + Math.sin(x * 0.005  + i * 2.1) * 4.5
+          + Math.sin(x * 0.0018 + i * 0.75) * 9
+          + Math.sin(x * 0.016  + i * 4.3) * 1.2
+        ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+    }
+
+    // 3. A subtle knot ~1/5 from left, ~55% down
+    const kx = W * 0.20, ky = H * 0.55
+    for (let r = 22; r >= 1; r--) {
+      ctx.beginPath()
+      ctx.ellipse(kx, ky, r * 1.4, r * 0.75, 0.1, 0, Math.PI * 2)
+      ctx.strokeStyle = `rgba(40, 12, 0, ${0.035 * (1 - r / 22)})`
+      ctx.lineWidth = 0.8
+      ctx.stroke()
+    }
+    // Knot centre fill
+    ctx.beginPath()
+    ctx.ellipse(kx, ky, 5, 3, 0.1, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(40, 12, 0, 0.25)'
+    ctx.fill()
+
+    // 4. Varnish sheen — elliptical highlight slightly off-centre
+    const sheen = ctx.createRadialGradient(W * 0.38, H * 0.28, 0, W * 0.52, H * 0.52, W * 0.88)
+    sheen.addColorStop(0,    'rgba(255, 235, 170, 0.16)')
+    sheen.addColorStop(0.40, 'rgba(255, 210, 110, 0.06)')
+    sheen.addColorStop(1,    'rgba(0, 0, 0, 0)')
+    ctx.fillStyle = sheen
+    ctx.fillRect(0, 0, W, H)
+
+    // 5. Slight dark vignette at edges for depth
+    const vignette = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, W * 0.85)
+    vignette.addColorStop(0, 'rgba(0,0,0,0)')
+    vignette.addColorStop(1, 'rgba(0,0,0,0.22)')
+    ctx.fillStyle = vignette
+    ctx.fillRect(0, 0, W, H)
+
+    // 6. Bottom edge shadow (table thickness illusion)
+    const edgeShadow = ctx.createLinearGradient(0, H - 14, 0, H)
+    edgeShadow.addColorStop(0, 'rgba(0,0,0,0)')
+    edgeShadow.addColorStop(1, 'rgba(0,0,0,0.30)')
+    ctx.fillStyle = edgeShadow
+    ctx.fillRect(0, 0, W, H)
+  }, [])
+
+  return (
+    <canvas
+      ref={ref}
+      width={900}
+      height={300}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
+    />
+  )
+}
+
 // ── Scattered paper (table preview) ──────────────────────────────────────────
+// Papers rotate around their center so corners extend equally in all directions.
+// Positions keep each paper's bounding box well within the container.
 const PAPER_POSITIONS = [
-  { left: '3%',  top: '14%', rot: -7,  zIndex: 2, width: '36%' },
-  { left: '31%', top:  '6%', rot:  5,  zIndex: 3, width: '38%' },
-  { left: '56%', top: '17%', rot: -3,  zIndex: 2, width: '36%' },
+  { left: '6%',  top: '16%', rot: -7, zIndex: 2, width: '33%' },
+  { left: '31%', top:  '9%', rot:  5, zIndex: 3, width: '35%' },
+  { left: '57%', top: '18%', rot: -4, zIndex: 2, width: '33%' },
 ]
 
 function TablePaper({ pos, drawing }) {
   const shadow = pos.rot > 0
-    ? '4px 6px 18px rgba(0,0,0,0.35)'
-    : '-4px 6px 18px rgba(0,0,0,0.35)'
+    ? '5px 7px 20px rgba(0,0,0,0.38)'
+    : '-5px 7px 20px rgba(0,0,0,0.38)'
   return (
     <div style={{
       position: 'absolute',
       left: pos.left, top: pos.top, width: pos.width,
       zIndex: pos.zIndex,
       transform: `rotate(${pos.rot}deg)`,
-      transformOrigin: 'top center',
+      transformOrigin: 'center center', // symmetric — corners extend equally
     }}>
       <div style={{
-        background: 'linear-gradient(160deg, #fdfcf8 0%, #f7f3ec 100%)',
+        background: 'linear-gradient(160deg, #fefdf9 0%, #f7f3ec 100%)',
         boxShadow: `${shadow}, inset 0 0 0 1px rgba(0,0,0,0.04)`,
-        padding: '8px 8px 20px',
+        padding: '8px 8px 22px',
         position: 'relative',
       }}>
         {/* Ruled lines */}
@@ -125,6 +232,9 @@ function TablePaper({ pos, drawing }) {
 }
 
 // ── Table preview (block's closed state) ─────────────────────────────────────
+// Two-layer structure:
+//   outer div  → overflow: visible  → papers can extend past the wood edge
+//   inner div  → overflow: hidden   → clips the canvas + art materials to rounded corners
 function TablePreview({ drawings, boardTitle, onClick }) {
   const [hovered, setHovered] = useState(false)
   const count = drawings.length
@@ -137,114 +247,110 @@ function TablePreview({ drawings, boardTitle, onClick }) {
       style={{
         position: 'relative',
         width: '100%',
-        height: 230,
-        borderRadius: 12,
-        overflow: 'hidden',
+        height: 260,
         cursor: 'pointer',
         userSelect: 'none',
-        // Warm wood table surface
-        background: 'linear-gradient(168deg, #c4956a 0%, #a87248 35%, #b98155 65%, #c4956a 100%)',
-        backgroundImage: [
-          'linear-gradient(168deg, #c4956a 0%, #a87248 35%, #b98155 65%, #c4956a 100%)',
-          // Wood grain streaks
-          'repeating-linear-gradient(88deg, transparent, transparent 18px, rgba(0,0,0,0.025) 18px, rgba(0,0,0,0.025) 20px)',
-          'repeating-linear-gradient(92deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 32px)',
-        ].join(', '),
-        boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
-        transition: 'box-shadow 0.2s',
       }}
     >
-      {/* Table surface shadow/depth */}
+      {/* ── Wood surface layer (clipped) ─────────────────────────────────── */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse at 50% 110%, rgba(0,0,0,0.18) 0%, transparent 65%)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* Paint blobs — bottom-right corner */}
-      <div style={{ position: 'absolute', right: '2%', bottom: '4%', opacity: 0.9, pointerEvents: 'none' }}>
-        <PaintBlobs />
-      </div>
-
-      {/* Pencil — bottom-left, diagonal */}
-      <div style={{
-        position: 'absolute', left: '-8px', bottom: '10%',
-        transform: 'rotate(-14deg)',
-        pointerEvents: 'none', zIndex: 4,
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 14,
+        overflow: 'hidden',
+        boxShadow: '0 6px 30px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.25)',
       }}>
-        <PencilSVG />
+        <WoodCanvas />
+
+        {/* Paint blobs — bottom-right */}
+        <div style={{ position: 'absolute', right: '3%', bottom: '6%', opacity: 0.92, pointerEvents: 'none', zIndex: 2 }}>
+          <PaintBlobs />
+        </div>
+
+        {/* Pencil — bottom-left, diagonal */}
+        <div style={{
+          position: 'absolute', left: 6, bottom: '12%',
+          transform: 'rotate(-13deg)',
+          pointerEvents: 'none', zIndex: 2,
+        }}>
+          <PencilSVG />
+        </div>
+
+        {/* Paintbrush — top-right, diagonal */}
+        <div style={{
+          position: 'absolute', right: 8, top: '8%',
+          transform: 'rotate(16deg)',
+          pointerEvents: 'none', zIndex: 2,
+        }}>
+          <BrushSVG />
+        </div>
+
+        {/* Hover dim overlay */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 8,
+          background: hovered ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0)',
+          transition: 'background 0.2s',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Board title badge */}
+        {boardTitle && (
+          <div style={{
+            position: 'absolute', top: 10, left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(253,245,210,0.92)',
+            border: '1.5px solid rgba(160,120,60,0.35)',
+            borderRadius: 6, padding: '3px 12px',
+            fontFamily: "'Caveat', cursive",
+            fontSize: 16, fontWeight: 700,
+            color: '#4a2a0a',
+            whiteSpace: 'nowrap',
+            zIndex: 9,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+            pointerEvents: 'none',
+          }}>
+            {boardTitle}
+          </div>
+        )}
+
+        {/* Drawing count badge */}
+        {count > 0 && (
+          <div style={{
+            position: 'absolute', bottom: 10, right: 12,
+            background: 'rgba(250,240,210,0.88)',
+            borderRadius: 10, padding: '2px 9px',
+            fontFamily: "'Caveat', cursive",
+            fontSize: 13, color: '#6a4520',
+            zIndex: 9, pointerEvents: 'none',
+            border: '1px solid rgba(160,120,60,0.25)',
+          }}>
+            {count} drawing{count === 1 ? '' : 's'}
+          </div>
+        )}
       </div>
 
-      {/* Paintbrush — top-right, diagonal */}
-      <div style={{
-        position: 'absolute', right: '-4px', top: '7%',
-        transform: 'rotate(18deg)',
-        pointerEvents: 'none', zIndex: 4,
-      }}>
-        <BrushSVG />
-      </div>
-
-      {/* The 3 papers */}
+      {/* ── Papers (outside overflow:hidden, free to overlap edges) ──────── */}
       {PAPER_POSITIONS.map((pos, i) => (
         <TablePaper key={i} pos={pos} drawing={drawings[i] ?? null} />
       ))}
 
-      {/* Hover overlay — "open gallery" hint */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 10,
-        background: hovered ? 'rgba(0,0,0,0.38)' : 'rgba(0,0,0,0)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: 8,
-        transition: 'background 0.2s',
-        pointerEvents: 'none',
-      }}>
-        {hovered && (
-          <>
-            <div style={{
-              background: 'rgba(255,255,255,0.95)',
-              borderRadius: 24, padding: '8px 20px',
-              fontFamily: "'Caveat', cursive",
-              fontSize: 18, fontWeight: 700,
-              color: '#4a2a0a',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            }}>
-              {count > 0 ? `See ${count} drawing${count === 1 ? '' : 's'}` : 'Start drawing'}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Board title badge */}
-      {boardTitle && (
+      {/* Hover call-to-action — centred over the wood surface */}
+      {hovered && (
         <div style={{
-          position: 'absolute', top: 10, left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(250,242,210,0.92)',
-          border: '1.5px solid rgba(160,120,60,0.35)',
-          borderRadius: 6, padding: '3px 12px',
-          fontFamily: "'Caveat', cursive",
-          fontSize: 16, fontWeight: 700,
-          color: '#4a2a0a',
-          whiteSpace: 'nowrap',
-          zIndex: 5,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          pointerEvents: 'none',
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 20, pointerEvents: 'none',
         }}>
-          {boardTitle}
-        </div>
-      )}
-
-      {/* Drawing count badge */}
-      {count > 0 && (
-        <div style={{
-          position: 'absolute', bottom: 10, right: 12,
-          background: 'rgba(255,255,255,0.85)',
-          borderRadius: 10, padding: '2px 8px',
-          fontFamily: "'Caveat', cursive",
-          fontSize: 13, color: '#6a4520',
-          zIndex: 5, pointerEvents: 'none',
-        }}>
-          {count} drawing{count === 1 ? '' : 's'}
+          <div style={{
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: 24, padding: '8px 22px',
+            fontFamily: "'Caveat', cursive",
+            fontSize: 18, fontWeight: 700,
+            color: '#4a2a0a',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+          }}>
+            {count > 0 ? `See ${count} drawing${count === 1 ? '' : 's'}` : 'Start drawing'}
+          </div>
         </div>
       )}
     </div>
