@@ -74,6 +74,11 @@ const SHADER_PRESETS = [
     shaderProps: { color1: '#7c3aed', color2: '#1e1b4b', color3: '#831843', type: 'plane', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 3, cDistance: 3.6, cPolarAngle: 90, lightType: '3d', grain: 'on' },
   },
   {
+    label: 'Aero',
+    bg: 'linear-gradient(135deg,#0017c4,#00ff37,#00ceb6)',
+    shaderProps: { animate: 'on', brightness: 0.8, cAzimuthAngle: 270, cDistance: 0.5, cPolarAngle: 180, cameraZoom: 15.09, color1: '#0017c4', color2: '#00ff37', color3: '#00ceb6', envPreset: 'lobby', grain: 'off', lightType: 'env', positionX: -0.1, reflection: 0.4, rotationY: 130, rotationZ: 70, type: 'sphere', uAmplitude: 3.2, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.3 },
+  },
+  {
     label: 'Nebula',
     bg: 'linear-gradient(135deg,#809bd6,#910aff,#af38ff)',
     shaderProps: { animate: 'on', positionX: 0, positionY: 0, brightness: 1.5, cAzimuthAngle: 250, cDistance: 1.5, cPolarAngle: 140, cameraZoom: 12.5, color1: '#809bd6', color2: '#910aff', color3: '#af38ff', envPreset: 'city', grain: 'on', lightType: '3d', reflection: 0.5, rotationZ: 140, type: 'sphere', uAmplitude: 7, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.4 },
