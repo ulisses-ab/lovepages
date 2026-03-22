@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import TextBlock from './TextBlock'
 import ImageBlock from './ImageBlock'
 import SongBlock from './SongBlock'
@@ -8,35 +8,38 @@ import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
 import CustomBlock from './CustomBlock'
 
-function useWindowWidth() {
-  const [width, setWidth] = useState(window.innerWidth)
-  useEffect(() => {
-    const onResize = () => setWidth(window.innerWidth)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-  return width
-}
-
 function BlockTransformWrapper({ block, children }) {
-  const windowWidth = useWindowWidth()
+  const wrapperRef = useRef(null)
+  const [containerW, setContainerW] = useState(0)
+
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const update = () => { if (el.offsetWidth > 0) setContainerW(el.offsetWidth) }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const rotate = block.rotate ?? 0
   // Legacy: `scale` was a single field; now we have separate desktop/mobile values
   const legacy       = block.scale ?? 1
   const scaleDesktop = block.scaleDesktop ?? legacy
   const scaleMobile  = block.scaleMobile  ?? legacy
-  const scale        = windowWidth < 768 ? scaleMobile : scaleDesktop
+  const scale        = containerW < 500 ? scaleMobile : scaleDesktop
 
   const hasTransform = rotate !== 0 || scale !== 1
-  if (!hasTransform) return children
 
   const parts = []
   if (rotate !== 0) parts.push(`rotate(${rotate}deg)`)
   if (scale !== 1)  parts.push(`scale(${scale})`)
 
   return (
-    <div style={{ transform: parts.join(' '), transformOrigin: 'center center' }}>
+    <div
+      ref={wrapperRef}
+      style={hasTransform ? { transform: parts.join(' '), transformOrigin: 'center center' } : undefined}
+    >
       {children}
     </div>
   )
