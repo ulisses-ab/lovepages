@@ -56,7 +56,7 @@ const SHADER_PRESETS = [
   {
     label: 'Cosmic',
     bg: 'linear-gradient(135deg,#6366f1,#1e1b4b,#0f172a)',
-    shaderProps: { color1: '#6366f1', color2: '#1e1b4b', color3: '#0f172a', type: 'sphere', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 5.5, cDistance: 5, cPolarAngle: 110, lightType: '3d', grain: 'on' },
+    shaderProps: { color1: '#6366f1', positionX: -0, color2: '#1e1b4b', color3: '#0f172a', type: 'plane', animate: 'on', uSpeed: 0.2, uStrength: 2, uFrequency: 5.5, cDistance: 5, cameraZoom: 10.09, cPolarAngle: 110, lightType: '3d', grain: 'on' },
   },
   {
     label: 'Rose',
@@ -76,7 +76,7 @@ const SHADER_PRESETS = [
   {
     label: 'Aero',
     bg: 'linear-gradient(135deg,#0017c4,#00ff37,#00ceb6)',
-    shaderProps: { animate: 'on', brightness: 0.8, cAzimuthAngle: 270, cDistance: 0.5, cPolarAngle: 180, cameraZoom: 15.09, color1: '#0017c4', color2: '#00ff37', color3: '#00ceb6', envPreset: 'lobby', grain: 'off', lightType: 'env', positionX: -0.1, reflection: 0.4, rotationY: 130, rotationZ: 70, type: 'sphere', uAmplitude: 3.2, uDensity: 0.8, uFrequency: 5.5, uSpeed: 0.3, uStrength: 0.3 },
+    shaderProps: { animate: 'on', brightness: 0.8, cAzimuthAngle: 270, cDistance: 0.5, cPolarAngle: 180, cameraZoom: 15.08, color1: '#0017c4', color2: '#00ff37', color3: '#00ceb6', envPreset: 'lobby', grain: 'off', lightType: 'env', positionX: -0.1, reflection: 0.4, rotationY: 130, rotationZ: 70, type: 'sphere', uAmplitude: 7, uDensity: 0, uFrequency: 5.5, uSpeed: 0.3, uStrength: 6.9 },
   },
   {
     label: 'Nebula',
