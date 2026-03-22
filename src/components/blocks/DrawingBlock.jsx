@@ -122,11 +122,26 @@ function PreviewView({ drawings, boardTitle, onClick }) {
   const [hovered, setHovered] = useState(false)
   const [shake, setShake] = useState(0)
   const shakeRef = useRef(0)
-  const prevScrollY = useRef(typeof window !== 'undefined' ? window.scrollY : 0)
+  const prevScrollY = useRef(0)
   const rafRef = useRef(null)
+  const containerRef = useRef(null)
   const count = drawings.length
 
   useEffect(() => {
+    // Find the nearest scrollable ancestor
+    function getScrollParent(el) {
+      while (el && el !== document.body) {
+        const { overflow, overflowY } = getComputedStyle(el)
+        if (/auto|scroll/.test(overflow + overflowY)) return el
+        el = el.parentElement
+      }
+      return window
+    }
+
+    const scroller = getScrollParent(containerRef.current)
+    const getScrollTop = () => scroller === window ? window.scrollY : scroller.scrollTop
+    prevScrollY.current = getScrollTop()
+
     function tick() {
       shakeRef.current *= 0.80
       setShake(shakeRef.current)
@@ -140,15 +155,16 @@ function PreviewView({ drawings, boardTitle, onClick }) {
     }
 
     function onScroll() {
-      const delta = window.scrollY - prevScrollY.current
-      prevScrollY.current = window.scrollY
+      const current = getScrollTop()
+      const delta = current - prevScrollY.current
+      prevScrollY.current = current
       shakeRef.current = Math.max(-10, Math.min(10, shakeRef.current + delta * 0.07))
       if (!rafRef.current) rafRef.current = requestAnimationFrame(tick)
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    scroller.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      scroller.removeEventListener('scroll', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])
@@ -158,6 +174,7 @@ function PreviewView({ drawings, boardTitle, onClick }) {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      ref={containerRef}
       style={{ position: 'relative', width: '100%', height: 260, cursor: 'pointer', userSelect: 'none' }}
     >
       {/* Art materials */}
