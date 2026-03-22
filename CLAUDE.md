@@ -209,11 +209,11 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 { "children": "[array of full block objects]", "fullBleed": true }
 
 // drawing
-{ "drawings": [{ "id": "nanoid", "dataUrl": "data:image/png;base64,...", "caption": "string", "pinColor": "#hex" }], "boardTitle": "string" }
-// drawings: array of user-created freehand drawings stored as PNG data URLs
+{ "drawings": [{ "id": "nanoid", "src": "https://…supabase…/storage/…/images/drawing-*.png", "caption": "string", "pinColor": "#hex" }], "boardTitle": "string" }
+// drawings: array of user-created freehand drawings; each is uploaded to Supabase Storage (images/ path) and stored as a public URL
 // boardTitle: optional title displayed at the top of the corkboard
 // pinColor: deterministically chosen push pin color per drawing (8 color options)
-// Canvas size: 460×320px, paper bg #faf5e4; stored as full base64 PNG in block JSON
+// Canvas size: 460×320px, paper bg #faf5e4; canvas.toBlob('image/png') → upload → store publicUrl
 // Always renders full-width (fullBleed:true by default). Background (bgColor/bgImage/bgFade etc.) is set via BackgroundChooser in edit mode.
 // Children are any block types, including other containers (nesting is supported).
 // In edit mode, ContainerBlock renders its visual body inline on the canvas (not as a side-panel list):

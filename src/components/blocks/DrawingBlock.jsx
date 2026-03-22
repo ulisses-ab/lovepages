@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { inputClass } from '../../lib/theme'
+import { supabase } from '../../lib/supabase'
 
 // ── Push pin ─────────────────────────────────────────────────────────────────
 const PIN_COLORS = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#e67e22', '#16a085', '#e91e8c', '#f39c12']
@@ -68,7 +69,7 @@ function PinnedPaper({ drawing, onRemove, showRemove }) {
 
         {/* Drawing */}
         <img
-          src={drawing.dataUrl}
+          src={drawing.src}
           alt={drawing.caption || 'drawing'}
           style={{
             display: 'block',
@@ -265,7 +266,7 @@ const CANVAS_W = 460
 const CANVAS_H = 320
 const PAPER_BG = '#faf5e4'
 
-function DrawingModal({ onSave, onClose }) {
+function DrawingModal({ onSave, onClose, uploading }) {
   const canvasRef = useRef(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState('#1c1c1c')
@@ -273,7 +274,6 @@ function DrawingModal({ onSave, onClose }) {
   const [tool, setTool] = useState('pen')
   const [caption, setCaption] = useState('')
   const lastPos = useRef(null)
-  const hasStrokes = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -336,8 +336,7 @@ function DrawingModal({ onSave, onClose }) {
   }
 
   function handleSave() {
-    const dataUrl = canvasRef.current.toDataURL('image/png')
-    onSave(dataUrl, caption.trim())
+    canvasRef.current.toBlob(blob => onSave(blob, caption.trim()), 'image/png')
   }
 
   const activeErase = tool === 'eraser'
@@ -481,15 +480,17 @@ function DrawingModal({ onSave, onClose }) {
         {/* Pin button */}
         <button
           onClick={handleSave}
+          disabled={uploading}
           style={{
-            background: 'linear-gradient(135deg, #e53e3e, #c0392b)',
+            background: uploading ? '#555' : 'linear-gradient(135deg, #e53e3e, #c0392b)',
             color: '#fff', border: 'none', borderRadius: 8,
             padding: '11px 20px', fontWeight: 700, fontSize: 15,
-            cursor: 'pointer', letterSpacing: '0.02em',
-            boxShadow: '0 4px 12px rgba(192,57,43,0.4)',
+            cursor: uploading ? 'not-allowed' : 'pointer', letterSpacing: '0.02em',
+            boxShadow: uploading ? 'none' : '0 4px 12px rgba(192,57,43,0.4)',
+            transition: 'background 0.2s',
           }}
         >
-          📌 Pin to board
+          {uploading ? 'Uploading…' : '📌 Pin to board'}
         </button>
       </div>
     </div>
@@ -500,16 +501,32 @@ function DrawingModal({ onSave, onClose }) {
 export default function DrawingBlock({ block, isEditing, onChange }) {
   const { drawings = [], boardTitle = '' } = block
   const [showModal, setShowModal] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
 
-  function addDrawing(dataUrl, caption) {
-    const seed = (nanoid() + dataUrl.slice(-8)).split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-    onChange({
-      drawings: [
-        ...drawings,
-        { id: nanoid(), dataUrl, caption, pinColor: PIN_COLORS[seed % PIN_COLORS.length] },
-      ],
-    })
-    setShowModal(false)
+  async function addDrawing(blob, caption) {
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const path = `images/drawing-${Date.now()}.png`
+      const { error } = await supabase.storage.from('lovepages').upload(path, blob, { contentType: 'image/png' })
+      if (error) throw error
+      const { data } = supabase.storage.from('lovepages').getPublicUrl(path)
+      const id = nanoid()
+      const seed = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+      onChange({
+        drawings: [
+          ...drawings,
+          { id, src: data.publicUrl, caption, pinColor: PIN_COLORS[seed % PIN_COLORS.length] },
+        ],
+      })
+      setShowModal(false)
+    } catch (err) {
+      console.error('Drawing upload failed:', err.message)
+      setUploadError('Upload failed — please try again.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   function removeDrawing(id) {
@@ -544,7 +561,7 @@ export default function DrawingBlock({ block, isEditing, onChange }) {
             {drawings.map((d, i) => (
               <div key={d.id} className="flex items-center gap-2 bg-overlay rounded-lg p-2">
                 <img
-                  src={d.dataUrl} alt=""
+                  src={d.src} alt=""
                   style={{ width: 52, height: 36, objectFit: 'cover', borderRadius: 3, flexShrink: 0 }}
                 />
                 <input
@@ -564,10 +581,15 @@ export default function DrawingBlock({ block, isEditing, onChange }) {
           </div>
         )}
 
+        {uploadError && (
+          <p className="text-xs text-primary-dim">{uploadError}</p>
+        )}
+
         {showModal && (
           <DrawingModal
             onSave={addDrawing}
-            onClose={() => setShowModal(false)}
+            onClose={() => { if (!uploading) setShowModal(false) }}
+            uploading={uploading}
           />
         )}
       </div>
