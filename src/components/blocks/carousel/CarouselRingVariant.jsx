@@ -1,14 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 
-const PERSPECTIVE   = 2000
-const IMAGE_DIST    = 500
-const W             = 300   // inner stage width (px)
-const H             = 400   // inner stage height (px)
+const PERSPECTIVE = 1500
+const IMAGE_DIST  = 340    // photo ring radius
+const W           = 300    // stage width
+const H           = 400    // stage height
+const DISC_D      = 780    // wooden turntable diameter
+const TILT        = 8      // rotateX applied to ring: +° tilts the base toward viewer
 
-/**
- * Parallax background-position so each image "pans" as the ring rotates.
- * Matches the original ThreeDImageRing formula exactly.
- */
+// Oak wood grain for the turntable top surface (fine grain + specular sheen + warm base)
+const WOOD_TOP = [
+  'repeating-linear-gradient(89.2deg, transparent 0, transparent 5px, rgba(255,255,255,0.016) 5px, rgba(255,255,255,0.016) 6px)',
+  'repeating-linear-gradient(90.8deg, transparent 0, transparent 3px, rgba(0,0,0,0.022) 3px, rgba(0,0,0,0.022) 4px)',
+  'repeating-linear-gradient(89.5deg, transparent 0, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 20px)',
+  'radial-gradient(ellipse at 38% 30%, rgba(255,235,185,0.22) 0%, transparent 48%)',
+  'radial-gradient(ellipse at 50% 50%, #dfa05a 0%, #b86c2a 40%, #8a4818 65%, #5a2c08 100%)',
+].join(', ')
+
+// Darker side/rim colour (peeks below the top surface to suggest thickness)
+const WOOD_RIM = 'linear-gradient(to bottom, #b06020, #6a3010, #b06020)'
+
 function getBgPos(index, rotation, angle, sc) {
   const effectiveRot   = rotation - index * angle
   const parallaxOffset = ((effectiveRot % 360) + 360) % 360 / 360
@@ -18,23 +28,20 @@ function getBgPos(index, rotation, angle, sc) {
 export default function CarouselRingVariant({ block }) {
   const { images = [] } = block
 
-  const containerRef  = useRef(null)
-  const ringRef       = useRef(null)
+  const containerRef = useRef(null)
+  const ringRef      = useRef(null)
 
-  // All mutable runtime state lives in refs to avoid re-renders during drag
-  const rotationRef   = useRef(0)
-  const scaleRef      = useRef(1)
-  const angleRef      = useRef(360 / Math.max(images.length, 1))
-  const isDragging    = useRef(false)
-  const startXRef     = useRef(0)
-  const velocityRef   = useRef(0)
-  const inertiaRaf    = useRef(null)
+  const rotationRef  = useRef(0)
+  const scaleRef     = useRef(1)
+  const angleRef     = useRef(360 / Math.max(images.length, 1))
+  const isDragging   = useRef(false)
+  const startXRef    = useRef(0)
+  const velocityRef  = useRef(0)
+  const inertiaRaf   = useRef(null)
 
-  // React state only for things that need to trigger a DOM update via React
-  const [scale, setScale]         = useState(1)
+  const [scale, setScale]           = useState(1)
   const [showImages, setShowImages] = useState(false)
 
-  // Keep angleRef in sync when images.length changes (between renders)
   angleRef.current = 360 / Math.max(images.length, 1)
 
   // ── DOM helpers ──────────────────────────────────────────────────────────────
@@ -43,17 +50,16 @@ export default function CarouselRingVariant({ block }) {
     rotationRef.current = deg
     const ring = ringRef.current
     if (!ring) return
-    ring.style.transform = `rotateY(${deg}deg)`
-    Array.from(ring.children).forEach((el, i) => {
+    // TILT stays constant; only rotateY changes
+    ring.style.transform = `rotateX(${TILT}deg) rotateY(${deg}deg)`
+    // Update parallax only on photo divs (first images.length children; disc divs come after)
+    Array.from(ring.children).slice(0, images.length).forEach((el, i) => {
       el.style.backgroundPosition = getBgPos(i, deg, angleRef.current, scaleRef.current)
     })
   }
 
   function stopInertia() {
-    if (inertiaRaf.current) {
-      cancelAnimationFrame(inertiaRaf.current)
-      inertiaRaf.current = null
-    }
+    if (inertiaRaf.current) { cancelAnimationFrame(inertiaRaf.current); inertiaRaf.current = null }
   }
 
   function startInertia(vel0) {
@@ -74,8 +80,8 @@ export default function CarouselRingVariant({ block }) {
     const el = containerRef.current
     if (!el) return
     const update = () => {
-      const w     = el.clientWidth
-      const sc    = w < 480 ? 0.62 : w < 680 ? 0.80 : 1
+      const w  = el.clientWidth
+      const sc = w < 480 ? 0.60 : w < 680 ? 0.78 : 1
       scaleRef.current = sc
       setScale(sc)
     }
@@ -85,28 +91,24 @@ export default function CarouselRingVariant({ block }) {
     return () => obs.disconnect()
   }, [])
 
-  // Entrance opacity stagger
   useEffect(() => {
     const t = setTimeout(() => setShowImages(true), 80)
     return () => clearTimeout(t)
   }, [])
 
-  // Cleanup on unmount
   useEffect(() => () => stopInertia(), [])
 
-  // ── Global drag listeners (attached once) ────────────────────────────────────
+  // ── Global drag listeners ────────────────────────────────────────────────────
 
   useEffect(() => {
-    function getClientX(e) {
-      return e.touches ? e.touches[0].clientX : e.clientX
-    }
+    function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX }
     function onMove(e) {
       if (!isDragging.current) return
       if (e.touches) e.preventDefault()
-      const dx = getClientX(e) - startXRef.current
+      const dx = getX(e) - startXRef.current
       velocityRef.current = -dx * 0.5
       applyRotation(rotationRef.current + velocityRef.current)
-      startXRef.current = getClientX(e)
+      startXRef.current = getX(e)
     }
     function onEnd() {
       if (!isDragging.current) return
@@ -115,21 +117,17 @@ export default function CarouselRingVariant({ block }) {
       startInertia(velocityRef.current)
       velocityRef.current = 0
     }
-
-    document.addEventListener('mousemove',  onMove)
-    document.addEventListener('mouseup',    onEnd)
-    document.addEventListener('touchmove',  onMove,  { passive: false })
-    document.addEventListener('touchend',   onEnd)
-
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup',   onEnd)
+    document.addEventListener('touchmove', onMove, { passive: false })
+    document.addEventListener('touchend',  onEnd)
     return () => {
-      document.removeEventListener('mousemove',  onMove)
-      document.removeEventListener('mouseup',    onEnd)
-      document.removeEventListener('touchmove',  onMove)
-      document.removeEventListener('touchend',   onEnd)
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup',   onEnd)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend',  onEnd)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Drag start (React event) ─────────────────────────────────────────────────
 
   function onDragStart(e) {
     isDragging.current = true
@@ -139,18 +137,26 @@ export default function CarouselRingVariant({ block }) {
     if (containerRef.current) containerRef.current.style.cursor = 'grabbing'
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Derived values ───────────────────────────────────────────────────────────
 
   const angle      = angleRef.current
   const scaledDist = IMAGE_DIST * scale
+
+  // The disc is a flat circle lying in the 3D XZ plane.
+  // We position it so its centre sits at ring-local (W/2, H, 0) — the bottom of the photos.
+  // rotateX(90deg) on the disc div rotates it from XY-plane to XZ-plane (flat on the "table").
+  const discLeft = (W - DISC_D) / 2   // negative — extends beyond ring div horizontally
+  const discTop  = H - DISC_D / 2     // centred at Y = H (bottom of photo panels)
+  const RIM_SINK = -20                 // rim rendered 20 px behind top surface in Z → visible thickness
 
   return (
     <div
       ref={containerRef}
       style={{
         width: '100%',
-        height: Math.round(H * scale + 40),
-        overflow: 'clip',
+        // Extra height so the disc (which pops forward due to TILT) is fully visible
+        height: Math.round(H * scale + 120),
+        overflow: 'visible',
         position: 'relative',
         cursor: 'grab',
         userSelect: 'none',
@@ -159,17 +165,17 @@ export default function CarouselRingVariant({ block }) {
       onMouseDown={onDragStart}
       onTouchStart={onDragStart}
     >
-      {/* Perspective stage — centred inside the container */}
+      {/* Perspective stage — slightly above vertical centre so disc appears below */}
       <div style={{
         perspective: `${PERSPECTIVE}px`,
         width:  `${W}px`,
         height: `${H}px`,
         position: 'absolute',
         left: '50%',
-        top:  '50%',
+        top:  '44%',
         transform: 'translate(-50%, -50%)',
       }}>
-        {/* Rotating ring */}
+        {/* Ring — all children (photos + disc) share the same spin + tilt */}
         <div
           ref={ringRef}
           style={{
@@ -177,9 +183,11 @@ export default function CarouselRingVariant({ block }) {
             height: '100%',
             position: 'absolute',
             transformStyle: 'preserve-3d',
-            transform: `rotateY(${rotationRef.current}deg)`,
+            // TILT is baked into the initial transform; applyRotation keeps it constant
+            transform: `rotateX(${TILT}deg) rotateY(0deg)`,
           }}
         >
+          {/* ── Photo panels ── */}
           {images.map((img, index) => (
             <div
               key={index}
@@ -190,46 +198,62 @@ export default function CarouselRingVariant({ block }) {
                 backgroundImage:    `url(${img.src})`,
                 backgroundSize:     'cover',
                 backgroundRepeat:   'no-repeat',
-                backgroundPosition: getBgPos(index, rotationRef.current, angle, scale),
+                backgroundPosition: getBgPos(index, 0, angle, scale),
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
                 transform: `rotateY(${index * -angle}deg) translateZ(${scaledDist}px)`,
-                borderRadius: 6,
-                opacity: showImages ? 1 : 0,
+                borderRadius: 3,
+                opacity:    showImages ? 1 : 0,
                 transition: `opacity 1.4s ease ${index * 0.08}s`,
+                boxShadow: '0 8px 28px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.35)',
               }}
             />
           ))}
+
+          {/* ── Disc rim — slightly behind the top face, darker wood colour ── */}
+          <div style={{
+            position: 'absolute',
+            width:    DISC_D,
+            height:   DISC_D,
+            left:     discLeft,
+            top:      discTop,
+            borderRadius: '50%',
+            // Sinks RIM_SINK px behind the top surface so it peeks below as a thickness band
+            transform: `rotateX(90deg) translateZ(${RIM_SINK}px)`,
+            background: WOOD_RIM,
+          }} />
+
+          {/* ── Disc top surface — wood grain, faces viewer after TILT ── */}
+          <div style={{
+            position: 'absolute',
+            width:    DISC_D,
+            height:   DISC_D,
+            left:     discLeft,
+            top:      discTop,
+            borderRadius: '50%',
+            transform: 'rotateX(90deg)',
+            background: WOOD_TOP,
+            boxShadow: [
+              'inset 0 0 0 8px rgba(55,22,4,0.6)',   // dark outer ring (edge grain)
+              'inset 0 0 0 14px rgba(70,30,6,0.3)',  // soft inner bevel
+              'inset 0 0 80px rgba(0,0,0,0.22)',     // centre vignette
+            ].join(', '),
+          }} />
         </div>
       </div>
 
-      {/* Subtle ground shadow */}
+      {/* Elliptical ground shadow beneath the whole display */}
       <div style={{
         position: 'absolute',
-        bottom: 4,
+        bottom: 0,
         left: '50%',
         transform: 'translateX(-50%)',
-        width: W * 0.85 * scale,
-        height: 28,
+        width:  Math.round(DISC_D * 0.7 * scale),
+        height: 22,
         borderRadius: '50%',
-        background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.35) 0%, transparent 72%)',
+        background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.42) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
-
-      {/* Drag hint */}
-      {!showImages && (
-        <div style={{
-          position: 'absolute',
-          bottom: 12,
-          width: '100%',
-          textAlign: 'center',
-          fontSize: 11,
-          color: 'rgba(255,255,255,0.4)',
-          pointerEvents: 'none',
-        }}>
-          drag to spin
-        </div>
-      )}
     </div>
   )
 }
