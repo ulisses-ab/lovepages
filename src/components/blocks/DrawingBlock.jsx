@@ -155,7 +155,7 @@ function PreviewView({ drawings, boardTitle, onClick }) {
       const currentY = scrollEl === window ? window.scrollY : scrollEl.scrollTop
       const delta = currentY - lastY
       lastY = currentY
-      shakeRef.current = Math.max(-2.5, Math.min(2.5, delta * 0.18))
+      shakeRef.current = Math.max(-6, Math.min(6, delta * 0.45))
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(decay)
     }
