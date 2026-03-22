@@ -121,15 +121,24 @@ function ScatteredPaper({ pos, drawing, shake }) {
 // don't all move identically. Values are multipliers on the base shake.
 const SHAKE_FACTORS = [1, -0.7, 0.9]
 
+function getScrollParent(el) {
+  if (!el || el === document.body) return window
+  const { overflowY } = getComputedStyle(el)
+  if (overflowY === 'auto' || overflowY === 'scroll') return el
+  return getScrollParent(el.parentElement)
+}
+
 function PreviewView({ drawings, boardTitle, onClick }) {
   const [hovered, setHovered] = useState(false)
   const [shake, setShake] = useState(0)
+  const containerRef = useRef(null)
   const shakeRef = useRef(0)
   const rafRef = useRef(null)
   const count = drawings.length
 
   useEffect(() => {
-    let lastY = window.scrollY
+    const scrollEl = getScrollParent(containerRef.current)
+    let lastY = scrollEl === window ? window.scrollY : scrollEl.scrollTop
 
     function decay() {
       shakeRef.current *= 0.80
@@ -143,17 +152,17 @@ function PreviewView({ drawings, boardTitle, onClick }) {
     }
 
     function onScroll() {
-      const delta = window.scrollY - lastY
-      lastY = window.scrollY
-      // Cap shake at ±2.5°, scale by scroll speed
+      const currentY = scrollEl === window ? window.scrollY : scrollEl.scrollTop
+      const delta = currentY - lastY
+      lastY = currentY
       shakeRef.current = Math.max(-2.5, Math.min(2.5, delta * 0.18))
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(decay)
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    scrollEl.addEventListener('scroll', onScroll, { passive: true })
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      scrollEl.removeEventListener('scroll', onScroll)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, [])
@@ -163,6 +172,7 @@ function PreviewView({ drawings, boardTitle, onClick }) {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      ref={containerRef}
       style={{ position: 'relative', width: '100%', height: 260, cursor: 'pointer', userSelect: 'none' }}
     >
       {/* Art materials */}
