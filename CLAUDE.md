@@ -79,7 +79,7 @@ src/
 │   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
 │   │   ├── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
 │   │   ├── ContainerBlock.jsx       ← layout wrapper that holds child blocks; edit mode shows BackgroundChooser + child block list + add-block menu; preview renders children in flex-wrap inside the container's background section
-│   │   └── DrawingBlock.jsx         ← corkboard with pinned paper drawings; edit mode has inline canvas-based drawing tool (palette, brush sizes, eraser) + caption per drawing; public view shows cork-textured board with deterministically-tilted papers and push pins
+│   │   └── DrawingBlock.jsx         ← drawing board block; resting state shows 3 scattered papers on a wood-grain table surface with SVG pencil/brush/paint-blob decorations; clicking opens a gallery modal showing all drawings as tilted paper cards; "Add yours" button inside gallery opens an inline canvas (palette, brush sizes, eraser, caption) that uploads to Supabase Storage on save
 │   └── editor/
 │       ├── EditorTopBar.jsx         ← title input, preview toggle, publish button, back arrow (→ /dashboard), sign-out icon; shows subtle "Saving…" indicator during autosave
 │       ├── PublishModal.jsx         ← publish modal: slug input with availability check, publish/unpublish, shows live URL
