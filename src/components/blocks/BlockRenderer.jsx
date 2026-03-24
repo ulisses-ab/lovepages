@@ -8,6 +8,7 @@ import CarouselBlock from './CarouselBlock'
 import ContainerBlock from './ContainerBlock'
 import CustomBlock from './CustomBlock'
 import DrawingBlock from './DrawingBlock'
+import GameBlock from './GameBlock'
 
 function BlockTransformWrapper({ block, children }) {
   const wrapperRef = useRef(null)
@@ -64,6 +65,7 @@ export default function BlockRenderer({ block, isEditing = false, onChange, isHi
       case 'container': return <ContainerBlock {...props} />
       case 'custom':    return <CustomBlock {...props} />
       case 'drawing':   return <DrawingBlock {...props} />
+      case 'game':      return <GameBlock {...props} />
       default:          return <p className="text-fg-muted text-sm">Unknown block</p>
     }
   }

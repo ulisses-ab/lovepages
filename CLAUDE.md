@@ -16,7 +16,7 @@ A web platform where users create personalized mini-webpages for loved ones. Pag
 | Backend / DB | Supabase (Postgres + Storage + Auth) |
 | ID generation | nanoid |
 
-Block types: `text | image | song | link | countdown | carousel | container | drawing`
+Block types: `text | image | song | link | countdown | carousel | container | drawing | game`
 
 > Node 18 constraint: use `create-vite@5`, NOT latest create-vite (requires Node >=20).
 
@@ -79,7 +79,8 @@ src/
 │   │   ├── CountdownBlock.jsx       ← live countdown to a user-specified date/time; shows expired message when reached
 │   │   ├── CarouselBlock.jsx        ← photo carousel; two modes: slider (swipe, dots, arrows) and album (react-pageflip two-page spread book — deep plum cover with user-chosen color, beige pages, white-framed photos, named cover with three title styles)
 │   │   ├── ContainerBlock.jsx       ← layout wrapper that holds child blocks; edit mode shows BackgroundChooser + child block list + add-block menu; preview renders children in flex-wrap inside the container's background section
-│   │   └── DrawingBlock.jsx         ← drawing board block; resting state shows 3 scattered papers on a wood-grain table surface with SVG pencil/brush/paint-blob decorations; clicking opens a gallery modal showing all drawings as tilted paper cards; "Add yours" button inside gallery opens an inline canvas (palette, brush sizes, eraser, caption) that uploads to Supabase Storage on save
+│   │   ├── DrawingBlock.jsx          ← drawing board block
+│   │   └── GameBlock.jsx            ← interactive game block; wordle variant (set a word, visitors guess); resting state shows 3 scattered papers on a wood-grain table surface with SVG pencil/brush/paint-blob decorations; clicking opens a gallery modal showing all drawings as tilted paper cards; "Add yours" button inside gallery opens an inline canvas (palette, brush sizes, eraser, caption) that uploads to Supabase Storage on save
 │   └── editor/
 │       ├── EditorTopBar.jsx         ← title input, preview toggle, publish button, back arrow (→ /dashboard), sign-out icon; shows subtle "Saving…" indicator during autosave
 │       ├── PublishModal.jsx         ← publish modal: slug input with availability check, publish/unpublish, shows live URL
@@ -187,7 +188,8 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 // — "vinyl": large spinning vinyl disc with play button to its left, title and progress bar below; coverUrl appears as the center label
 // — "aero": Frutiger Aero — rectangular aqua-blue device body, SVG transport icons, cover art panel with glass reflection, LCD screen with blue-glow monospace, progress track with chrome knob, EQ bars, neon green play button with 4-ring halo
 // — "xp": Windows XP / Luna Blue — full WMP-style window frame; Luna Blue title bar gradient, classic gray chrome (#ECE9D8), 3D raised/sunken borders, menu bar, cover art inset, Tahoma font, XP seek bar with grip-line thumb, transport buttons, status bar
-// coverUrl: used by "cover", "vinyl", and "xp" variants; supports Supabase Storage upload or direct URL
+// — "bubble": Frutiger Aero — translucent sky-blue capsule body (stadium shape, backdrop-blur frosted glass); left side has a large spinning CD disc with cover art center label, iridescent conic-gradient tracks, and chrome spindle; right side shows title/artist, frosted progress bar, glass-bubble transport buttons, and subtle EQ bars; decorated with bokeh orbs, water caustic SVG pattern, and light flares
+// coverUrl: used by "cover", "vinyl", "xp", "aero", and "bubble" variants; supports Supabase Storage upload or direct URL
 
 // link
 { "href": "url", "label": "string", "color": "#hex", "variant": "default | xp" }
@@ -227,6 +229,11 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
 //   clockColor: "dark" (default) — dark anodised aluminium housing, light digits; "beige" — warm cream housing, dark digits.
 // minimal: large serif numbers, hairline dividers, small uppercase unit labels, dot separators. Clean white-space editorial look. Minimalist aesthetic.
 // aero: Frutiger Aero — glossy sky-blue pill-shaped housing with specular highlights; inner deep-blue capsule display showing DD:HH:MM:SS in white monospace with blue glow; status label + micro SVG icons; lime-green progress bar tracking seconds within the current minute.
+
+// game
+{ "variant": "wordle", "word": "string (uppercase A-Z, 3-8 chars)", "gameTitle": "string", "winMessage": "string", "loseMessage": "string" }
+// variant: controls the game type
+// — "wordle": classic Wordle clone — dark board (#121213), colored tile feedback (green=correct, yellow=present, gray=absent), on-screen keyboard with letter status tracking, 6 guesses, shake animation on invalid length, play-again button; the creator sets the secret word and optionally customizes title/win/lose messages
 ```
 
 To add a new block type:
@@ -302,10 +309,12 @@ Currently the mapping looks like this (variants per block type):
 
 - **Text**: `heading` (neutral), `paragraph` (neutral), `quote` (dark/moody), `typewriter` (cottagecore — aged paper note), `postit` (playful/bold — sticky note), `ransom` (playful/bold — cut magazine letters, every character different font/size/rotation), `cyberpunk` (cyberpunk — dark panel, neon cyan border glow, scanlines, Space Mono, RGB chromatic-aberration glitch ghost layers), `xp` (retro — classic Windows XP Notepad window, Courier New, title bar, menu bar, status bar)
 - **Image**: `default` (neutral — plain image), `polaroid` (cottagecore — polaroid frame with tape), `xp` (retro — Windows XP "Windows Picture and Fax Viewer" window with toolbar and status bar)
-- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — rectangular aqua-blue media player body), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
+- **Song**: `default` (soft), `cover` (dark/moody), `vinyl` (dark/moody — physical turntable), `aero` (Frutiger Aero — translucent pebble-shaped media player), `bubble` (Frutiger Aero — translucent capsule with spinning CD disc), `xp` (retro/playful — Windows XP Luna Blue window, full WMP chrome)
 - **Link**: `default` (neutral — rounded pill button), `xp` (retro — Windows XP "Open Link" dialog box with globe icon and 3D raised Open/Cancel buttons)
 - **Countdown**: `flip` (dark/moody — physical flip clock), `minimal` (minimalist — large serif numbers, hairline dividers), `aero` (Frutiger Aero — glossy sky-blue pill housing, deep-blue capsule display, lime-green progress bar), `xp` (retro — Windows XP "Date and Time Properties" control panel dialog with tabbed chrome, sunken digit panels, OK/Cancel/Apply buttons)
 - **Carousel**: `slider` (neutral), `album` (cottagecore — physical photo album with leather cover), `xp` (retro — Windows XP "My Pictures" Windows Explorer window with task pane sidebar, image viewport, and filmstrip), `ring` (soft/aero — draggable 3D rotating ring of photos; drag-to-spin with inertia, parallax background-position per image, staggered opacity entrance)
+
+- **Game**: `wordle` (dark/moody — classic Wordle clone with dark board, colored tile feedback, on-screen keyboard)
 
 As new variants are added, each should map to an aesthetic and feel like it truly belongs to that world — not just a reskinned version of another variant.
 

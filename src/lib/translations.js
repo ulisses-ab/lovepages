@@ -52,6 +52,7 @@ export const translations = {
     'block.link': 'Link',
     'block.custom': 'Custom HTML',
     'block.drawing': 'Drawing Board',
+    'block.game': 'Game',
 
     // SortableBlock
     'sortable.dragToReorder': 'Drag to reorder',
@@ -121,7 +122,8 @@ export const translations = {
     'song.variantCover': 'Cover art',
     'song.variantVinyl': 'Vinyl',
     'song.variantAero': 'Glossy',
-    'song.variantXp':   'Retro XP',
+    'song.variantXp':     'Retro XP',
+    'song.variantBubble': 'Bubble',
     'song.playerStyle': 'Player style',
     'song.colors': 'Colors',
 
@@ -282,6 +284,7 @@ export const translations = {
     'block.link': 'Link',
     'block.custom': 'HTML Personalizado',
     'block.drawing': 'Quadro de Desenhos',
+    'block.game': 'Jogo',
 
     // SortableBlock
     'sortable.dragToReorder': 'Arrastar para reordenar',
@@ -351,7 +354,8 @@ export const translations = {
     'song.variantCover': 'Capa',
     'song.variantVinyl': 'Vinil',
     'song.variantAero': 'Brilhante',
-    'song.variantXp':   'Retr\u00f4 XP',
+    'song.variantXp':     'Retr\u00f4 XP',
+    'song.variantBubble': 'Bolha',
     'song.playerStyle': 'Estilo do player',
     'song.colors': 'Cores',
 
