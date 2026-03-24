@@ -172,7 +172,7 @@ export default function GameWordleVariant({ block }) {
     }
   }, [gameOver, currentGuess, wordLength, submitGuess])
 
-  // Physical keyboard
+  // Physical keyboard — listen on window so it works inside the fullscreen modal
   useEffect(() => {
     const handler = (e) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -182,9 +182,8 @@ export default function GameWordleVariant({ block }) {
         handleKey(k)
       }
     }
-    const el = containerRef.current
-    if (el) el.addEventListener('keydown', handler)
-    return () => { if (el) el.removeEventListener('keydown', handler) }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [handleKey])
 
   const resetGame = () => {
