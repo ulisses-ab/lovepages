@@ -55,7 +55,7 @@ export default function EditorTopBar({
 
   return (
     <>
-      <header className="h-14 bg-surface border-b border-overlay flex items-center gap-3 px-4 shrink-0">
+      <header className="h-14 border-b border-overlay/50 flex items-center gap-3 px-4 shrink-0" style={{ background: 'rgba(13,11,16,0.82)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 1, position: 'relative' }}>
         {onBack && (
           <button
             onClick={onBack}
@@ -80,15 +80,13 @@ export default function EditorTopBar({
             <span className="text-xs text-fg-faint hidden sm:inline">{t('editor.saving')}</span>
           )}
           <LangToggle />
-          {previewMode && (
-            <button
-              onClick={() => setMobilePreview(v => !v)}
-              title={mobilePreview ? 'Desktop view' : 'Mobile view'}
-              className="p-2 rounded-lg bg-overlay text-fg-tertiary hover:bg-subtle transition"
-            >
-              {mobilePreview ? <Monitor size={16} /> : <Smartphone size={16} />}
-            </button>
-          )}
+          <button
+            onClick={() => setMobilePreview(v => !v)}
+            title={mobilePreview ? 'Desktop preview' : 'Mobile preview'}
+            className={`p-2 rounded-lg transition ${mobilePreview ? 'bg-primary/20 text-primary-dim' : 'bg-overlay text-fg-tertiary hover:bg-subtle'}`}
+          >
+            {mobilePreview ? <Smartphone size={16} /> : <Monitor size={16} />}
+          </button>
           <button
             onClick={() => setPreviewMode(v => !v)}
             className={`p-2 rounded-lg text-sm font-medium transition ${
@@ -130,7 +128,7 @@ export default function EditorTopBar({
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-10 w-44 bg-surface border border-overlay rounded-xl shadow-lg z-50 overflow-hidden">
+              <div className="absolute right-0 top-10 w-44 border border-overlay/60 rounded-xl shadow-2xl z-50 overflow-hidden" style={{ background: 'rgba(19,17,24,0.95)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
                 {displayName && (
                   <div className="px-3 py-2 border-b border-overlay">
                     <p className="text-xs text-fg-muted truncate">{displayName}</p>

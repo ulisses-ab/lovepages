@@ -10,7 +10,7 @@ export default function ShaderBgLayer({ shaderProps, pos = 'absolute' }) {
   return (
     <Suspense fallback={null}>
       <ShaderGradientCanvas
-        style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}
+        style={{ position: pos, inset: 0, width: '100%', height: pos === 'fixed' ? '100dvh' : '100%', zIndex: 0, pointerEvents: 'none' }}
         pixelDensity={1}
       >
         <ShaderGradient {...shaderProps} />

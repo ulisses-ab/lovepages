@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json()
+    const { prompt, currentHtml } = await req.json()
 
     if (!prompt?.trim()) {
       return new Response(JSON.stringify({ error: 'prompt is required' }), {
@@ -42,24 +42,35 @@ Deno.serve(async (req) => {
       })
     }
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 55_000)
+
     const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         max_tokens: 4096,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: prompt },
+          {
+            role: 'user',
+            content: currentHtml?.trim()
+              ? `Current HTML in the block:\n\`\`\`html\n${currentHtml}\n\`\`\`\n\nInstruction: ${prompt}`
+              : prompt,
+          },
         ],
       }),
     })
+    clearTimeout(timeout)
 
     if (!openaiRes.ok) {
       const err = await openaiRes.text()
+      console.error('OpenAI error response:', err)
       return new Response(JSON.stringify({ error: `OpenAI error: ${err}` }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -67,13 +78,27 @@ Deno.serve(async (req) => {
     }
 
     const data = await openaiRes.json()
-    const html = data.choices?.[0]?.message?.content ?? ''
+    console.log('OpenAI finish_reason:', data.choices?.[0]?.finish_reason)
+
+    const raw: string = data.choices?.[0]?.message?.content ?? ''
+
+    if (!raw.trim()) {
+      console.error('Empty content from OpenAI. Full response:', JSON.stringify(data))
+      return new Response(JSON.stringify({ error: 'AI returned empty response — try rephrasing your prompt' }), {
+        status: 502,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Strip markdown code fences if model wrapped output despite instructions
+    const html = raw.replace(/^```(?:html)?\n?/i, '').replace(/\n?```$/i, '').trim()
 
     return new Response(JSON.stringify({ html }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    const message = err.name === 'AbortError' ? 'Request timed out — try again' : err.message
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

@@ -1,0 +1,167 @@
+precision mediump float;
+
+uniform float iTime;
+uniform vec2  iResolution;
+uniform float u_speed;
+uniform float u_bubbleCount;
+uniform float u_bubbleSize;
+uniform float u_animationIntensity;
+
+vec2 uv;
+
+// ---------------- HASH / NOISE ----------------
+
+vec2 hash2a(vec2 x, float anim) {
+    float r = 523.0 * sin(dot(x, vec2(53.3158, 43.6143)));
+    float xa1 = fract(anim);
+    float xb1 = anim - xa1;
+    anim += 0.5;
+    float xa2 = fract(anim);
+    float xb2 = anim - xa2;
+
+    vec2 z1 = vec2(fract(15.32354*(r+xb1)), fract(17.25865*(r+xb1)));
+    r += 1.0;
+    vec2 z2 = vec2(fract(15.32354*(r+xb1)), fract(17.25865*(r+xb1)));
+    r += 1.0;
+    vec2 z3 = vec2(fract(15.32354*(r+xb2)), fract(17.25865*(r+xb2)));
+    r += 1.0;
+    vec2 z4 = vec2(fract(15.32354*(r+xb2)), fract(17.25865*(r+xb2)));
+
+    return (mix(z1,z2,xa1)+mix(z3,z4,xa2))*0.5;
+}
+
+float hashNull(vec2 x) {
+    return fract(523.0*sin(dot(x,vec2(53.3158,43.6143))));
+}
+
+vec4 NC0 = vec4(0.0,157.0,113.0,270.0);
+vec4 NC1 = vec4(1.0,158.0,114.0,271.0);
+
+vec4 hash4(vec4 n) { return fract(sin(n)*753.5453123); }
+vec2 hash2(vec2 n) { return fract(sin(n)*753.5453123); }
+
+float noise2(vec2 x) {
+    vec2 p=floor(x); vec2 f=fract(x);
+    f=f*f*(3.0-2.0*f);
+    float n=p.x+p.y*157.0;
+    vec2 s1=mix(hash2(vec2(n)+NC0.xy),hash2(vec2(n)+NC1.xy),vec2(f.x));
+    return mix(s1.x,s1.y,f.y);
+}
+
+// ---------------- BUBBLE ----------------
+
+vec4 booble(vec2 te, vec2 pos, float numCells) {
+    float d = dot(te,te);
+
+    vec2 te1 = te + (pos-vec2(0.5))*0.4/numCells;
+    vec2 te2 = -te1;
+
+    float zb1 = max(pow(noise2(te2*1000.11*d),10.0),0.01);
+    float zb2 = noise2(te1*1000.11*d);
+    float zb3 = noise2(te1*200.11*d);
+    float zb4 = noise2(te1*200.11*d+vec2(20.0));
+
+    vec4 colorb = vec4(1.0);
+    colorb.xyz *= (0.7 + noise2(te1*1000.11*d)*0.3);
+
+    zb2 = max(pow(zb2,20.1),0.01);
+    colorb.xyz *= (zb2*1.9);
+
+    vec4 color = vec4(
+        noise2(te2*10.8),
+        noise2(te2*9.5+vec2(15.0)),
+        noise2(te2*11.2+vec2(12.0)),
+        1.0
+    );
+
+    color = mix(color, vec4(1.0), noise2(te2*20.5+vec2(200.0)));
+    color.xyz *= (0.7 + noise2(te2*1000.11*d)*0.3);
+    color.xyz *= (0.2 + zb1*1.9);
+
+    float d2 = (0.06 - min(0.06,d))*10.0;
+    d = (0.04 - min(0.04,d))*10.0;
+
+    color.xyz += colorb.xyz*d*1.5;
+
+    float f1 = pow(min(d*10.0,0.5-d)*2.2,4.0);
+    float f2 = min(d*4.1,0.9-d)*2.0;
+    float f3 = pow(min(d2*2.0,0.7-d2)*2.2,4.0);
+
+    return vec4(color*f1 + vec4(zb3)*f3 - vec4(zb4)*(f2*0.5));
+}
+
+// ---------------- CELLS ----------------
+
+vec4 Cells(vec2 p, vec2 move, float numCells, float count, float blur) {
+    vec2 inp = (p + move) * numCells;
+
+    float d = 1.0;
+    vec2 pos;
+    vec2 te;
+
+    for (int xo=-1; xo<=1; xo++) {
+        for (int yo=-1; yo<=1; yo++) {
+            vec2 tp = floor(inp) + vec2(xo,yo);
+            vec2 rr = mod(tp,numCells);
+
+            tp += (hash2a(rr,iTime*0.1*u_speed) + hash2a(rr,iTime*0.1*u_speed+0.25))*0.5;
+
+            vec2 l = inp - tp;
+            float dr = dot(l,l);
+
+            if (hashNull(rr)>count && d>dr) {
+                d = dr;
+                pos = tp;
+            }
+        }
+    }
+
+    if (d >= 0.06*u_bubbleSize) return vec4(0.0);
+
+    te = inp - pos;
+
+    if (d < 0.04*u_bubbleSize)
+        uv += te * d * 2.0 * u_animationIntensity;
+
+    return booble(te,p,numCells);
+}
+
+// ---------------- MAIN ----------------
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    uv = fragCoord.xy / iResolution.y * 0.5;
+
+    vec2 l1 = vec2(iTime*0.02) * u_speed;
+    vec2 l2 = vec2(-iTime*0.01, iTime*0.007) * u_speed;
+    vec2 l3 = vec2(0.0, iTime*0.01) * u_speed;
+
+    float cs = 2.0 / u_bubbleCount;
+
+    vec4 bubbles = vec4(0.0);
+    bubbles += Cells(uv, vec2(20.2449,93.78)+l1, 2.0*cs, 0.5, 0.0) * 1.8;
+    bubbles += Cells(uv, vec2(0.0),            3.0*cs, 0.5, 0.0) * 1.4;
+    bubbles += Cells(uv, vec2(230.79,193.2)+l2,4.0*cs, 0.5, 0.0) * 1.1;
+    bubbles += Cells(uv, vec2(200.19,393.2)+l3,7.0*cs, 0.8, 0.0) * 1.3;
+    bubbles += Cells(uv, vec2(10.3245,233.645)+l3,9.2*cs,0.9, 0.0) * 1.6;
+    bubbles += Cells(uv, vec2(10.3245,233.645)+l3,14.2*cs,0.95,0.0) * 1.6;
+
+    // grayscale intensity
+    float intensity = length(bubbles.rgb);
+    vec3 color = vec3(intensity);
+
+    // blue tint (optional)
+    color *= vec3(0.2, 0.6, 1.0);
+
+    // smooth solid alpha
+    float alpha = smoothstep(0.0, 0.25, intensity);
+    alpha = pow(alpha, 0.7);
+    alpha = max(alpha, 0.12); // prevent holes
+
+    fragColor = vec4(color, alpha);
+}
+
+void main() {
+    vec4 col;
+    mainImage(col, gl_FragCoord.xy);
+    gl_FragColor = col;
+}

@@ -24,10 +24,10 @@ export default {
         },
 
         primary: {
-          DEFAULT: colors.primary,
-          hover:   colors.primaryHover,
-          dim:     colors.primaryDim,
-          subtle:  colors.primarySubtle,
+          DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+          hover:   'rgb(var(--primary-hover) / <alpha-value>)',
+          dim:     'rgb(var(--primary-dim) / <alpha-value>)',
+          subtle:  'rgb(var(--primary-subtle) / <alpha-value>)',
         },
       },
     },

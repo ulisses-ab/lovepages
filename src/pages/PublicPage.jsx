@@ -61,31 +61,68 @@ export default function PublicPage({ slug: slugProp }) {
   const colGap     = page.settings?.columnGap     ?? 16
   const colPadding = page.settings?.columnPadding ?? 24
 
+  // Drawing blocks: public visitors can append their own drawings via a
+  // security-definer RPC function that bypasses normal RLS.
+  function makeDrawingChange(block) {
+    return function(patch) {
+      if (!patch.drawings) return
+      // Find drawings that are new (not already in the block)
+      const existingIds = new Set((block.drawings || []).map(d => d.id))
+      const newDrawings = patch.drawings.filter(d => !existingIds.has(d.id))
+      // Update local UI immediately
+      setPage(p => ({
+        ...p,
+        blocks: (p.blocks || []).map(b => b.id === block.id ? { ...b, ...patch } : b),
+      }))
+      // Persist each new drawing via RPC
+      newDrawings.forEach(drawing => {
+        supabase.rpc('append_drawing', {
+          p_page_id: page.id,
+          p_block_id: block.id,
+          p_drawing: drawing,
+        }).then(({ error }) => {
+          if (error) console.error('drawing save failed:', error.message)
+        })
+      })
+    }
+  }
+
+  function blockProps(block) {
+    return block.type === 'drawing' ? { block, onChange: makeDrawingChange(block) } : { block }
+  }
+
   return (
-    <PageBgWrapper settings={page.settings} className="min-h-screen" style={{ overflowX: 'clip' }} viewportFixed>
-      {segments.map((seg, i) =>
-        seg.fullBleed ? (
-          <BlockRenderer key={seg.block.id} block={seg.block} />
+    <PageBgWrapper settings={page.settings} className="min-h-[100dvh]" style={{ overflowX: 'clip' }} viewportFixed>
+      {segments.map((seg, i) => {
+        const isLast = i === segments.length - 1
+        return seg.fullBleed ? (
+          <BlockRenderer key={seg.block.id} {...blockProps(seg.block)} />
         ) : (
           <div
             key={i}
             className="flex flex-col max-w-3xl mx-auto"
-            style={{ gap: colGap, padding: colPadding }}
+            style={{
+              gap: colGap,
+              paddingTop: colPadding,
+              paddingLeft: colPadding,
+              paddingRight: colPadding,
+              paddingBottom: isLast ? 0 : colPadding,
+            }}
           >
             {seg.blocks.map(block => (
-              <BlockRenderer key={block.id} block={block} />
+              <BlockRenderer key={block.id} {...blockProps(block)} />
             ))}
           </div>
         )
-      )}
-      <footer className="text-center py-8">
-        <a
-          href={window.location.origin}
-          className="text-fg-faint text-xs hover:text-fg-muted transition-colors"
-        >
-          Made with 💌 lovepages
-        </a>
-      </footer>
+      })}
+      {/* Fixed watermark — not in scroll flow so the page ends at the last block */}
+      <a
+        href={window.location.origin}
+        style={{ position: 'fixed', bottom: 10, right: 14, zIndex: 50 }}
+        className="text-fg-faint/60 text-[10px] hover:text-fg-muted transition-colors pointer-events-auto"
+      >
+        made with lovepages
+      </a>
     </PageBgWrapper>
   )
 }

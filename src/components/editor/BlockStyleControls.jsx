@@ -58,14 +58,14 @@ export default function BlockStyleControls({ block, onChange }) {
               displayFn={v => `${v}°`}
             />
             <SliderRow
-              label="Scale (wide)"
+              label="Scale (desktop)"
               value={scaleDesktop}
               min={0.1} max={3} step={0.05}
               onChange={v => onChange({ scaleDesktop: v, scale: undefined })}
               displayFn={v => `${v.toFixed(2)}×`}
             />
             <SliderRow
-              label="Scale (narrow)"
+              label="Scale (mobile)"
               value={scaleMobile}
               min={0.1} max={3} step={0.05}
               onChange={v => onChange({ scaleMobile: v, scale: undefined })}

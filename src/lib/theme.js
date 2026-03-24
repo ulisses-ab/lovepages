@@ -5,10 +5,16 @@
  */
 export const colors = {
   // Page-level backgrounds
-  base:    '#181d23', // outermost page bg
-  surface: '#1a202a', // panels, cards
-  overlay: '#3a4453', // inputs, secondary surfaces, panel borders
-  subtle:  '#5a616a', // input borders, hover backgrounds
+  base:    '#0d0b10', // outermost page bg
+  surface: '#131118', // panels, cards
+  overlay: '#2a2535', // inputs, secondary surfaces, panel borders
+  subtle:  '#3d3649', // input borders, hover backgrounds
+
+  // Logo colors
+  logoOrange:  '#ff751f',
+  logoRed:     '#ff3131',
+  logoGreen:   '#00bf63',
+  logoBlue:    '#38b6ff',
 
   // Foreground / text
   fg:          '#f3f4f6', // primary text

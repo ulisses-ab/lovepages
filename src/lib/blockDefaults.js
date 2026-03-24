@@ -11,8 +11,8 @@ export const BLOCK_TYPES = {
   CAROUSEL: 'carousel',
   CONTAINER: 'container',
   DRAWING: 'drawing',
-  CUSTOM: 'custom',
   GAME: 'game',
+  CUSTOM: 'custom',
 }
 
 export const TEXT_VARIANTS = ['plain', 'typewriter', 'postit', 'ransom']
@@ -91,4 +91,35 @@ export const BLOCK_ICONS = {
   custom: Code,
   drawing: PenLine,
   game: Gamepad2,
+}
+
+/** Logo-color accent per block type — used by BlockPanel and SortableBlock */
+export const BLOCK_ACCENTS = {
+  [BLOCK_TYPES.TEXT]:       colors.logoRed,
+  [BLOCK_TYPES.IMAGE]:      colors.logoOrange,
+  [BLOCK_TYPES.SONG]:       colors.logoBlue,
+  [BLOCK_TYPES.LINK]:       colors.logoGreen,
+  [BLOCK_TYPES.COUNTDOWN]:  colors.logoOrange,
+  [BLOCK_TYPES.CAROUSEL]:   colors.logoBlue,
+  [BLOCK_TYPES.DRAWING]:    colors.logoGreen,
+  [BLOCK_TYPES.GAME]:       colors.logoRed,
+  [BLOCK_TYPES.CUSTOM]:     colors.logoOrange,
+  [BLOCK_TYPES.CONTAINER]:  colors.logoBlue,
+}
+
+/**
+ * CSS variable overrides (RGB channels) per block type.
+ * Set these on a wrapper element to retheme all Tailwind `primary-*` classes within.
+ */
+export const BLOCK_ACCENT_VARS = {
+  [BLOCK_TYPES.TEXT]:       { '--primary': '255 49 49',   '--primary-hover': '255 90 90',   '--primary-dim': '255 140 140', '--primary-subtle': '74 10 10'  },
+  [BLOCK_TYPES.IMAGE]:     { '--primary': '255 117 31',  '--primary-hover': '255 150 80',  '--primary-dim': '255 180 130', '--primary-subtle': '78 35 4'   },
+  [BLOCK_TYPES.SONG]:      { '--primary': '56 182 255',  '--primary-hover': '100 200 255', '--primary-dim': '150 215 255', '--primary-subtle': '8 45 78'   },
+  [BLOCK_TYPES.LINK]:      { '--primary': '0 191 99',    '--primary-hover': '50 210 135',  '--primary-dim': '110 230 175', '--primary-subtle': '4 60 30'   },
+  [BLOCK_TYPES.COUNTDOWN]: { '--primary': '255 117 31',  '--primary-hover': '255 150 80',  '--primary-dim': '255 180 130', '--primary-subtle': '78 35 4'   },
+  [BLOCK_TYPES.CAROUSEL]:  { '--primary': '56 182 255',  '--primary-hover': '100 200 255', '--primary-dim': '150 215 255', '--primary-subtle': '8 45 78'   },
+  [BLOCK_TYPES.DRAWING]:   { '--primary': '0 191 99',    '--primary-hover': '50 210 135',  '--primary-dim': '110 230 175', '--primary-subtle': '4 60 30'   },
+  [BLOCK_TYPES.GAME]:      { '--primary': '255 49 49',   '--primary-hover': '255 90 90',   '--primary-dim': '255 140 140', '--primary-subtle': '74 10 10'  },
+  [BLOCK_TYPES.CUSTOM]:    { '--primary': '255 117 31',  '--primary-hover': '255 150 80',  '--primary-dim': '255 180 130', '--primary-subtle': '78 35 4'   },
+  [BLOCK_TYPES.CONTAINER]: { '--primary': '56 182 255',  '--primary-hover': '100 200 255', '--primary-dim': '150 215 255', '--primary-subtle': '8 45 78'   },
 }

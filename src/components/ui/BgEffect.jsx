@@ -1,7 +1,15 @@
-import { useMemo, useRef, useEffect } from 'react'
+import { useMemo, useRef, useEffect, lazy, Suspense } from 'react'
 import normalFrag from './bubbles/normal.glsl?raw';
 import rainbowFrag from './bubbles/rainbow.glsl?raw';
 import blueFrag from './bubbles/blue.glsl?raw';
+
+const PrismLazy = lazy(() => import('./Prism'))
+const LightRaysLazy = lazy(() => import('./LightRays'))
+const PixelBlastLazy = lazy(() => import('./PixelBlast'))
+const ColorBendsLazy = lazy(() => import('./ColorBends'))
+const PrismaticBurstLazy = lazy(() => import('./PrismaticBurst'))
+const IridescenceLazy = lazy(() => import('./Iridescence'))
+const LetterGlitchLazy = lazy(() => import('./LetterGlitch'))
 
 
 // Deterministic pseudo-random — same seed always gives the same layout
@@ -113,8 +121,8 @@ function SoapBubbles({ pos = 'fixed', variant = 'normal' }) {
       let start = null
   
       function resize() {
-        const w = canvas.clientWidth  || canvas.offsetWidth  || window.innerWidth  || 300
-        const h = canvas.clientHeight || canvas.offsetHeight || window.innerHeight || 300
+        const w = canvas.clientWidth  || canvas.offsetWidth  || 300
+        const h = canvas.clientHeight || canvas.offsetHeight || 300
         if (canvas.width !== w || canvas.height !== h) {
           canvas.width  = w
           canvas.height = h
@@ -138,13 +146,117 @@ function SoapBubbles({ pos = 'fixed', variant = 'normal' }) {
     return (
       <canvas
         ref={canvasRef}
-        style={{ position: pos, inset: 0, pointerEvents: 'none', zIndex: 0 }}
+        style={{ position: pos, inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
       />
     )
   }
 
-export default function BgEffect({ effect, variant = 'normal', pos = 'fixed' }) {
+export default function BgEffect({ effect, variant = 'normal', color, options, pos = 'fixed' }) {
   if (effect === 'bubbles')      return <Bubbles     pos={pos} />
   if (effect === 'soap-bubbles') return <SoapBubbles pos={pos} variant={variant} />
+  if (effect === 'prism') return (
+    <Suspense fallback={null}>
+      <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+        <PrismLazy />
+      </div>
+    </Suspense>
+  )
+  if (effect === 'light-rays') return (
+    <Suspense fallback={null}>
+      <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+        <LightRaysLazy followMouse={false} />
+      </div>
+    </Suspense>
+  )
+  if (effect === 'pixel-blast') {
+    const o = options || {}
+    return (
+      <Suspense fallback={null}>
+        <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+          <PixelBlastLazy
+            color={color || '#B19EEF'}
+            variant={o.variant || 'square'}
+            pixelSize={o.pixelSize ?? 4}
+            patternScale={o.patternScale ?? 2}
+            patternDensity={o.patternDensity ?? 1}
+            pixelSizeJitter={o.pixelJitter ?? 0}
+            speed={o.speed ?? 0.5}
+            edgeFade={o.edgeFade ?? 0.25}
+            enableRipples={o.ripples ?? false}
+            liquid={o.liquid ?? false}
+          />
+        </div>
+      </Suspense>
+    )
+  }
+  if (effect === 'color-bends') {
+    const o = options || {}
+    return (
+      <Suspense fallback={null}>
+        <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+          <ColorBendsLazy
+            colors={o.colors || []}
+            speed={o.speed ?? 0.2}
+            scale={o.scale ?? 1}
+            frequency={o.frequency ?? 1}
+            warpStrength={o.warpStrength ?? 1}
+            rotation={o.rotation ?? 45}
+            noise={o.noise ?? 0.1}
+            mouseInfluence={0}
+            parallax={0}
+          />
+        </div>
+      </Suspense>
+    )
+  }
+  if (effect === 'prismatic-burst') {
+    const o = options || {}
+    return (
+      <Suspense fallback={null}>
+        <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+          <PrismaticBurstLazy
+            intensity={o.intensity ?? 2}
+            speed={o.speed ?? 0.5}
+            animationType={o.animationType || 'rotate3d'}
+            colors={o.colors || []}
+            distort={o.distort ?? 0}
+            rayCount={o.rayCount ?? 0}
+          />
+        </div>
+      </Suspense>
+    )
+  }
+  if (effect === 'iridescence') {
+    const o = options || {}
+    const c = o.color || [1, 1, 1]
+    return (
+      <Suspense fallback={null}>
+        <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+          <IridescenceLazy
+            color={c}
+            speed={o.speed ?? 1.0}
+            amplitude={o.amplitude ?? 0.1}
+            mouseReact={false}
+          />
+        </div>
+      </Suspense>
+    )
+  }
+  if (effect === 'letter-glitch') {
+    const o = options || {}
+    return (
+      <Suspense fallback={null}>
+        <div style={{ position: pos, inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+          <LetterGlitchLazy
+            glitchColors={o.colors || ['#2b4539', '#61dca3', '#61b3dc']}
+            glitchSpeed={o.speed ?? 50}
+            smooth={o.smooth ?? true}
+            outerVignette={o.outerVignette ?? true}
+            centerVignette={o.centerVignette ?? false}
+          />
+        </div>
+      </Suspense>
+    )
+  }
   return null
 }

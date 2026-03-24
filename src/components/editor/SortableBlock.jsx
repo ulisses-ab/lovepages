@@ -1,10 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import BlockRenderer from '../blocks/BlockRenderer'
 import ContainerBlock, { ContainerSettingsPanel } from '../blocks/ContainerBlock'
 import BlockStyleControls from './BlockStyleControls'
-import { BLOCK_ICONS, BLOCK_LABELS } from '../../lib/blockDefaults'
+import { BLOCK_ICONS, BLOCK_LABELS, BLOCK_ACCENTS, BLOCK_ACCENT_VARS } from '../../lib/blockDefaults'
+import { colors } from '../../lib/theme'
 import { HelpCircle } from 'lucide-react'
 import { useT } from '../../lib/i18n'
 
@@ -12,44 +13,10 @@ function getIcon(type) {
   return BLOCK_ICONS[type] ?? HelpCircle
 }
 
-function DeleteMenu({ onDelete, onClose, t }) {
-  const [confirming, setConfirming] = useState(false)
-  return (
-    <div className="py-1">
-      {confirming ? (
-        <div className="px-3 py-2 space-y-2">
-          <p className="text-xs text-fg-muted">{t('sortable.removeBlock')}</p>
-          <div className="flex gap-1.5">
-            <button
-              onClick={onClose}
-              className="flex-1 text-xs py-1.5 rounded bg-overlay text-fg-muted hover:bg-subtle transition"
-            >
-              {t('dashboard.cancel')}
-            </button>
-            <button
-              onClick={onDelete}
-              className="flex-1 text-xs py-1.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition font-medium"
-            >
-              {t('sortable.remove')}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          onClick={() => setConfirming(true)}
-          className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-red-500/10 transition"
-        >
-          {t('sortable.deleteBlock')}
-        </button>
-      )}
-    </div>
-  )
-}
 
 export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget, onHoverBlock }) {
   const [expanded, setExpanded] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef(null)
+  const [confirming, setConfirming] = useState(false)
   const { t } = useT()
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -61,15 +28,6 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
     transition,
   }
 
-  useEffect(() => {
-    if (!menuOpen) return
-    function handleClick(e) {
-      if (!menuRef.current?.contains(e.target)) setMenuOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [menuOpen])
-
   function handleChange(patch) {
     onUpdate(block.id, patch)
   }
@@ -78,28 +36,41 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
     return (
       <div
         ref={setNodeRef}
-        style={style}
-        className="rounded-xl border-2 border-dashed border-primary bg-surface h-12"
+        className="rounded-xl border-2 border-dashed border-primary/60 h-12"
+        style={{ ...style, background: 'rgba(19,17,24,0.5)' }}
       />
     )
   }
 
   const isContainerDropTarget = isDropTarget && block.type === 'container'
   const blockLabel = BLOCK_LABELS[block.type] ?? t(`block.${block.type}`)
+  const accent = BLOCK_ACCENTS[block.type] || colors.logoBlue
+  const accentVars = BLOCK_ACCENT_VARS[block.type] || {}
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
       onMouseEnter={() => onHoverBlock?.(block.id)}
       onMouseLeave={() => onHoverBlock?.(null)}
-      className={`relative bg-surface rounded-xl border transition ${
+      className={`relative rounded-xl border transition ${
         expanded
-          ? 'border-primary shadow-md shadow-primary-subtle/30'
+          ? ''
           : isContainerDropTarget
             ? 'border-primary ring-2 ring-primary/40'
-            : 'border-overlay hover:border-subtle'
+            : 'border-overlay/70 hover:border-subtle'
       }`}
+      style={{
+        ...style,
+        '--primary': accentVars['--primary'],
+        '--primary-hover': accentVars['--primary-hover'],
+        '--primary-dim': accentVars['--primary-dim'],
+        '--primary-subtle': accentVars['--primary-subtle'],
+        ...(expanded ? { borderColor: `${accent}b3` } : {}),
+        background: `radial-gradient(circle at 95% 50%, ${accent}18 0%, rgba(19,17,24,0.80) 65%)`,
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: expanded ? `0 0 0 1px ${accent}40, 0 4px 24px rgba(0,0,0,0.4)` : '0 2px 12px rgba(0,0,0,0.3)',
+      }}
     >
       {isDropTarget && !isContainerDropTarget && (
         <div className="absolute -top-1.5 left-0 right-0 h-0.5 bg-primary rounded-full z-20 pointer-events-none" />
@@ -117,7 +88,7 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
         className="flex items-center gap-2 px-3 py-2 cursor-grab active:cursor-grabbing touch-none"
       >
         <span className="text-fg-ghost select-none text-sm" title={t('sortable.dragToReorder')}>⠿</span>
-        {(() => { const Icon = getIcon(block.type); return <Icon size={15} className="text-fg-secondary shrink-0" /> })()}
+        {(() => { const Icon = getIcon(block.type); return <Icon size={15} className="shrink-0" style={{ color: accent }} /> })()}
         <span className="text-sm font-medium text-fg-secondary flex-1 select-none">{blockLabel}</span>
 
         <button
@@ -125,28 +96,39 @@ export default function SortableBlock({ block, onUpdate, onDelete, isDropTarget,
           onPointerDown={e => e.stopPropagation()}
           className={`text-xs px-3 py-1.5 rounded transition font-medium ${
             expanded
-              ? 'bg-primary/20 text-primary-dim hover:bg-primary/30'
-              : 'text-fg-muted hover:text-primary-dim hover:bg-primary-subtle/50'
+              ? 'hover:opacity-80'
+              : 'text-fg-muted hover:text-fg hover:bg-overlay'
           }`}
+          style={expanded ? { backgroundColor: `${accent}33`, color: `${accent}cc` } : {}}
         >
-          {expanded ? `✓ ${t('sortable.done')}` : `✏ ${t('sortable.edit')}`}
+          {expanded ? t('sortable.done') : t('sortable.edit')}
         </button>
 
-        <div ref={menuRef} className="relative">
+        {confirming ? (
+          <div className="flex items-center gap-1.5" onPointerDown={e => e.stopPropagation()}>
+            <button
+              onClick={() => setConfirming(false)}
+              className="text-xs px-2 py-1 rounded text-fg-muted hover:text-fg transition"
+            >
+              {t('dashboard.cancel')}
+            </button>
+            <button
+              onClick={() => onDelete(block.id)}
+              className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 transition font-medium"
+            >
+              {t('sortable.remove')}
+            </button>
+          </div>
+        ) : (
           <button
-            onClick={() => setMenuOpen(v => !v)}
+            onClick={() => setConfirming(true)}
             onPointerDown={e => e.stopPropagation()}
-            className="text-fg-ghost hover:text-fg-muted w-7 h-7 flex items-center justify-center rounded transition text-lg leading-none"
-            title={t('sortable.more')}
+            className="text-fg-ghost hover:text-red-400 w-6 h-6 flex items-center justify-center rounded transition text-base leading-none"
+            title={t('sortable.deleteBlock')}
           >
-            ⋯
+            ×
           </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 z-30 bg-surface border border-overlay rounded-lg shadow-xl min-w-[150px]">
-              <DeleteMenu onDelete={() => { onDelete(block.id); setMenuOpen(false) }} onClose={() => setMenuOpen(false)} t={t} />
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Expanded editor */}

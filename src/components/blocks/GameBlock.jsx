@@ -1,91 +1,106 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { inputClass } from '../../lib/theme'
 import GameWordleVariant from './game/GameWordleVariant'
 
 /* ── CRT TV shell (resting state) ──────────────────────────────────────────── */
 
-const TV_BEZEL = '#1a1a1e'
-const TV_BODY  = '#232328'
-const TV_LIGHT = '#3a3a40'
-const TV_EDGE  = '#111114'
+/* Warm silver-gray plastic body — like a real 90s/2000s tube TV */
+const TV_PLASTIC     = '#c8c0b8'   /* main body — warm gray plastic */
+const TV_PLASTIC_LIT = '#d8d2ca'   /* top highlight — light catch on plastic */
+const TV_PLASTIC_DK  = '#9e968e'   /* underside shadow */
+const TV_BEZEL_RING  = '#3a3632'   /* dark ring around the screen inset */
 
-function CrtScreen({ label, isOn }) {
+function CrtScreen({ label }) {
   return (
     <div style={{
       position: 'relative',
       width: '100%',
-      paddingBottom: '66%',
+      paddingBottom: '72%',
       overflow: 'hidden',
-      borderRadius: 8,
-      background: isOn ? 'radial-gradient(ellipse at center, #1a2a1a 0%, #0a0f0a 80%)' : '#0a0a0c',
-      boxShadow: isOn
-        ? 'inset 0 0 60px rgba(80,200,80,0.08), inset 0 0 20px rgba(0,0,0,0.5)'
-        : 'inset 0 0 30px rgba(0,0,0,0.6)',
+      borderRadius: 12,
+      /* Blue-channel idle screen — like a TV tuned to no signal */
+      background: 'radial-gradient(ellipse 90% 80% at 50% 48%, #2844a8 0%, #1a2e78 40%, #0e1a4a 75%, #060d2a 100%)',
+      boxShadow: 'inset 0 0 50px rgba(30,60,160,0.15), inset 0 0 20px rgba(0,0,0,0.4)',
     }}>
-      {/* Convex glass highlight */}
+      {/* Convex glass highlight — strong curved reflection */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'radial-gradient(ellipse 70% 55% at 40% 35%, rgba(255,255,255,0.07) 0%, transparent 100%)',
+        background: 'radial-gradient(ellipse 60% 40% at 35% 30%, rgba(255,255,255,0.13) 0%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
+      {/* Secondary specular — bottom-right edge glow from room light */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 30% 20% at 75% 80%, rgba(180,200,255,0.06) 0%, transparent 100%)',
         pointerEvents: 'none',
       }} />
 
-      {/* Scanlines */}
+      {/* Subtle scanlines */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px)',
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px)',
         pointerEvents: 'none',
         zIndex: 1,
       }} />
 
-      {/* Screen content */}
+      {/* Screen content — warm white channel text */}
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none',
         zIndex: 2,
       }}>
-        {isOn ? (
-          <>
-            {/* Static noise canvas (subtle) */}
-            <CrtNoise />
-            {/* Title / prompt */}
-            <div style={{
-              fontFamily: "'Courier New', Courier, monospace",
-              fontSize: 13, fontWeight: 700,
-              color: '#5aff5a',
-              textShadow: '0 0 8px rgba(90,255,90,0.6), 0 0 20px rgba(90,255,90,0.3)',
-              textTransform: 'uppercase',
-              letterSpacing: 3,
-              textAlign: 'center',
-              padding: '0 20px',
-              zIndex: 3,
-              animation: 'crt-blink 1.2s ease-in-out infinite',
-            }}>
-              {label || 'Press to play'}
-            </div>
-            {/* Blinking cursor */}
-            <div style={{
-              width: 10, height: 2,
-              backgroundColor: '#5aff5a',
-              boxShadow: '0 0 6px rgba(90,255,90,0.8)',
-              marginTop: 8,
-              animation: 'crt-blink 1s step-end infinite',
-              zIndex: 3,
-            }} />
-          </>
-        ) : (
+        {/* Subtle static noise */}
+        <CrtNoise />
+
+        {/* Channel number — top left like a real TV */}
+        <div style={{
+          position: 'absolute', top: '8%', left: '7%',
+          fontFamily: "'Courier New', Courier, monospace",
+          fontSize: 18, fontWeight: 700,
+          color: 'rgba(220,225,255,0.7)',
+          textShadow: '0 0 10px rgba(180,200,255,0.4)',
+          zIndex: 3,
+        }}>
+          CH 03
+        </div>
+
+        {/* Play triangle + label — centered */}
+        <div style={{
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: 10, zIndex: 3,
+        }}>
+          {/* Play triangle */}
           <div style={{
-            width: 3, height: 3, borderRadius: '50%',
-            backgroundColor: '#333',
+            width: 0, height: 0,
+            borderLeft: '20px solid rgba(230,235,255,0.85)',
+            borderTop: '13px solid transparent',
+            borderBottom: '13px solid transparent',
+            filter: 'drop-shadow(0 0 12px rgba(180,200,255,0.4))',
           }} />
-        )}
+          {/* Label */}
+          <div style={{
+            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontSize: 13, fontWeight: 600,
+            color: 'rgba(220,230,255,0.9)',
+            textShadow: '0 0 12px rgba(180,200,255,0.5)',
+            textTransform: 'uppercase',
+            letterSpacing: 2.5,
+            textAlign: 'center',
+            padding: '0 16px',
+          }}>
+            {label || 'Press to play'}
+          </div>
+        </div>
       </div>
 
-      {/* Edge vignette for convex effect */}
+      {/* Edge vignette — strong for convex glass tube look */}
       <div style={{
         position: 'absolute', inset: 0,
-        boxShadow: 'inset 0 0 40px 15px rgba(0,0,0,0.5)',
-        borderRadius: 8,
+        boxShadow: 'inset 0 0 50px 20px rgba(0,0,0,0.55)',
+        borderRadius: 12,
         pointerEvents: 'none',
         zIndex: 3,
       }} />
@@ -107,14 +122,14 @@ function CrtNoise() {
 
     const draw = () => {
       frame++
-      if (frame % 4 !== 0) { rafRef.current = requestAnimationFrame(draw); return }
+      if (frame % 5 !== 0) { rafRef.current = requestAnimationFrame(draw); return }
       const imgData = ctx.createImageData(120, 80)
       for (let i = 0; i < imgData.data.length; i += 4) {
-        const v = Math.random() * 20
-        imgData.data[i] = v
-        imgData.data[i+1] = v + Math.random() * 8
-        imgData.data[i+2] = v
-        imgData.data[i+3] = 18
+        const v = Math.random() * 30 + 10
+        imgData.data[i]   = v * 0.7        /* R — muted */
+        imgData.data[i+1] = v * 0.75       /* G */
+        imgData.data[i+2] = v * 1.1        /* B — slight blue tint */
+        imgData.data[i+3] = 12             /* very subtle */
       }
       ctx.putImageData(imgData, 0, 0)
       rafRef.current = requestAnimationFrame(draw)
@@ -129,7 +144,7 @@ function CrtNoise() {
       style={{
         position: 'absolute', inset: 0,
         width: '100%', height: '100%',
-        opacity: 0.5,
+        opacity: 0.4,
         pointerEvents: 'none',
         imageRendering: 'pixelated',
       }}
@@ -141,81 +156,125 @@ function CrtTvShell({ block, onClick }) {
   const [hover, setHover] = useState(false)
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      style={{ cursor: 'pointer', userSelect: 'none', maxWidth: 420, margin: '0 auto' }}
+      style={{
+        cursor: 'pointer',
+        userSelect: 'none',
+        maxWidth: 400,
+        margin: '0 auto',
+        display: 'block',
+        width: '100%',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        textAlign: 'left',
+        WebkitTapHighlightColor: 'transparent',
+      }}
     >
-      {/* Outer body */}
+      {/* Outer plastic body — chunky tube TV shape */}
       <div style={{
         position: 'relative',
-        background: `linear-gradient(170deg, ${TV_LIGHT} 0%, ${TV_BODY} 25%, ${TV_BEZEL} 60%, ${TV_EDGE} 100%)`,
-        borderRadius: 18,
-        padding: '18px 18px 12px',
+        background: `linear-gradient(175deg, ${TV_PLASTIC_LIT} 0%, ${TV_PLASTIC} 35%, ${TV_PLASTIC_DK} 100%)`,
+        borderRadius: '20px 20px 12px 12px',
+        padding: '20px 22px 10px',
         boxShadow: hover
-          ? '0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)'
-          : '0 6px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03), inset 0 1px 0 rgba(255,255,255,0.05)',
+          ? '0 10px 40px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.4)'
+          : '0 6px 24px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.35)',
         transition: 'box-shadow 0.25s ease, transform 0.25s ease',
         transform: hover ? 'scale(1.015)' : 'scale(1)',
       }}>
-        {/* Inner bezel */}
+        {/* Subtle plastic texture — top sheen line */}
         <div style={{
-          border: '3px solid #0c0c0e',
-          borderRadius: 10,
-          padding: 4,
-          backgroundColor: '#0e0e10',
-          boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6)',
+          position: 'absolute', top: 0, left: 20, right: 20, height: 1,
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+          borderRadius: '20px 20px 0 0',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Dark screen inset — thick bezel ring */}
+        <div style={{
+          background: TV_BEZEL_RING,
+          borderRadius: 14,
+          padding: '8px 8px 6px',
+          boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.1)',
         }}>
-          <CrtScreen label={block.gameTitle || 'Press to play'} isOn={true} />
+          <CrtScreen label={block.gameTitle || 'Press to play'} />
         </div>
 
-        {/* Bottom bar: speaker grille + power LED + brand */}
+        {/* Bottom panel — speaker + controls side by side like a real TV */}
         <div style={{
           display: 'flex', alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '10px 8px 2px',
+          padding: '10px 6px 6px',
         }}>
-          {/* Speaker grille */}
-          <div style={{ display: 'flex', gap: 2 }}>
-            {Array.from({ length: 8 }).map((_, i) => (
+          {/* Speaker grille — horizontal slots */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', gap: 2.5,
+            padding: '2px 0',
+          }}>
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{
-                width: 2, height: 12, borderRadius: 1,
-                backgroundColor: i % 2 === 0 ? '#2a2a2e' : '#1e1e22',
+                width: 48, height: 2, borderRadius: 1,
+                backgroundColor: i % 2 === 0 ? '#a8a098' : '#b8b0a8',
+                boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.15)',
               }} />
             ))}
           </div>
 
-          {/* Brand label */}
+          {/* Brand label — embossed into plastic */}
           <div style={{
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-            fontSize: 9, fontWeight: 600,
-            color: '#555',
-            letterSpacing: 2.5,
+            fontSize: 8, fontWeight: 700,
+            color: '#8a8480',
+            letterSpacing: 2,
             textTransform: 'uppercase',
+            textShadow: '0 1px 0 rgba(255,255,255,0.3)',
           }}>
             lovepages
           </div>
 
-          {/* Power LED + channel knob */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Controls cluster — power LED + two knobs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            {/* Power LED */}
             <div style={{
-              width: 6, height: 6, borderRadius: '50%',
-              backgroundColor: '#3ade3a',
-              boxShadow: '0 0 6px rgba(58,222,58,0.6), 0 0 12px rgba(58,222,58,0.3)',
+              width: 5, height: 5, borderRadius: '50%',
+              backgroundColor: '#e83030',
+              boxShadow: '0 0 4px rgba(232,48,48,0.5), 0 0 10px rgba(232,48,48,0.2)',
             }} />
-            {/* Volume dial */}
+            {/* Channel knob */}
             <div style={{
-              width: 14, height: 14, borderRadius: '50%',
-              background: 'linear-gradient(145deg, #3a3a3e, #222226)',
-              border: '1px solid #444',
+              width: 16, height: 16, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #b0a8a0, #888078)',
+              border: '1.5px solid #6e6860',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)',
+              position: 'relative',
+            }}>
+              {/* Knob indicator line */}
+              <div style={{
+                position: 'absolute', top: 3, left: '50%',
+                width: 1.5, height: 5, borderRadius: 1,
+                backgroundColor: '#555',
+                transform: 'translateX(-50%) rotate(20deg)',
+                transformOrigin: 'bottom center',
+              }} />
+            </div>
+            {/* Volume knob */}
+            <div style={{
+              width: 16, height: 16, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #b0a8a0, #888078)',
+              border: '1.5px solid #6e6860',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)',
               position: 'relative',
             }}>
               <div style={{
-                position: 'absolute', top: 2, left: '50%',
-                width: 1.5, height: 4, borderRadius: 1,
-                backgroundColor: '#666',
-                transform: 'translateX(-50%) rotate(-30deg)',
+                position: 'absolute', top: 3, left: '50%',
+                width: 1.5, height: 5, borderRadius: 1,
+                backgroundColor: '#555',
+                transform: 'translateX(-50%) rotate(-40deg)',
                 transformOrigin: 'bottom center',
               }} />
             </div>
@@ -223,27 +282,7 @@ function CrtTvShell({ block, onClick }) {
         </div>
       </div>
 
-      {/* Feet / stand */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 100, marginTop: -2 }}>
-        <div style={{
-          width: 40, height: 6,
-          background: `linear-gradient(to bottom, ${TV_BODY}, ${TV_EDGE})`,
-          borderRadius: '0 0 6px 6px',
-        }} />
-        <div style={{
-          width: 40, height: 6,
-          background: `linear-gradient(to bottom, ${TV_BODY}, ${TV_EDGE})`,
-          borderRadius: '0 0 6px 6px',
-        }} />
-      </div>
-
-      <style>{`
-        @keyframes crt-blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
-    </div>
+    </button>
   )
 }
 
@@ -270,7 +309,7 @@ function GameModal({ block, onClose }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
@@ -286,6 +325,7 @@ function GameModal({ block, onClose }) {
         WebkitBackdropFilter: 'blur(8px)',
         opacity: ready ? 1 : 0,
         transition: 'opacity 0.3s ease',
+        pointerEvents: 'none',
       }} />
 
       {/* Content container — scales up from small */}
@@ -322,7 +362,8 @@ function GameModal({ block, onClose }) {
 
         <GameWordleVariant block={block} />
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -330,10 +371,6 @@ function GameModal({ block, onClose }) {
 
 export default function GameBlock({ block, isEditing, onChange }) {
   const [modalOpen, setModalOpen] = useState(false)
-
-  const handleOpen = useCallback(() => {
-    if (block.word) setModalOpen(true)
-  }, [block.word])
 
   if (isEditing) {
     return (
@@ -398,7 +435,7 @@ export default function GameBlock({ block, isEditing, onChange }) {
   // Public / preview mode — show CRT TV, click to open game
   return (
     <>
-      <CrtTvShell block={block} onClick={handleOpen} />
+      <CrtTvShell block={block} onClick={() => setModalOpen(true)} />
       {modalOpen && <GameModal block={block} onClose={() => setModalOpen(false)} />}
     </>
   )

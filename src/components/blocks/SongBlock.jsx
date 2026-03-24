@@ -10,6 +10,7 @@ import SongCoverVariant from './song/SongCoverVariant'
 import SongVinylVariant from './song/SongVinylVariant'
 import SongAeroVariant from './song/SongAeroVariant'
 import SongXPVariant from './song/SongXPVariant'
+import SongBubbleVariant from './song/SongBubbleVariant'
 
 function VariantCard({ label, selected, onClick, children }) {
   return (
@@ -88,6 +89,9 @@ export default function SongBlock({ block, isEditing, onChange }) {
       { value: 'xp', label: t('song.variantXp'), preview: (
         <ScaledPreview><SongXPVariant {...mockShared} /></ScaledPreview>
       )},
+      { value: 'bubble', label: t('song.variantBubble'), preview: (
+        <ScaledPreview><SongBubbleVariant {...mockShared} /></ScaledPreview>
+      )},
     ]
 
     return (
@@ -124,7 +128,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
               </VariantCard>
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="grid grid-cols-3 gap-2 mt-2">
             {VARIANTS.slice(3).map(({ value, label: vLabel, preview }) => (
               <VariantCard key={value} label={vLabel} selected={variant === value} onClick={() => onChange({ variant: value })}>
                 {preview}
@@ -134,7 +138,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
         </div>
 
         {/* Cover art — only for variants that use it */}
-        {(variant === 'cover' || variant === 'vinyl' || variant === 'xp') && (
+        {(variant === 'cover' || variant === 'vinyl' || variant === 'xp' || variant === 'aero' || variant === 'bubble') && (
           <div className="space-y-1">
             <p className="text-xs text-fg-muted">{t('song.coverImage')}</p>
             <ImageUpload
@@ -210,6 +214,7 @@ export default function SongBlock({ block, isEditing, onChange }) {
   if (variant === 'cover') return <><HiddenPlayer mountRef={mountRef} /><SongCoverVariant {...shared} /></>
   if (variant === 'vinyl') return <><HiddenPlayer mountRef={mountRef} /><SongVinylVariant {...shared} volume={volume} setVolume={setVolume} /></>
   if (variant === 'aero')  return <><HiddenPlayer mountRef={mountRef} /><SongAeroVariant  {...shared} /></>
-  if (variant === 'xp')    return <><HiddenPlayer mountRef={mountRef} /><SongXPVariant    {...shared} /></>
+  if (variant === 'xp')     return <><HiddenPlayer mountRef={mountRef} /><SongXPVariant     {...shared} /></>
+  if (variant === 'bubble') return <><HiddenPlayer mountRef={mountRef} /><SongBubbleVariant {...shared} /></>
   return <><HiddenPlayer mountRef={mountRef} /><SongBarVariant {...shared} /></>
 }

@@ -2,9 +2,9 @@ import { useRef, useState, useEffect } from 'react'
 import { formatTime } from './useSongPlayer'
 
 const BASE_W = 400
-const BASE_H = 218
+const BASE_H = 220
 
-// ─── SVG transport icons (crisp, no emoji) ──────────────────────────────────
+// ─── SVG transport icons ─────────────────────────────────────────────────────
 function IconPlay({ size = 16 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" style={{ display: 'block' }}>
@@ -36,66 +36,11 @@ function IconSkipFwd({ size = 12 }) {
     </svg>
   )
 }
-
-// ─── Gloss cap: white upper-half highlight — THE defining Aero signature ────
-// Works on any element; pass the borderRadius of the host.
-function GlossCap({ radius = '50% 50% 0 0 / 80% 80% 0 0', opacity = 0.62, height = '52%' }) {
+function IconStop({ size = 10 }) {
   return (
-    <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0, height,
-      borderRadius: radius,
-      background: `linear-gradient(to bottom, rgba(255,255,255,${opacity}), rgba(255,255,255,0.04))`,
-      pointerEvents: 'none',
-    }} />
-  )
-}
-
-// ─── Bokeh bubble (water / nature motif) ─────────────────────────────────────
-function Bubble({ size, top, left, opacity = 0.14 }) {
-  return (
-    <div style={{
-      position: 'absolute', top, left,
-      width: size, height: size, borderRadius: '50%',
-      background: `radial-gradient(circle at 34% 28%, rgba(255,255,255,${opacity * 2.0}), rgba(255,255,255,${opacity * 0.4}) 55%, transparent)`,
-      border: `1px solid rgba(255,255,255,${opacity})`,
-      pointerEvents: 'none',
-    }} />
-  )
-}
-
-// ─── Pill button (transport controls) ───────────────────────────────────────
-function PillButton({ onClick, children, disabled = false, wide = false }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        height: 24,
-        minWidth: wide ? 44 : 34,
-        paddingLeft: 10, paddingRight: 10,
-        borderRadius: 12,
-        border: 'none',
-        cursor: disabled ? 'default' : 'pointer',
-        background: 'linear-gradient(178deg, rgba(255,255,255,0.38) 0%, rgba(180,225,255,0.22) 40%, rgba(100,175,240,0.14) 100%)',
-        boxShadow: [
-          'inset 0 1.5px 3px rgba(255,255,255,0.70)',
-          'inset 0 -1.5px 2.5px rgba(0,0,0,0.22)',
-          '0 2px 6px rgba(0,0,0,0.38)',
-          '0 0 0 0.5px rgba(255,255,255,0.32)',
-        ].join(', '),
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'rgba(255,255,255,0.92)',
-        position: 'relative', overflow: 'hidden',
-        opacity: disabled ? 0.45 : 1,
-        transition: 'opacity 0.15s',
-      }}
-    >
-      {/* Gloss cap on each pill */}
-      <GlossCap radius="12px 12px 0 0" opacity={0.55} height="52%" />
-      <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center' }}>
-        {children}
-      </span>
-    </button>
+    <svg width={size} height={size} viewBox="0 0 10 10" fill="none" style={{ display: 'block' }}>
+      <rect x="1.5" y="1.5" width="7" height="7" rx="1" fill="currentColor" />
+    </svg>
   )
 }
 
@@ -120,8 +65,7 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
 
   const pct = progress.duration > 0 ? (progress.current / progress.duration) * 100 : 0
 
-  // Decorative EQ bars — heights cycle slowly when playing
-  const EQ_HEIGHTS = [6, 10, 14, 8, 12, 5, 11, 13, 7, 9, 11, 6, 10, 8, 13]
+  const EQ_HEIGHTS = [5, 9, 13, 7, 11, 4, 10, 14, 6, 8, 12, 5, 9, 7, 13, 6, 10, 8]
 
   return (
     <div ref={wrapRef} className="w-full select-none" style={{ position: 'relative', height: BASE_H * sc }}>
@@ -130,390 +74,504 @@ export default function SongAeroVariant({ block, playing, ready, progress, toggl
         transformOrigin: 'top left', transform: `scale(${sc})`,
       }}>
 
-        {/* ═══════════════════════════════════════════════════════════════════
-            OUTER BODY — glossy aqua-blue plastic device shell
-        ═══════════════════════════════════════════════════════════════════ */}
+        {/* ═══════════════════════════════════════════════════════════════════════
+            DROP SHADOW — soft diffuse glow beneath
+        ═══════════════════════════════════════════════════════════════════════ */}
+        <div style={{
+          position: 'absolute',
+          bottom: -6, left: '10%', right: '10%', height: 24,
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(0,120,200,0.25) 0%, rgba(0,80,160,0.1) 50%, transparent 75%)',
+          filter: 'blur(10px)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* ═══════════════════════════════════════════════════════════════════════
+            OUTER SHELL — frosted translucent white, organic pebble shape
+            Large border-radius with generous padding so content stays inside
+        ═══════════════════════════════════════════════════════════════════════ */}
         <div style={{
           position: 'absolute', inset: 0,
-          borderRadius: 26,
-          // Sky-to-deep-blue gradient; aqua is the signature Frutiger Aero hue
-          background: 'linear-gradient(152deg, #d2ecff 0%, #a8d8f4 20%, #72bcec 42%, #4aa4de 62%, #2a88cc 80%, #1870b4 100%)',
+          borderRadius: 40,
+          background: 'linear-gradient(165deg, rgba(255,255,255,0.72) 0%, rgba(240,245,252,0.58) 25%, rgba(220,232,245,0.48) 50%, rgba(200,218,240,0.42) 75%, rgba(185,205,230,0.38) 100%)',
+          backdropFilter: 'blur(18px) saturate(1.4)',
+          WebkitBackdropFilter: 'blur(18px) saturate(1.4)',
           boxShadow: [
-            '0 26px 72px rgba(0,40,120,0.50)',
-            '0 10px 26px rgba(0,20,80,0.32)',
-            '0 3px 8px rgba(0,0,0,0.22)',
-            // Bright inset top bevel
-            'inset 0 2.5px 0 rgba(255,255,255,1)',
-            'inset 0 0 0 1.5px rgba(255,255,255,0.55)',
-            // Subtle inner bottom shadow
-            'inset 0 -5px 16px rgba(0,50,120,0.28)',
+            '0 16px 48px rgba(0,40,100,0.22)',
+            '0 6px 18px rgba(0,30,80,0.14)',
+            '0 2px 6px rgba(0,20,60,0.1)',
+            'inset 0 1.5px 0 rgba(255,255,255,0.85)',
+            'inset 0 -1px 0 rgba(0,40,100,0.08)',
+            '0 0 0 1px rgba(255,255,255,0.35)',
           ].join(', '),
           overflow: 'hidden',
         }}>
 
-          {/* Main diagonal gloss sweep across body */}
+          {/* Shell — top gloss sweep (frosted glass highlight) */}
           <div style={{
             position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none',
-            background: 'linear-gradient(152deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.52) 16%, rgba(255,255,255,0.14) 30%, rgba(255,255,255,0.02) 46%, transparent 58%)',
-          }} />
-          {/* Top bright rim highlight */}
-          <div style={{
-            position: 'absolute', top: 1.5, left: '7%', right: '7%', height: 2.5,
-            borderRadius: '50%', pointerEvents: 'none',
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,1) 22%, rgba(255,255,255,1) 78%, transparent)',
-          }} />
-          {/* Bottom tint darkening */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '38%',
-            borderRadius: '0 0 26px 26px', pointerEvents: 'none',
-            background: 'linear-gradient(to bottom, transparent, rgba(0,40,100,0.30))',
-          }} />
-          {/* Right edge shadow */}
-          <div style={{
-            position: 'absolute', top: 0, right: 0, bottom: 0, width: '6%',
-            borderRadius: '0 26px 26px 0', pointerEvents: 'none',
-            background: 'linear-gradient(to left, rgba(0,40,100,0.20), transparent)',
-          }} />
-          {/* Left edge shine */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, bottom: 0, width: '4%',
-            borderRadius: '26px 0 0 26px', pointerEvents: 'none',
-            background: 'linear-gradient(to right, rgba(255,255,255,0.22), transparent)',
+            background: 'linear-gradient(162deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.3) 15%, rgba(255,255,255,0.08) 28%, transparent 42%)',
           }} />
 
-          {/* ═══════════════════════════════════════════════════════════════
-              COVER ART PANEL — left inset, recessed into the body
-          ═══════════════════════════════════════════════════════════════ */}
+          {/* Shell — specular edge streak */}
           <div style={{
-            position: 'absolute', left: 16, top: 15, width: 136, bottom: 15,
-            borderRadius: 12,
-            // Recessed surround / bezel
-            background: 'rgba(0,10,28,0.60)',
+            position: 'absolute', top: 2, left: '14%', right: '14%', height: 2.5,
+            borderRadius: '50%', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent 8%, rgba(255,255,255,0.8) 30%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,0.8) 70%, transparent 92%)',
+            filter: 'blur(1px)',
+          }} />
+
+          {/* Shell — bottom edge reflection */}
+          <div style={{
+            position: 'absolute', bottom: 3, left: '18%', right: '18%', height: 2,
+            borderRadius: '50%', pointerEvents: 'none',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.25) 70%, transparent)',
+            filter: 'blur(1.5px)',
+          }} />
+
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              INNER BLUE PANEL — translucent aqua glass, inset with generous margin
+          ═══════════════════════════════════════════════════════════════════ */}
+          <div style={{
+            position: 'absolute',
+            top: 14, bottom: 14, left: 14, right: 14,
+            borderRadius: 28,
+            background: 'linear-gradient(158deg, rgba(160,210,248,0.65) 0%, rgba(100,180,235,0.55) 20%, rgba(60,155,220,0.50) 40%, rgba(35,130,200,0.48) 60%, rgba(20,110,180,0.45) 80%, rgba(12,90,160,0.42) 100%)',
             boxShadow: [
-              'inset 0 4px 14px rgba(0,0,0,0.75)',
-              'inset 0 0 0 1px rgba(0,0,0,0.60)',
-              // Outer rim highlight (the bevel lip shows above the recess)
-              '0 2px 0 rgba(255,255,255,0.30)',
-              '0 -1px 0 rgba(0,0,0,0.20)',
+              'inset 0 3px 12px rgba(0,40,100,0.25)',
+              'inset 0 0 0 1px rgba(255,255,255,0.2)',
+              '0 -1px 0 rgba(255,255,255,0.5)',
+              '0 1px 0 rgba(0,30,70,0.1)',
             ].join(', '),
             overflow: 'hidden',
           }}>
-            {/* Actual cover or placeholder */}
-            {coverUrl
-              ? <img src={coverUrl} alt="cover" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              : <div style={{
-                  width: '100%', height: '100%',
-                  background: 'linear-gradient(140deg, #0f2744 0%, #0a1c36 45%, #132c50 70%, #080f1e 100%)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 40, opacity: 0.65,
-                }}>🎵</div>
-            }
-            {/* Glass reflection overlay on cover */}
-            <div style={{
-              position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
-              background: 'linear-gradient(152deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.07) 28%, transparent 48%)',
-            }} />
-            {/* Cover: bottom specular strip */}
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0, height: 24, pointerEvents: 'none',
-              background: 'linear-gradient(to top, rgba(255,255,255,0.09), transparent)',
-            }} />
-          </div>
 
-          {/* ═══════════════════════════════════════════════════════════════
-              CENTER COLUMN — LCD + progress + transport + EQ
-          ═══════════════════════════════════════════════════════════════ */}
-          <div style={{
-            position: 'absolute',
-            left: 164, right: 80, top: 15, bottom: 15,
-            display: 'flex', flexDirection: 'column', gap: 7,
-          }}>
-
-            {/* ── LCD screen ── */}
+            {/* Blue panel — diagonal gloss */}
             <div style={{
-              height: 48, borderRadius: 10,
-              background: 'linear-gradient(175deg, #00070f 0%, #000c18 55%, #000f22 100%)',
+              position: 'absolute', inset: 0, borderRadius: 'inherit', pointerEvents: 'none',
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 12%, rgba(255,255,255,0.08) 24%, transparent 38%)',
+            }} />
+
+            {/* Blue panel — bottom fade */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%',
+              borderRadius: 'inherit', pointerEvents: 'none',
+              background: 'linear-gradient(to bottom, transparent, rgba(0,30,80,0.15))',
+            }} />
+
+            {/* Blue panel — top specular streak */}
+            <div style={{
+              position: 'absolute', top: 3, left: '12%', right: '16%', height: 2,
+              borderRadius: '50%', pointerEvents: 'none',
+              background: 'linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.5) 70%, transparent 90%)',
+              filter: 'blur(0.8px)',
+            }} />
+
+
+            {/* ═══════════════════════════════════════════════════════════════
+                COVER ART — rounded, recessed, inside the blue area
+            ═══════════════════════════════════════════════════════════════ */}
+            <div style={{
+              position: 'absolute', left: 14, top: 14, width: 104, bottom: 14,
+              borderRadius: 18,
+              background: 'rgba(0,15,35,0.5)',
               boxShadow: [
-                'inset 0 4px 12px rgba(0,0,0,0.95)',
-                'inset 0 0 0 1px rgba(0,140,220,0.18)',
-                '0 1.5px 0 rgba(255,255,255,0.22)',
-                '0 0 0 0.5px rgba(0,70,150,0.35)',
+                'inset 0 3px 12px rgba(0,0,0,0.55)',
+                'inset 0 0 0 1px rgba(0,0,0,0.3)',
+                '0 1.5px 0 rgba(255,255,255,0.15)',
               ].join(', '),
-              position: 'relative', overflow: 'hidden',
-              display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              padding: '5px 11px 4px',
+              overflow: 'hidden',
             }}>
-              {/* Screen edge glow from top */}
+              {coverUrl
+                ? <img src={coverUrl} alt="cover" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                : <div style={{
+                    width: '100%', height: '100%',
+                    background: 'linear-gradient(140deg, rgba(15,40,70,0.8) 0%, rgba(10,28,55,0.7) 50%, rgba(8,15,30,0.9) 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="36" height="36" viewBox="0 0 44 44" fill="none" style={{ opacity: 0.4 }}>
+                      <path d="M30 8v20a6 6 0 1 1-2-4.5V14l-12 3v15a6 6 0 1 1-2-4.5V10l16-4v2z" fill="rgba(100,180,255,0.5)" />
+                    </svg>
+                  </div>
+              }
+              {/* Glass reflection */}
               <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
-                background: 'linear-gradient(to bottom, rgba(0,170,255,0.07), transparent)',
-                pointerEvents: 'none',
+                position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
+                background: 'linear-gradient(150deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 22%, transparent 40%)',
               }} />
-              {/* Screen glass glare streak */}
               <div style={{
-                position: 'absolute', top: 4, left: '16%', width: '26%', height: 1.5,
-                borderRadius: 1, background: 'rgba(255,255,255,0.12)', pointerEvents: 'none',
+                position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
+                boxShadow: 'inset 0 0 16px rgba(0,0,0,0.3)',
               }} />
-              {/* Screen: very subtle scanlines */}
-              <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 3px)',
-              }} />
+            </div>
 
-              {/* Title row */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative', zIndex: 1 }}>
-                <span style={{
-                  fontSize: 8.5, letterSpacing: 0.7, fontWeight: 700,
-                  color: '#44d4ff',
-                  fontFamily: '"Courier New", monospace',
-                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  maxWidth: '60%',
-                  textShadow: '0 0 8px rgba(0,210,255,0.65)',
+
+            {/* ═══════════════════════════════════════════════════════════════
+                CENTER COLUMN — LCD + progress + transport + EQ
+            ═══════════════════════════════════════════════════════════════ */}
+            <div style={{
+              position: 'absolute',
+              left: 130, right: 72, top: 14, bottom: 14,
+              display: 'flex', flexDirection: 'column', gap: 5,
+            }}>
+
+              {/* ── LCD screen ── */}
+              <div style={{
+                flex: '0 0 auto',
+                borderRadius: 12,
+                background: 'linear-gradient(178deg, rgba(0,10,22,0.85) 0%, rgba(0,14,30,0.8) 50%, rgba(0,18,38,0.85) 100%)',
+                boxShadow: [
+                  'inset 0 3px 10px rgba(0,0,0,0.8)',
+                  'inset 0 0 0 1px rgba(0,100,180,0.15)',
+                  '0 1px 0 rgba(255,255,255,0.15)',
+                ].join(', '),
+                position: 'relative', overflow: 'hidden',
+                padding: '7px 10px 6px',
+              }}>
+                {/* Screen glow */}
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+                  background: 'linear-gradient(to bottom, rgba(0,140,220,0.06), transparent)',
+                  pointerEvents: 'none',
+                }} />
+                {/* Scanlines */}
+                <div style={{
+                  position: 'absolute', inset: 0, pointerEvents: 'none',
+                  backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 3px)',
+                }} />
+
+                {/* Time */}
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  position: 'relative', zIndex: 1, marginBottom: 3,
                 }}>
-                  {title ? title.toUpperCase() : 'NO TRACK'}
-                </span>
-                <span style={{
-                  fontSize: 11, letterSpacing: 2, fontWeight: 700,
+                  <span style={{
+                    fontSize: 14, letterSpacing: 2, fontWeight: 700,
+                    color: '#55ddff',
+                    fontFamily: '"Courier New", monospace',
+                    textShadow: '0 0 10px rgba(0,200,255,0.65), 0 0 20px rgba(0,180,255,0.25)',
+                  }}>
+                    {formatTime(progress.current)}
+                  </span>
+                  {progress.duration > 0 && (
+                    <span style={{
+                      fontSize: 8, letterSpacing: 1,
+                      color: 'rgba(100,200,255,0.35)',
+                      fontFamily: '"Courier New", monospace',
+                    }}>
+                      {formatTime(progress.duration)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <div style={{
+                  fontSize: 7.5, letterSpacing: 0.5, fontWeight: 600,
                   color: '#88eeff',
                   fontFamily: '"Courier New", monospace',
-                  textShadow: '0 0 10px rgba(0,230,255,0.75)',
-                  flexShrink: 0, marginLeft: 5,
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  textShadow: '0 0 5px rgba(0,200,255,0.45)',
+                  position: 'relative', zIndex: 1,
                 }}>
-                  {formatTime(progress.current)}
-                </span>
-              </div>
+                  {title ? title.toUpperCase() : 'NO TRACK'}
+                </div>
 
-              {/* Artist */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', position: 'relative', zIndex: 1, marginTop: 3 }}>
-                <span style={{
-                  fontSize: 7, letterSpacing: 0.3,
-                  color: 'rgba(90,195,255,0.50)',
+                {/* Artist */}
+                <div style={{
+                  fontSize: 6.5, letterSpacing: 0.3, marginTop: 1.5,
+                  color: 'rgba(90,190,255,0.4)',
                   fontFamily: 'system-ui, sans-serif',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  maxWidth: '65%',
+                  position: 'relative', zIndex: 1,
                 }}>
                   {artist || '\u00a0'}
-                </span>
-                {progress.duration > 0 && (
-                  <span style={{
-                    fontSize: 7, letterSpacing: 0.8,
-                    color: 'rgba(90,195,255,0.38)',
-                    fontFamily: '"Courier New", monospace',
-                    flexShrink: 0,
+                </div>
+
+                {/* Status icons */}
+                <div style={{
+                  display: 'flex', gap: 4, marginTop: 3,
+                  position: 'relative', zIndex: 1,
+                }}>
+                  <svg width="5" height="5" viewBox="0 0 6 6" fill="none">
+                    <path d="M1 0.5L5.5 3L1 5.5V0.5Z" fill={playing ? '#55ddff' : 'rgba(80,160,220,0.25)'} />
+                  </svg>
+                  <svg width="9" height="5" viewBox="0 0 10 6" fill="none">
+                    <rect x="0" y="4" width="1.5" height="2" rx="0.3" fill="rgba(80,160,220,0.25)" />
+                    <rect x="2.5" y="2.5" width="1.5" height="3.5" rx="0.3" fill="rgba(80,160,220,0.25)" />
+                    <rect x="5" y="1" width="1.5" height="5" rx="0.3" fill="rgba(80,160,220,0.25)" />
+                    <rect x="7.5" y="0" width="1.5" height="6" rx="0.3" fill="rgba(80,160,220,0.25)" />
+                  </svg>
+                  <svg width="11" height="5" viewBox="0 0 12 6" fill="none" style={{ marginLeft: 'auto' }}>
+                    <rect x="0.5" y="0.5" width="9" height="5" rx="1" stroke="rgba(80,160,220,0.3)" strokeWidth="0.8" fill="none" />
+                    <rect x="9.5" y="1.5" width="1.5" height="3" rx="0.5" fill="rgba(80,160,220,0.3)" />
+                    <rect x="1.5" y="1.5" width="7" height="3" rx="0.5" fill="rgba(0,200,255,0.2)" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* ── Progress track ── */}
+              <div
+                onClick={ready ? handleSeek : undefined}
+                onTouchEnd={ready ? handleSeek : undefined}
+                style={{ cursor: ready ? 'pointer' : 'default', padding: '2px 0', position: 'relative' }}
+                role="slider"
+                aria-valuenow={Math.round(progress.current)}
+                aria-valuemin={0}
+                aria-valuemax={Math.round(progress.duration)}
+              >
+                <div style={{
+                  height: 6, borderRadius: 3,
+                  background: 'linear-gradient(to bottom, rgba(0,16,32,0.7), rgba(0,24,48,0.6))',
+                  boxShadow: [
+                    'inset 0 2px 5px rgba(0,0,0,0.7)',
+                    'inset 0 0 0 0.5px rgba(0,80,160,0.2)',
+                    '0 1px 0 rgba(255,255,255,0.12)',
+                  ].join(', '),
+                  position: 'relative',
+                  overflow: 'visible',
+                }}>
+                  {/* Aqua fill */}
+                  <div style={{
+                    position: 'absolute', left: 0, top: 0, bottom: 0,
+                    width: `${pct}%`,
+                    borderRadius: pct >= 99 ? 3 : '3px 0 0 3px',
+                    background: 'linear-gradient(to bottom, #77eeff 0%, #33ccee 40%, #0099cc 100%)',
+                    boxShadow: '0 0 7px rgba(0,200,255,0.55)',
+                    transition: 'width 0.5s linear',
+                    overflow: 'hidden',
                   }}>
-                    -{formatTime(progress.duration - progress.current)}
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
+                      background: 'linear-gradient(to bottom, rgba(255,255,255,0.45), transparent)',
+                    }} />
+                  </div>
+
+                  {/* Knob */}
+                  {pct > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%', transform: 'translate(-50%, -50%)',
+                      left: `${Math.min(pct, 97)}%`,
+                      width: 12, height: 12, borderRadius: '50%',
+                      background: 'radial-gradient(circle at 36% 28%, #ffffff 0%, #d0e8ff 30%, #90c4e0 60%, #5098b8 100%)',
+                      boxShadow: [
+                        '0 2px 5px rgba(0,0,0,0.4)',
+                        '0 0 6px rgba(0,180,255,0.45)',
+                        'inset 0 1px 0 rgba(255,255,255,0.9)',
+                      ].join(', '),
+                      zIndex: 2,
+                      transition: 'left 0.5s linear',
+                    }} />
+                  )}
+                </div>
+              </div>
+
+              {/* ── Transport pills ── */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
+                {[
+                  { icon: <IconSkipBack size={9} />, action: () => {}, label: 'Previous' },
+                  { icon: <IconStop size={7} />, action: () => {}, label: 'Stop' },
+                  { icon: <IconSkipFwd size={9} />, action: () => {}, label: 'Next' },
+                ].map((btn, i) => (
+                  <button
+                    key={i}
+                    onClick={btn.action}
+                    disabled={!ready}
+                    aria-label={btn.label}
+                    style={{
+                      width: 26, height: 16,
+                      borderRadius: 8,
+                      border: 'none',
+                      cursor: ready ? 'pointer' : 'default',
+                      background: 'linear-gradient(178deg, rgba(255,255,255,0.85) 0%, rgba(225,238,248,0.75) 40%, rgba(195,215,235,0.65) 100%)',
+                      boxShadow: [
+                        'inset 0 1px 1.5px rgba(255,255,255,0.85)',
+                        'inset 0 -1px 1.5px rgba(0,20,50,0.1)',
+                        '0 1.5px 4px rgba(0,20,60,0.3)',
+                        '0 0 0 0.5px rgba(255,255,255,0.3)',
+                      ].join(', '),
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'rgba(20,60,100,0.6)',
+                      position: 'relative', overflow: 'hidden',
+                      opacity: ready ? 1 : 0.4,
+                      transition: 'opacity 0.15s',
+                    }}
+                  >
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+                      borderRadius: '8px 8px 0 0',
+                      background: 'linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.05))',
+                      pointerEvents: 'none',
+                    }} />
+                    <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center' }}>
+                      {btn.icon}
+                    </span>
+                  </button>
+                ))}
+
+                {!ready && (
+                  <span style={{
+                    fontSize: 6, color: 'rgba(120,200,255,0.45)',
+                    fontFamily: '"Courier New", monospace',
+                    marginLeft: 3,
+                  }}>
+                    loading…
                   </span>
                 )}
               </div>
-            </div>
 
-            {/* ── Progress track ── */}
-            <div
-              onClick={ready ? handleSeek : undefined}
-              onTouchEnd={ready ? handleSeek : undefined}
-              style={{ cursor: ready ? 'pointer' : 'default', padding: '5px 0', position: 'relative' }}
-              role="slider"
-              aria-valuenow={Math.round(progress.current)}
-              aria-valuemin={0}
-              aria-valuemax={Math.round(progress.duration)}
-            >
-              {/* Outer groove — recessed channel */}
+              {/* ── EQ bars ── */}
               <div style={{
-                height: 8, borderRadius: 4,
-                background: 'linear-gradient(to bottom, #00060f, #001424)',
-                boxShadow: [
-                  'inset 0 3px 7px rgba(0,0,0,0.92)',
-                  'inset 0 0 0 0.5px rgba(0,110,200,0.30)',
-                  '0 1.5px 0 rgba(255,255,255,0.18)',
-                ].join(', '),
-                position: 'relative',
-                overflow: 'visible',
+                display: 'flex', gap: 1.5, alignItems: 'flex-end',
+                height: 14, marginTop: 'auto',
               }}>
-                {/* Aqua fill with inner gloss */}
-                <div style={{
-                  position: 'absolute', left: 0, top: 0, bottom: 0,
-                  width: `${pct}%`,
-                  borderRadius: '4px 0 0 4px',
-                  background: 'linear-gradient(to bottom, #66ddff 0%, #22bbee 45%, #0099cc 100%)',
-                  boxShadow: '0 0 9px rgba(0,200,255,0.72)',
-                  transition: 'width 0.5s linear',
-                  overflow: 'hidden',
-                }}>
-                  {/* Fill inner highlight */}
-                  <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, height: '48%',
-                    background: 'linear-gradient(to bottom, rgba(255,255,255,0.44), transparent)',
-                    borderRadius: '4px 0 0 0',
+                {EQ_HEIGHTS.map((h, i) => (
+                  <div key={i} style={{
+                    width: 2.5, borderRadius: '1.5px 1.5px 0 0',
+                    height: playing ? h : Math.max(1.5, Math.round(h * 0.2)),
+                    background: playing
+                      ? `linear-gradient(to top, rgba(0,136,187,0.7), rgba(51,204,255,0.6) ${60 + (i % 3) * 10}%, rgba(136,238,255,0.5))`
+                      : 'rgba(80,160,220,0.2)',
+                    boxShadow: playing ? '0 0 3px rgba(0,200,255,0.35)' : 'none',
+                    transition: `height ${0.2 + (i % 5) * 0.06}s ease-in-out`,
+                    opacity: playing ? 1 : 0.5,
                   }} />
-                </div>
+                ))}
+              </div>
 
-                {/* Slider knob */}
-                {pct > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%', transform: 'translate(-50%, -50%)',
-                    left: `${Math.min(pct, 98)}%`,
-                    width: 16, height: 16, borderRadius: '50%',
-                    background: 'radial-gradient(circle at 38% 30%, #ffffff 0%, #cce8ff 32%, #88c4e8 62%, #4898c0 100%)',
+            </div>{/* end center column */}
+
+
+            {/* ═══════════════════════════════════════════════════════════════════
+                PLAY BUTTON — neon green with concentric glow rings
+            ═══════════════════════════════════════════════════════════════════ */}
+            <div style={{
+              position: 'absolute', right: 12, top: '50%',
+              transform: 'translateY(-50%)',
+            }}>
+              {/* Recessed well */}
+              <div style={{
+                width: 50, height: 50, borderRadius: '50%',
+                background: 'linear-gradient(to bottom, rgba(0,30,60,0.2), rgba(0,20,50,0.1))',
+                boxShadow: [
+                  'inset 0 2px 5px rgba(0,0,0,0.2)',
+                  '0 1px 0 rgba(255,255,255,0.1)',
+                ].join(', '),
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative',
+              }}>
+                <button
+                  onClick={togglePlay}
+                  disabled={!ready}
+                  style={{
+                    width: 42, height: 42, borderRadius: '50%',
+                    border: 'none',
+                    cursor: ready ? 'pointer' : 'default',
+                    background: 'radial-gradient(circle at 38% 26%, #e8ff88 0%, #bbff22 20%, #88ee00 36%, #66cc00 54%, #44aa00 72%, #228800 90%, #116600 100%)',
                     boxShadow: [
-                      '0 2px 7px rgba(0,0,0,0.48)',
-                      '0 0 10px rgba(0,190,255,0.55)',
-                      'inset 0 1.5px 0 rgba(255,255,255,0.92)',
+                      '0 0 0 2px rgba(120,240,0,0.65)',
+                      '0 0 0 4.5px rgba(100,220,0,0.3)',
+                      '0 0 0 8px rgba(80,200,0,0.15)',
+                      '0 0 0 12px rgba(60,180,0,0.06)',
+                      '0 0 20px rgba(100,230,0,0.45)',
+                      '0 0 40px rgba(80,200,0,0.2)',
+                      'inset 0 2.5px 8px rgba(255,255,255,0.5)',
+                      'inset 0 -2.5px 8px rgba(0,60,0,0.4)',
+                      '0 5px 14px rgba(40,160,0,0.55)',
+                      '0 2px 4px rgba(0,0,0,0.35)',
                     ].join(', '),
-                    zIndex: 2,
-                    transition: 'left 0.5s linear',
-                  }}>
-                    {/* Knob gloss cap */}
-                    <div style={{
-                      position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
-                      borderRadius: '50% 50% 0 0 / 80% 80% 0 0',
-                      background: 'linear-gradient(to bottom, rgba(255,255,255,0.75), transparent)',
-                    }} />
-                  </div>
-                )}
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'rgba(0,50,0,0.75)',
+                    position: 'relative', overflow: 'hidden',
+                    opacity: ready ? 1 : 0.4,
+                    transition: 'opacity 0.15s',
+                  }}
+                  aria-label={playing ? 'Pause' : 'Play'}
+                >
+                  {/* Gloss dome */}
+                  <div style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+                    borderRadius: '50% 50% 0 0 / 80% 80% 0 0',
+                    background: 'linear-gradient(to bottom, rgba(255,255,255,0.65), rgba(255,255,255,0.12) 60%, transparent)',
+                    pointerEvents: 'none',
+                  }} />
+                  {/* Specular hotspot */}
+                  <div style={{
+                    position: 'absolute', top: '14%', left: '30%', width: '30%', height: '18%',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse, rgba(255,255,255,0.5), transparent)',
+                    pointerEvents: 'none',
+                    filter: 'blur(1.5px)',
+                  }} />
+                  <span style={{ position: 'relative', zIndex: 1, marginLeft: playing ? 0 : 2 }}>
+                    {playing ? <IconPause size={17} /> : <IconPlay size={17} />}
+                  </span>
+                </button>
               </div>
             </div>
 
-            {/* ── Transport buttons ── */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <PillButton onClick={() => {}} disabled={!ready}>
-                <IconSkipBack size={12} />
-              </PillButton>
-              <PillButton onClick={() => {}} disabled={!ready}>
-                <IconSkipFwd size={12} />
-              </PillButton>
-              <div style={{ flex: 1 }} />
-              {!ready && (
-                <span style={{ fontSize: 7, color: 'rgba(130,210,255,0.52)', fontFamily: '"Courier New", monospace' }}>
-                  loading…
-                </span>
-              )}
-            </div>
 
-            {/* ── EQ bars (decorative visualizer) ── */}
+            {/* ═══════════════════════════════════════════════════════════════════
+                ABSTRACT DECORATIONS — soft bokeh, light orbs, ripples
+            ═══════════════════════════════════════════════════════════════════ */}
+
+            {/* Bokeh orbs — soft, abstract, floating */}
+            {[
+              { size: 20, top: '65%', left: '80%', opacity: 0.1 },
+              { size: 12, top: '76%', left: '88%', opacity: 0.07 },
+              { size: 8,  top: '80%', left: '76%', opacity: 0.06 },
+              { size: 15, top: '16%', left: '70%', opacity: 0.05 },
+              { size: 6,  top: '28%', left: '82%', opacity: 0.04 },
+              { size: 28, top: '40%', left: '92%', opacity: 0.04 },
+            ].map((b, i) => (
+              <div key={i} style={{
+                position: 'absolute', top: b.top, left: b.left,
+                width: b.size, height: b.size, borderRadius: '50%',
+                background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,${b.opacity * 2}), rgba(255,255,255,${b.opacity * 0.4}) 50%, transparent)`,
+                border: `0.5px solid rgba(255,255,255,${b.opacity * 0.7})`,
+                pointerEvents: 'none',
+              }} />
+            ))}
+
+            {/* Soft ripple rings — abstract water motif */}
             <div style={{
-              display: 'flex', gap: 2.5, alignItems: 'flex-end',
-              height: 18, marginTop: 'auto', paddingBottom: 2,
+              position: 'absolute', right: '18%', bottom: '16%',
+              width: 34, height: 34, borderRadius: '50%', pointerEvents: 'none',
+              boxShadow: [
+                '0 0 0 0.5px rgba(255,255,255,0.05)',
+                '0 0 0 5px rgba(255,255,255,0.03)',
+                '0 0 0 12px rgba(255,255,255,0.015)',
+              ].join(', '),
+            }} />
+
+            {/* Light orb — upper left, soft lens flare feel */}
+            <div style={{
+              position: 'absolute', top: '10%', left: '8%', pointerEvents: 'none',
             }}>
-              {EQ_HEIGHTS.map((h, i) => (
-                <div key={i} style={{
-                  width: 3.5, borderRadius: '2px 2px 0 0',
-                  height: playing ? h : Math.max(2, Math.round(h * 0.25)),
-                  background: playing
-                    ? 'linear-gradient(to top, #0099cc, #33ccff, #88eeff)'
-                    : 'rgba(100,180,255,0.28)',
-                  boxShadow: playing ? '0 0 5px rgba(0,200,255,0.55)' : 'none',
-                  transition: `height ${0.25 + (i % 4) * 0.08}s ease-in-out`,
-                  opacity: playing ? 1 : 0.55,
-                }} />
-              ))}
+              <div style={{
+                width: 5, height: 5, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.7)',
+                boxShadow: '0 0 10px 3px rgba(255,255,255,0.3), 0 0 22px 8px rgba(200,230,255,0.15)',
+              }} />
+              {/* Soft cross rays */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 18, height: 0.5,
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0.2) 60%, transparent)',
+              }} />
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 0.5, height: 14,
+                background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.18) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.18) 60%, transparent)',
+              }} />
             </div>
 
-          </div>{/* end center column */}
+          </div>{/* end blue panel */}
 
-          {/* ═══════════════════════════════════════════════════════════════
-              RIGHT — neon green play/pause button
-          ═══════════════════════════════════════════════════════════════ */}
-          <div style={{
-            position: 'absolute', right: 15, top: '50%',
-            transform: 'translateY(-50%)',
-          }}>
-            <button
-              onClick={togglePlay}
-              disabled={!ready}
-              style={{
-                width: 54, height: 54, borderRadius: '50%',
-                border: 'none',
-                cursor: ready ? 'pointer' : 'default',
-                // Neon lime-green radial gradient — high center highlight
-                background: 'radial-gradient(circle at 40% 28%, #e8ff80 0%, #aaff00 22%, #66dd00 48%, #33aa00 72%, #1a6400 100%)',
-                boxShadow: [
-                  // Concentric neon glow rings — the Frutiger Aero halo
-                  '0 0 0 2.5px rgba(130,245,0,0.62)',
-                  '0 0 0 6px rgba(100,220,0,0.30)',
-                  '0 0 0 11px rgba(70,190,0,0.15)',
-                  '0 0 0 18px rgba(50,165,0,0.07)',
-                  '0 0 30px rgba(110,235,0,0.55)',
-                  // Physical shading
-                  'inset 0 3px 9px rgba(255,255,255,0.58)',
-                  'inset 0 -3px 9px rgba(0,60,0,0.48)',
-                  '0 7px 22px rgba(50,185,0,0.72)',
-                  '0 2px 6px rgba(0,0,0,0.46)',
-                ].join(', '),
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'rgba(0,55,0,0.82)',
-                position: 'relative', overflow: 'hidden',
-                opacity: ready ? 1 : 0.45,
-                transition: 'opacity 0.15s, filter 0.15s',
-              }}
-              aria-label={playing ? 'Pause' : 'Play'}
-            >
-              {/* Gloss cap — upper white dome */}
-              <GlossCap opacity={0.65} />
-              <span style={{ position: 'relative', zIndex: 1, marginLeft: playing ? 0 : 2 }}>
-                {playing ? <IconPause size={18} /> : <IconPlay size={18} />}
-              </span>
-            </button>
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════════
-              DECORATIONS — bokeh bubbles, water ripple, lens flare
-          ═══════════════════════════════════════════════════════════════ */}
-
-          {/* Bokeh bubbles (right half, clear of content) */}
-          <Bubble size={26} top="60%" left="79%" opacity={0.12} />
-          <Bubble size={16} top="72%" left="87%" opacity={0.09} />
-          <Bubble size={10} top="78%" left="76%" opacity={0.08} />
-          <Bubble size={8}  top="83%" left="83%" opacity={0.07} />
-          <Bubble size={14} top="55%" left="85%" opacity={0.08} />
-
-          {/* Water ripple rings — subtly overlaid near bottom-right */}
-          <div style={{
-            position: 'absolute', right: '14%', bottom: '12%',
-            width: 50, height: 50, borderRadius: '50%', pointerEvents: 'none',
-            boxShadow: [
-              '0 0 0 1px rgba(255,255,255,0.07)',
-              '0 0 0 9px rgba(255,255,255,0.045)',
-              '0 0 0 20px rgba(255,255,255,0.025)',
-              '0 0 0 33px rgba(255,255,255,0.012)',
-            ].join(', '),
-          }} />
-
-          {/* Lens flare — small bright dot near top-left with cross-hairs */}
-          <div style={{
-            position: 'absolute', top: '11%', left: '11%', pointerEvents: 'none',
-          }}>
-            {/* Central bright orb */}
-            <div style={{
-              width: 7, height: 7, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.88)',
-              boxShadow: '0 0 14px 5px rgba(255,255,255,0.42), 0 0 34px 12px rgba(200,230,255,0.22)',
-            }} />
-            {/* Horizontal ray */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 28, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.30) 40%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.30) 60%, transparent)',
-            }} />
-            {/* Vertical ray */}
-            <div style={{
-              position: 'absolute', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 1, height: 22,
-              background: 'linear-gradient(180deg, transparent, rgba(255,255,255,0.30) 38%, rgba(255,255,255,0.50) 50%, rgba(255,255,255,0.30) 62%, transparent)',
-            }} />
-          </div>
-
-          {/* Secondary micro lens flare (ghost reflection lower) */}
-          <div style={{
-            position: 'absolute', top: '24%', left: '17%', pointerEvents: 'none',
-            width: 4, height: 4, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.38)',
-            boxShadow: '0 0 8px 3px rgba(180,220,255,0.25)',
-          }} />
-
-        </div>{/* end outer body */}
+        </div>{/* end outer shell */}
       </div>
     </div>
   )

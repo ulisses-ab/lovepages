@@ -53,3 +53,44 @@ create trigger pages_updated_at
 -- Public: true
 -- Allowed MIME types: image/*, audio/*, video/*
 -- Max file size: 50MB
+
+-- Allow anyone (including anonymous visitors) to upload images so public visitors
+-- can add drawings to a published page's drawing board.
+-- Run this in the Supabase SQL editor after creating the bucket.
+insert into storage.buckets (id, name, public) values ('lovepages', 'lovepages', true)
+  on conflict (id) do nothing;
+
+create policy "anyone can upload images"
+  on storage.objects for insert
+  to anon, authenticated
+  with check (bucket_id = 'lovepages' and name like 'images/%');
+
+-- Stored function: lets anonymous visitors append a drawing to a published page's
+-- drawing block without being able to modify any other page data.
+-- SECURITY DEFINER means it runs with the privileges of the function owner (postgres),
+-- bypassing the normal RLS that blocks anonymous updates.
+create or replace function append_drawing(
+  p_page_id  uuid,
+  p_block_id text,
+  p_drawing  jsonb
+)
+returns void language plpgsql security definer as $$
+begin
+  update pages
+  set blocks = (
+    select jsonb_agg(
+      case
+        when b->>'id' = p_block_id
+        then jsonb_set(b, '{drawings}',
+               coalesce(b->'drawings', '[]'::jsonb) || jsonb_build_array(p_drawing))
+        else b
+      end
+    )
+    from jsonb_array_elements(blocks) as b
+  )
+  where id = p_page_id and published = true;
+end;
+$$;
+
+-- Grant execute to anonymous/authenticated callers
+grant execute on function append_drawing(uuid, text, jsonb) to anon, authenticated;

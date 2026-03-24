@@ -45,10 +45,11 @@ export default function CustomBlock({ block, isEditing, onChange }) {
     setError('')
     try {
       const { data, error: fnErr } = await supabase.functions.invoke('generate-html', {
-        body: { prompt: aiPrompt },
+        body: { prompt: aiPrompt, currentHtml: block.html || '' },
       })
       if (fnErr) throw fnErr
       if (data?.error) throw new Error(data.error)
+      if (!data?.html?.trim()) throw new Error('AI returned empty HTML — try rephrasing your prompt')
       onChange({ html: data.html })
       setAiOpen(false)
       setAiPrompt('')

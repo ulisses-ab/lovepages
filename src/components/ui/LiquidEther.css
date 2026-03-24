@@ -1,0 +1,8 @@
+.liquid-ether-container {
+  display: block;
+  overflow: hidden;
+}
+
+.liquid-ether-container canvas {
+  display: block;
+}

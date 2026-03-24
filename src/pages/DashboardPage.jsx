@@ -156,9 +156,23 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0d0b10', position: 'relative', overflow: 'hidden' }}>
+
+      {/* Center glow */}
+      <div style={{
+        position: 'fixed',
+        width: '70vw', height: '70vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(100,180,255,0.09) 0%, transparent 65%)',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none',
+        zIndex: 0,
+        filter: 'blur(40px)',
+      }} />
+
       {/* Nav */}
-      <header className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-overlay">
+      <header className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-overlay relative" style={{ zIndex: 1 }}>
         <img src="/logo.png" alt="Lovio" className="h-10 w-auto" />
         <div className="flex items-center gap-3">
           <LangToggle />
@@ -171,7 +185,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-10">
+      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-10 relative" style={{ zIndex: 1 }}>
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-fg">{t('dashboard.myPages')}</h1>
           <button

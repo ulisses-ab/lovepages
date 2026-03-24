@@ -243,7 +243,20 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen h-[100dvh] bg-base">
+    <div className="flex flex-col h-screen h-[100dvh]" style={{ background: '#0d0b10', position: 'relative' }}>
+
+      {/* Fixed center glow */}
+      <div style={{
+        position: 'fixed',
+        width: '60vw', height: '60vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(100,180,255,0.07) 0%, transparent 65%)',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none',
+        zIndex: 0,
+        filter: 'blur(40px)',
+      }} />
       <EditorTopBar
         pageTitle={pageTitle}
         setPageTitle={setPageTitle}
@@ -270,16 +283,16 @@ export default function EditorPage() {
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden" style={{ position: 'relative', zIndex: 1 }}>
         {previewMode ? (
           mobilePreview ? (
             /* Mobile phone frame */
-            <div className="flex-1 bg-base flex flex-col items-center justify-start overflow-auto py-8 gap-3">
+            <div className="flex-1 flex flex-col items-center justify-start overflow-auto py-8 gap-3" style={{ background: '#0d0b10' }}>
               <p className="text-xs text-fg-faint tracking-wide uppercase shrink-0">Mobile preview</p>
-              <div className="shrink-0 w-[390px] h-[844px] rounded-[44px] border-[6px] border-surface shadow-2xl overflow-hidden relative" style={{ transform: 'translateZ(0)' }}>
+              <div className="shrink-0 w-[390px] h-[844px] rounded-[44px] border-[6px] border-surface shadow-2xl overflow-hidden relative bg-black" style={{ transform: 'translateZ(0)' }}>
                 {/* notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-surface rounded-b-2xl z-10" />
-                <PageBgWrapper settings={pageSettings} className="absolute inset-0 overflow-hidden">
+                <PageBgWrapper settings={pageSettings} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
                   <div className="absolute inset-0 overflow-y-auto">
                     <div className="pt-7">
                       <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} />
@@ -309,7 +322,7 @@ export default function EditorPage() {
             onDragCancel={handleDragCancel}
           >
             {/* Desktop sidebar — hidden on mobile */}
-            <aside className="hidden md:flex flex-col w-56 bg-surface border-r border-overlay overflow-y-auto shrink-0">
+            <aside className="hidden md:flex flex-col w-56 border-r border-overlay/50 overflow-y-auto shrink-0" style={{ background: 'rgba(13,11,16,0.78)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
               <BlockPanel onAddBlock={handleAddBlock} onOpenAi={() => setAiModalOpen(true)} />
             </aside>
 
@@ -343,15 +356,34 @@ export default function EditorPage() {
 
               {/* Live preview — desktop only */}
               <div className="flex-1 overflow-hidden hidden md:flex md:flex-col">
-                <div className="text-xs text-fg-faint text-center bg-base py-2 border-b border-overlay tracking-wide uppercase shrink-0">
-                  {t('editor.previewLabel')}
+                <div className="text-xs text-fg-faint text-center py-2 border-b border-overlay tracking-wide uppercase shrink-0" style={{ background: '#0d0b10' }}>
+                  {mobilePreview ? 'Mobile preview' : t('editor.previewLabel')}
                 </div>
-                {/* PageBgWrapper is non-scrolling; Canvas scrolls inside it */}
-                <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
-                  <div className="absolute inset-0 overflow-y-auto">
-                    <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
+                {mobilePreview ? (
+                  /* Mobile phone frame in the preview panel */
+                  <div className="flex-1 flex flex-col items-center justify-start overflow-auto py-6 gap-3" style={{ background: '#0d0b10' }}>
+                    <div className="shrink-0 w-[320px] h-[660px] rounded-[36px] border-[5px] border-surface shadow-2xl overflow-hidden relative bg-black" style={{ transform: 'translateZ(0)' }}>
+                      {/* notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-surface rounded-b-xl z-10" />
+                      <PageBgWrapper settings={pageSettings} style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+                        <div className="absolute inset-0 overflow-y-auto">
+                          <div className="pt-5">
+                            <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
+                          </div>
+                        </div>
+                      </PageBgWrapper>
+                      {/* home indicator */}
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-1 rounded-full bg-fg-faint/40 z-10" />
+                    </div>
                   </div>
-                </PageBgWrapper>
+                ) : (
+                  /* PageBgWrapper is non-scrolling; Canvas scrolls inside it */
+                  <PageBgWrapper settings={pageSettings} className="flex-1 overflow-hidden">
+                    <div className="absolute inset-0 overflow-y-auto">
+                      <Canvas blocks={blocks} setBlocks={setBlocks} previewMode={true} pageSettings={pageSettings} hoveredBlockId={hoveredBlockId} />
+                    </div>
+                  </PageBgWrapper>
+                )}
               </div>
             </div>
 

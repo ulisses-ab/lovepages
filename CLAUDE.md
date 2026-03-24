@@ -119,7 +119,9 @@ Every block is a plain JSON object stored in the `blocks` jsonb column.
   "bgFade": false,
   "bgColor2": "#hex or empty — second background stop for fade",
   "bgImage2": "url or empty — second background image for fade",
-  "bgEffect": "empty string | bubbles — animated overlay rendered by BgEffect component (position:fixed, zIndex:0)",
+  "bgEffect": "empty string | bubbles | soap-bubbles | prism | light-rays | pixel-blast | color-bends — animated overlay rendered by BgEffect component (position:fixed, zIndex:0)",
+  "bgEffectColor": "#hex or empty — color for effects that support it (e.g. pixel-blast, default: #B19EEF)",
+  "bgEffectOptions": "object or empty — effect-specific settings (e.g. pixel-blast: { variant, pixelSize, patternScale, patternDensity, pixelJitter, speed, edgeFade, ripples, liquid })",
   "columnGap": "number (px) — gap between blocks in the page column (default: 16)",
   "columnPadding": "number (px) — padding around the page column (default: 24)"
 }

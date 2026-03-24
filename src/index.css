@@ -14,7 +14,14 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --bg-tile-size: 25vw; }
+:root {
+  --bg-tile-size: 25vw;
+  /* Primary accent — overridden per-block in editor */
+  --primary: 255 49 49;
+  --primary-hover: 251 86 86;
+  --primary-dim: 255 127 127;
+  --primary-subtle: 74 4 78;
+}
 
 @layer base {
   html {
@@ -25,6 +32,57 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
+}
+
+@keyframes glow-move-1 {
+  0%   { transform: translate(0vw,    0vh);   }
+  15%  { transform: translate(30vw,  -20vh);  }
+  30%  { transform: translate(55vw,   15vh);  }
+  45%  { transform: translate(40vw,   45vh);  }
+  60%  { transform: translate(10vw,   55vh);  }
+  75%  { transform: translate(-20vw,  30vh);  }
+  90%  { transform: translate(-10vw, -15vh);  }
+  100% { transform: translate(0vw,    0vh);   }
+}
+
+@keyframes glow-move-2 {
+  0%   { transform: translate(0vw,    0vh);   }
+  15%  { transform: translate(-35vw,  25vh);  }
+  30%  { transform: translate(-15vw,  50vh);  }
+  45%  { transform: translate(25vw,   40vh);  }
+  60%  { transform: translate(50vw,   10vh);  }
+  75%  { transform: translate(35vw,  -25vh);  }
+  90%  { transform: translate(5vw,   -30vh);  }
+  100% { transform: translate(0vw,    0vh);   }
+}
+
+@keyframes glow-move-3 {
+  0%   { transform: translate(0vw,    0vh);   }
+  15%  { transform: translate(20vw,   35vh);  }
+  30%  { transform: translate(-30vw,  45vh);  }
+  45%  { transform: translate(-45vw,  10vh);  }
+  60%  { transform: translate(-20vw, -30vh);  }
+  75%  { transform: translate(30vw,  -40vh);  }
+  90%  { transform: translate(45vw,   15vh);  }
+  100% { transform: translate(0vw,    0vh);   }
+}
+
+@keyframes glow-move-4 {
+  0%   { transform: translate(0vw,    0vh);   }
+  20%  { transform: translate(-40vw, -25vh);  }
+  40%  { transform: translate(20vw,  -45vh);  }
+  60%  { transform: translate(50vw,   20vh);  }
+  80%  { transform: translate(15vw,   50vh);  }
+  100% { transform: translate(0vw,    0vh);   }
+}
+
+@keyframes glow-move-5 {
+  0%   { transform: translate(0vw,    0vh);   }
+  20%  { transform: translate(35vw,   40vh);  }
+  40%  { transform: translate(-25vw,  35vh);  }
+  60%  { transform: translate(-50vw, -10vh);  }
+  80%  { transform: translate(10vw,  -40vh);  }
+  100% { transform: translate(0vw,    0vh);   }
 }
 
 @keyframes ovo-bounce {

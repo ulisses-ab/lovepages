@@ -313,6 +313,9 @@ export default function CarouselAlbumVariant({ block }) {
   const totalPages   = paddedImages.length + 2
   const mobileOffset = (mobile && pageSize) ? -(pageSize.width - STRIP) : 0
 
+  // Shadow widens when book is open (inner pages), narrows on cover / back cover
+  const isOpen = page > 0 && page < totalPages - 1
+
   function onFlip(e) { setPage(e.data) }
   function flipPrev() { bookRef.current?.pageFlip().flipPrev() }
   function flipNext() { bookRef.current?.pageFlip().flipNext() }
@@ -325,6 +328,20 @@ export default function CarouselAlbumVariant({ block }) {
         <div style={mobile ? { width: pageSize.width + STRIP, overflow: 'visible' } : {}}>
           <div style={mobile ? { transform: `translateX(${mobileOffset}px)` } : {}}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
+              {/* Ground shadow — expands when open, shrinks on cover/back cover */}
+              <div style={{
+                position: 'absolute',
+                bottom: -16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: isOpen ? pageSize.width * (mobile ? 1.6 : 1.7) : pageSize.width * 0.7,
+                height: 28,
+                borderRadius: '50%',
+                background: 'radial-gradient(ellipse at center, rgba(12,6,22,0.65) 0%, rgba(12,6,22,0.28) 48%, transparent 72%)',
+                transition: `width 680ms ease`,
+                pointerEvents: 'none',
+                zIndex: 0,
+              }} />
               <HTMLFlipBook
                 key={`${pageSize.width}x${pageSize.height}x${mobile}x${totalPages}`}
                 ref={bookRef}
@@ -336,7 +353,7 @@ export default function CarouselAlbumVariant({ block }) {
                 flippingTime={680}
                 useMouseEvents
                 mobileScrollSupport
-                drawShadow
+                drawShadow={true}
                 onFlip={onFlip}
                 startPage={0}
               >

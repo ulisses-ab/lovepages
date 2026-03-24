@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import AuthModal from '../components/auth/AuthModal'
 import { useT } from '../lib/i18n'
 import LangToggle from '../components/LangToggle'
+import HeroRing from '../components/ui/HeroRing'
 
 function OvO() {
   const [blinking, setBlinking] = useState(false)
@@ -48,101 +49,16 @@ function OvO() {
   )
 }
 
-const PAGE_PREVIEWS = [
-  { src: '/preview1.jpg',  label: 'Creative Portfolio' },
-  { src: '/preview2.webp', label: 'Event Landing Page' },
-  { src: '/preview3.jpg',  label: 'Product Showcase' },
-  { src: '/preview4.jpg',  label: 'Personal Site' },
+const RING_IMAGES = [
+  '/preview1.jpg',
+  '/preview2.webp',
+  '/preview3.jpg',
+  '/preview4.jpg',
+  '/preview1.jpg',
+  '/preview2.webp',
+  '/preview3.jpg',
+  '/preview4.jpg',
 ]
-
-const n = PAGE_PREVIEWS.length
-
-function BrowserCard({ preview, style }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      width: 340,
-      borderRadius: 12,
-      overflow: 'hidden',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.55)',
-      transition: 'opacity 0.5s ease, transform 0.5s ease',
-      ...style,
-    }}>
-      {/* Browser chrome */}
-      <div style={{
-        background: '#2a2f3a',
-        padding: '7px 10px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
-        <div style={{
-          flex: 1, marginLeft: 8, background: '#1a1f2a', borderRadius: 4, height: 14,
-          display: 'flex', alignItems: 'center', paddingLeft: 6,
-          fontSize: 8, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace',
-          overflow: 'hidden', whiteSpace: 'nowrap',
-        }}>
-          lovepages.com/{preview.label.toLowerCase().replace(/ /g, '-')}
-        </div>
-      </div>
-      <img
-        src={preview.src}
-        alt={preview.label}
-        draggable={false}
-        style={{ display: 'block', width: '100%', height: 230, objectFit: 'cover', objectPosition: 'top' }}
-      />
-    </div>
-  )
-}
-
-function PagePreviewSide({ initialIndex = 0, isRight = false }) {
-  const [activeIndex, setActiveIndex] = useState(initialIndex)
-  const [fadingOut, setFadingOut] = useState(false)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFadingOut(true)
-      setTimeout(() => { setActiveIndex(i => (i + 1) % n); setFadingOut(false) }, 500)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const s = isRight ? 1 : -1  // sign for mirroring offsets
-
-  const cards = [
-    {
-      preview: PAGE_PREVIEWS[(activeIndex + n - 1) % n],
-      zIndex: 1, scale: 0.82,
-      y: -60 * s, x: 24 * s, rotate: -6 * s, opacity: 0.35,
-    },
-    {
-      preview: PAGE_PREVIEWS[activeIndex],
-      zIndex: 3, scale: 1,
-      y: 0, x: 0, rotate: -2 * s, opacity: fadingOut ? 0 : 1,
-    },
-    {
-      preview: PAGE_PREVIEWS[(activeIndex + 1) % n],
-      zIndex: 2, scale: 0.88,
-      y: 60 * s, x: 12 * s, rotate: 2 * s, opacity: 0.5,
-    },
-  ]
-
-  return (
-    <div className="relative hidden lg:flex items-center justify-center" style={{ width: 380, height: 520, flexShrink: 0 }}>
-      {cards.map(({ preview, zIndex, scale, y, x, rotate, opacity }, i) => (
-        <BrowserCard
-          key={i}
-          preview={preview}
-          style={{ zIndex, opacity, transform: `translateY(${y}px) translateX(${x}px) scale(${scale}) rotate(${rotate}deg)` }}
-        />
-      ))}
-    </div>
-  )
-}
 
 export default function HeroPage() {
   const [showAuth, setShowAuth] = useState(false)
@@ -151,7 +67,66 @@ export default function HeroPage() {
   const [titleLine1, titleLine2] = t('hero.title').split('\n')
 
   return (
-    <div className="min-h-screen bg-base flex flex-col overflow-hidden">
+    <div className="min-h-screen flex flex-col" style={{ background: '#0d0b10', position: 'relative', overflow: 'hidden' }}>
+
+      {/* Moving glows */}
+      <div style={{
+        position: 'absolute',
+        width: '70vw', height: '70vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(100,180,255,0.15) 0%, transparent 65%)',
+        top: '10%', left: '15%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        animation: 'glow-move-1 36s ease-in-out infinite',
+        filter: 'blur(40px)',
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: '65vw', height: '65vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(80,220,140,0.13) 0%, transparent 65%)',
+        top: '25%', left: '40%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        animation: 'glow-move-2 44s ease-in-out infinite',
+        filter: 'blur(44px)',
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: '60vw', height: '60vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255,160,60,0.12) 0%, transparent 65%)',
+        top: '35%', left: '5%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        animation: 'glow-move-3 40s ease-in-out infinite',
+        filter: 'blur(42px)',
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: '55vw', height: '55vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(180,100,255,0.11) 0%, transparent 65%)',
+        top: '50%', left: '50%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        animation: 'glow-move-4 50s ease-in-out infinite',
+        filter: 'blur(46px)',
+      }} />
+      <div style={{
+        position: 'absolute',
+        width: '50vw', height: '50vw',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(255,80,120,0.10) 0%, transparent 65%)',
+        top: '5%', left: '60%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        animation: 'glow-move-5 46s ease-in-out infinite',
+        filter: 'blur(44px)',
+      }} />
+
+
       {/* Nav */}
       <header className="flex items-center justify-between px-4 sm:px-8 py-5 relative z-10">
         <img src="/logo.png" alt="Lovio" className="h-10 w-auto" />
@@ -166,11 +141,9 @@ export default function HeroPage() {
         </div>
       </header>
 
-      {/* Hero — 3-column layout */}
-      <main className="flex-1 flex items-center justify-center px-4 gap-32 -mt-10">
-        <PagePreviewSide initialIndex={0} isRight={false} />
-
-        <div className="flex flex-col items-center text-center flex-shrink-0" style={{ maxWidth: 700 }}>
+      {/* Above-fold: text centered in remaining viewport */}
+      <main className="flex flex-col items-center justify-center flex-1 px-4 text-center relative z-10" style={{ minHeight: 'calc(100vh - 160px)' }}>
+        <div className="flex flex-col items-center w-full min-w-0" style={{ maxWidth: 640 }}>
           <OvO />
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-fg leading-tight mb-4">
@@ -191,13 +164,15 @@ export default function HeroPage() {
 
           <p className="mt-4 text-fg-faint text-sm">{t('hero.free')}</p>
         </div>
-
-        {/* Right side starts at index 2 to be out of phase with left */}
-        <PagePreviewSide initialIndex={2} isRight={true} />
       </main>
 
+      {/* Below-fold: full-width ring */}
+      <div style={{ width: '100vw', height: 500, position: 'relative', zIndex: 1 }}>
+        <HeroRing images={RING_IMAGES} width={600} imageDistance={1200} />
+      </div>
+
       {/* Footer */}
-      <footer className="py-6 text-center text-fg-ghost text-xs">
+      <footer className="py-6 text-center text-fg-ghost text-xs relative z-10">
         lovepages &copy; {new Date().getFullYear()}
       </footer>
 

@@ -17,7 +17,15 @@
       "Bash(container\" label so the intent is clear.:*)",
       "Bash(git revert:*)",
       "Bash(git checkout:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(grep -n \"mobile\\\\|narrow\\\\|resize\\\\|containerWidth\\\\|ResizeObserver\\\\|width\\\\|breakpoint\" src/components/blocks/song/*.jsx)",
+      "Bash(ls /home/ulissesalvesbicalho/code/lovepages/src/lib/utils*)",
+      "Bash(npx vite:*)",
+      "Bash(grep -q '\"\"ogl\"\"' package.json)",
+      "WebFetch(domain:www.reactbits.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

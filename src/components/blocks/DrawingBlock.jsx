@@ -4,71 +4,134 @@ import { nanoid } from 'nanoid'
 import { inputClass } from '../../lib/theme'
 import { supabase } from '../../lib/supabase'
 
-// ── Art material SVGs ─────────────────────────────────────────────────────────
-function PencilSVG({ style }) {
+// ── Animation keyframes ────────────────────────────────────────────────────────
+const ANIM_STYLES = `
+  @keyframes db-lightbox-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes db-img-in {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes db-img-nav {
+    from { transform: scale(0.88); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+`
+let _animStyleInjected = false
+function ensureAnimStyles() {
+  if (_animStyleInjected) return
+  _animStyleInjected = true
+  const el = document.createElement('style')
+  el.textContent = ANIM_STYLES
+  document.head.appendChild(el)
+}
+
+// ── Art supply SVGs (vertical, tip at top) ────────────────────────────────────
+function BrushVertical() {
   return (
-    <svg width="140" height="22" viewBox="0 0 140 22" fill="none" style={style}>
-      {/* Body */}
-      <rect x="14" y="6" width="108" height="10" fill="#f5c518" />
-      <rect x="14" y="6" width="108" height="3.5" fill="#f7d645" opacity="0.5" />
-      {/* Side facet lines */}
-      <line x1="14" y1="11" x2="122" y2="11" stroke="rgba(0,0,0,0.06)" strokeWidth="0.8" />
-      {/* Tip wood */}
-      <polygon points="14,6 14,16 4,11" fill="#e8d098" />
-      <polygon points="14,6 14,16 4,11" fill="url(#woodGrad)" />
-      {/* Graphite */}
-      <polygon points="4,11 8,9 8,13" fill="#444" />
-      <polygon points="4,11 7,10 7,12" fill="#222" />
+    <svg width="14" height="180" viewBox="0 0 14 180" fill="none">
+      {/* Bristle tip */}
+      <ellipse cx="7" cy="4" rx="2" ry="4" fill="#0e0b06" />
+      {/* Bristle body */}
+      <ellipse cx="7" cy="20" rx="5" ry="20" fill="#1a1208" />
+      <ellipse cx="7" cy="16" rx="3.5" ry="14" fill="#2d2010" />
+      {/* Bristle sheen */}
+      <rect x="5" y="7" width="2" height="14" rx="1" fill="rgba(255,255,255,0.07)" />
       {/* Ferrule */}
-      <rect x="122" y="6" width="7" height="10" fill="#c0c0c0" />
-      <rect x="122" y="6" width="7" height="3" fill="#d8d8d8" />
-      {/* Eraser */}
-      <rect x="129" y="6.5" width="11" height="9" rx="2" fill="#f0a0a0" />
-      <rect x="129" y="6.5" width="11" height="3.5" rx="1" fill="#f5bcbc" />
+      <rect x="2" y="37" width="10" height="15" rx="1" fill="#bdbdbd" />
+      <rect x="2" y="37" width="10" height="5.5" rx="1" fill="#d8d8d8" />
+      <rect x="2" y="46" width="10" height="2" fill="#a0a0a0" />
+      <rect x="2" y="49" width="10" height="1.5" fill="#acacac" />
+      {/* Handle */}
+      <rect x="3.5" y="52" width="7" height="116" rx="3.5" fill="url(#dbBrH)" />
+      <rect x="4.5" y="52" width="2.5" height="116" rx="1.25" fill="rgba(255,255,255,0.17)" />
+      {/* Grain lines on handle */}
+      <line x1="3.5" y1="80" x2="10.5" y2="82" stroke="rgba(0,0,0,0.07)" strokeWidth="0.8" />
+      <line x1="3.5" y1="105" x2="10.5" y2="107" stroke="rgba(0,0,0,0.07)" strokeWidth="0.8" />
+      <line x1="3.5" y1="130" x2="10.5" y2="132" stroke="rgba(0,0,0,0.06)" strokeWidth="0.8" />
+      {/* End cap */}
+      <rect x="3.5" y="163" width="7" height="17" rx="3.5" fill="#7a4820" />
+      <rect x="4.5" y="165" width="3" height="8" rx="1.5" fill="rgba(255,255,255,0.1)" />
       <defs>
-        <linearGradient id="woodGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#d4a855" />
-          <stop offset="1" stopColor="#e8d098" />
+        <linearGradient id="dbBrH" x1="3.5" y1="0" x2="10.5" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0"    stopColor="#7a4e22" />
+          <stop offset="0.3"  stopColor="#c48848" />
+          <stop offset="0.65" stopColor="#d8a860" />
+          <stop offset="1"    stopColor="#8b5828" />
         </linearGradient>
       </defs>
     </svg>
   )
 }
 
-function BrushSVG({ style }) {
+function PencilVertical() {
   return (
-    <svg width="120" height="20" viewBox="0 0 120 20" fill="none" style={style}>
-      {/* Handle */}
-      <rect x="22" y="7" width="90" height="6" rx="3" fill="#c4956a" />
-      <rect x="22" y="7" width="90" height="2" rx="1" fill="rgba(255,255,255,0.28)" />
-      {/* End cap */}
-      <circle cx="113" cy="10" r="4" fill="#a07040" />
-      <circle cx="113" cy="9" r="2" fill="rgba(255,255,255,0.18)" />
+    <svg width="12" height="158" viewBox="0 0 12 158" fill="none">
+      {/* Graphite point */}
+      <polygon points="6,0 3,14 9,14" fill="#2a2a2a" />
+      <polygon points="6,0 4.5,9 7.5,9" fill="#111" />
+      {/* Sharpened wood cone */}
+      <polygon points="3,14 0.5,28 11.5,28 9,14" fill="#deb887" />
+      <polygon points="3,14 2.5,24 5.5,24 5,14" fill="rgba(255,255,255,0.18)" />
+      {/* Yellow body */}
+      <rect x="0.5" y="27" width="11" height="104" fill="url(#dbPcB)" />
+      {/* Facet lines */}
+      <line x1="0.5" y1="27" x2="0.5" y2="131" stroke="#e0b010" strokeWidth="0.8" />
+      <line x1="3.5" y1="27" x2="3.5" y2="131" stroke="rgba(0,0,0,0.06)" strokeWidth="0.6" />
+      <line x1="7.5" y1="27" x2="7.5" y2="131" stroke="rgba(0,0,0,0.06)" strokeWidth="0.6" />
+      <line x1="11.5" y1="27" x2="11.5" y2="131" stroke="#e0b010" strokeWidth="0.8" />
       {/* Ferrule */}
-      <rect x="18" y="5.5" width="16" height="9" rx="1.5" fill="#9a9a9a" />
-      <rect x="18" y="5.5" width="16" height="3" rx="1" fill="#bbb" />
-      {/* Bristles */}
-      <ellipse cx="10" cy="10" rx="13" ry="7" fill="#2a2218" />
-      <ellipse cx="10" cy="9" rx="10" ry="4.5" fill="#3a3020" />
-      {/* Bristle highlight */}
-      <ellipse cx="8" cy="8" rx="5" ry="2" fill="rgba(255,255,255,0.07)" />
+      <rect x="0" y="130" width="12" height="13" fill="#c0c0c0" />
+      <rect x="0" y="130" width="12" height="5" fill="#d8d8d8" />
+      <rect x="0" y="137" width="12" height="2" fill="#a4a4a4" />
+      <rect x="0" y="140" width="12" height="1.5" fill="#b0b0b0" />
+      {/* Eraser */}
+      <rect x="0.5" y="143" width="11" height="15" rx="1.5" fill="#f07878" />
+      <rect x="0.5" y="143" width="5.5" height="15" rx="1" fill="rgba(255,255,255,0.2)" />
+      <defs>
+        <linearGradient id="dbPcB" x1="0.5" y1="0" x2="11.5" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0"   stopColor="#e8b800" />
+          <stop offset="0.25" stopColor="#f7d040" />
+          <stop offset="0.55" stopColor="#f5c518" />
+          <stop offset="1"   stopColor="#d4a800" />
+        </linearGradient>
+      </defs>
     </svg>
   )
 }
 
-function PaintBlobs({ style }) {
+function MarkerVertical() {
   return (
-    <svg width="70" height="60" viewBox="0 0 70 60" fill="none" style={style}>
-      <ellipse cx="15" cy="14" rx="12" ry="9" fill="#e53e3e" opacity="0.85" />
-      <ellipse cx="15" cy="13" rx="7" ry="4" fill="rgba(255,255,255,0.18)" />
-      <ellipse cx="46" cy="10" rx="10" ry="8" fill="#3182ce" opacity="0.85" />
-      <ellipse cx="46" cy="9" rx="6" ry="3.5" fill="rgba(255,255,255,0.18)" />
-      <ellipse cx="32" cy="34" rx="11" ry="8" fill="#38a169" opacity="0.85" />
-      <ellipse cx="32" cy="33" rx="6.5" ry="3.5" fill="rgba(255,255,255,0.18)" />
-      <ellipse cx="10" cy="46" rx="8" ry="7" fill="#d69e2e" opacity="0.85" />
-      <ellipse cx="10" cy="45" rx="5" ry="3" fill="rgba(255,255,255,0.18)" />
-      <ellipse cx="55" cy="44" rx="9" ry="7" fill="#805ad5" opacity="0.85" />
-      <ellipse cx="55" cy="43" rx="5.5" ry="3" fill="rgba(255,255,255,0.18)" />
+    <svg width="17" height="148" viewBox="0 0 17 148" fill="none">
+      {/* Cap top — rounded */}
+      <rect x="2" y="0" width="13" height="30" rx="4" fill="#1a3f7a" />
+      <rect x="2" y="0" width="6" height="30" rx="4" fill="rgba(255,255,255,0.1)" />
+      {/* Cap clip */}
+      <rect x="11.5" y="4" width="3" height="30" rx="1.5" fill="#152e5c" />
+      <rect x="12" y="4" width="1.5" height="30" rx="0.75" fill="rgba(255,255,255,0.08)" />
+      {/* Cap / body join ridge */}
+      <rect x="1" y="27" width="15" height="5" rx="2" fill="#1a3f7a" />
+      {/* Body */}
+      <rect x="1" y="30" width="15" height="102" rx="2" fill="url(#dbMkB)" />
+      <rect x="1" y="30" width="5.5" height="102" rx="2" fill="rgba(255,255,255,0.12)" />
+      {/* Label stripe */}
+      <rect x="2.5" y="54" width="12" height="26" rx="1.5" fill="rgba(255,255,255,0.07)" />
+      <rect x="4" y="59" width="9" height="2" rx="1" fill="rgba(255,255,255,0.15)" />
+      <rect x="4" y="64" width="7" height="2" rx="1" fill="rgba(255,255,255,0.1)" />
+      <rect x="4" y="69" width="8" height="2" rx="1" fill="rgba(255,255,255,0.1)" />
+      {/* Bottom end */}
+      <rect x="1" y="128" width="15" height="20" rx="4" fill="#1a3a6e" />
+      <rect x="1" y="128" width="6.5" height="20" rx="3" fill="rgba(255,255,255,0.07)" />
+      <defs>
+        <linearGradient id="dbMkB" x1="1" y1="0" x2="16" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0"    stopColor="#1d4ed8" />
+          <stop offset="0.35" stopColor="#3b82f6" />
+          <stop offset="0.65" stopColor="#2563eb" />
+          <stop offset="1"    stopColor="#1e40af" />
+        </linearGradient>
+      </defs>
     </svg>
   )
 }
@@ -177,25 +240,20 @@ function PreviewView({ drawings, boardTitle, onClick }) {
         position: 'relative', width: '100%', height: 260,
         cursor: 'pointer', userSelect: 'none',
         borderRadius: 14,
-        border: `2px dashed ${hovered ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)'}`,
         transition: 'border-color 0.2s',
       }}
     >
-      {/* Art materials */}
-      <div style={{ position: 'absolute', left: 6, bottom: '10%', transform: 'rotate(-13deg)', pointerEvents: 'none', zIndex: 1 }}>
-        <PencilSVG />
-      </div>
-      <div style={{ position: 'absolute', right: 8, top: '8%', transform: 'rotate(16deg)', pointerEvents: 'none', zIndex: 1 }}>
-        <BrushSVG />
-      </div>
-      <div style={{ position: 'absolute', right: '4%', bottom: '8%', opacity: 0.9, pointerEvents: 'none', zIndex: 1 }}>
-        <PaintBlobs />
+      {/* Art supplies — grouped on the right */}
+      <div style={{ position: 'absolute', right: 14, bottom: 18, display: 'flex', alignItems: 'flex-end', gap: 7, pointerEvents: 'none', zIndex: 1 }}>
+        <div style={{ transform: 'rotate(-4deg)', transformOrigin: 'bottom center' }}><BrushVertical /></div>
+        <div style={{ transform: 'rotate(2deg)', transformOrigin: 'bottom center' }}><PencilVertical /></div>
+        <div style={{ transform: 'rotate(-7deg)', transformOrigin: 'bottom center' }}><MarkerVertical /></div>
       </div>
 
       {/* Papers — lift slightly on hover */}
       {PAPER_POSITIONS.map((pos, i) => (
         <ScatteredPaper
-          key={i} pos={pos} drawing={drawings[i] ?? null}
+          key={i} pos={pos} drawing={i === 1 ? null : (drawings[i < 1 ? i : i - 1] ?? null)}
           shake={shake * SHAKE_FACTORS[i]} hovered={hovered}
         />
       ))}
@@ -235,17 +293,121 @@ function PreviewView({ drawings, boardTitle, onClick }) {
   )
 }
 
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+function Lightbox({ drawings, index, onClose, onNav }) {
+  const drawing = drawings[index]
+  const hasPrev = index > 0
+  const hasNext = index < drawings.length - 1
+  const [animKey, setAnimKey] = useState(0)
+  const isFirstRender = useRef(true)
+
+  ensureAnimStyles()
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft'  && hasPrev) onNav(index - 1)
+      if (e.key === 'ArrowRight' && hasNext) onNav(index + 1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [index, hasPrev, hasNext])
+
+  // Bump animKey whenever index changes so the image re-animates
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    setAnimKey(k => k + 1)
+  }, [index])
+
+  const imgAnim = animKey === 0
+    ? 'db-img-in 0.28s cubic-bezier(0.34,1.56,0.64,1) both'
+    : 'db-img-nav 0.18s ease both'
+
+  return (
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 10010,
+        background: 'rgba(0,0,0,0.92)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'db-lightbox-in 0.18s ease both',
+      }}
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      {/* Close */}
+      <button onClick={onClose} style={{
+        position: 'absolute', top: 16, right: 16,
+        width: 38, height: 38, borderRadius: '50%', border: 'none',
+        background: 'rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <X size={18} />
+      </button>
+
+      {/* Prev */}
+      {hasPrev && (
+        <button onClick={() => onNav(index - 1)} style={{
+          position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+          width: 44, height: 44, borderRadius: '50%', border: 'none',
+          background: 'rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+          fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>‹</button>
+      )}
+
+      {/* Next */}
+      {hasNext && (
+        <button onClick={() => onNav(index + 1)} style={{
+          position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+          width: 44, height: 44, borderRadius: '50%', border: 'none',
+          background: 'rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+          fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>›</button>
+      )}
+
+      {/* Image */}
+      <div
+        key={`${index}-${animKey}`}
+        style={{
+          maxWidth: 'min(90vw, 800px)', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: 14,
+          animation: imgAnim,
+        }}
+      >
+        <img
+          src={drawing.src}
+          alt={drawing.caption || 'drawing'}
+          style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 4, boxShadow: '0 8px 48px rgba(0,0,0,0.6)' }}
+        />
+        {drawing.caption && (
+          <p style={{
+            fontFamily: "'Caveat', cursive", fontSize: 20,
+            color: 'rgba(255,255,255,0.8)', margin: 0, textAlign: 'center',
+          }}>
+            {drawing.caption}
+          </p>
+        )}
+        {drawings.length > 1 && (
+          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, margin: 0 }}>
+            {index + 1} / {drawings.length}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Gallery paper card ────────────────────────────────────────────────────────
-function GalleryPaper({ drawing, onRemove, showRemove }) {
+function GalleryPaper({ drawing, onRemove, showRemove, onClick }) {
   const seed = (drawing.id ?? '').split('').reduce((a, c) => a + c.charCodeAt(0), 0)
   const rot = ((seed % 11) - 5) * 0.7
+  const [hovered, setHovered] = useState(false)
 
   return (
     <div style={{
       position: 'relative',
-      transform: `rotate(${rot}deg)`,
+      transform: `rotate(${rot}deg) scale(${hovered ? 1.08 : 1})`,
       transformOrigin: 'center center',
       flexShrink: 0,
+      transition: 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)',
     }}>
       {showRemove && (
         <button
@@ -262,40 +424,35 @@ function GalleryPaper({ drawing, onRemove, showRemove }) {
         </button>
       )}
 
-      <div style={{
-        background: 'linear-gradient(160deg, #fdfcf8 0%, #f5f1e8 100%)',
-        padding: '10px 10px 28px',
-        boxShadow: [
-          `${rot > 0 ? 5 : -5}px 8px 20px rgba(0,0,0,0.28)`,
-          '0 2px 4px rgba(0,0,0,0.14)',
-          'inset 0 0 0 1px rgba(0,0,0,0.04)',
-        ].join(', '),
-        width: 160,
-        position: 'relative',
-      }}>
-        {/* Ruled lines */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'repeating-linear-gradient(transparent, transparent 19px, rgba(170,185,215,0.2) 19px, rgba(170,185,215,0.2) 20px)',
-          backgroundPosition: '0 30px',
-          pointerEvents: 'none',
-        }} />
+      <div
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          background: '#f7f3ec',
+          boxShadow: hovered
+            ? `${rot > 0 ? 8 : -8}px 16px 36px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.25)`
+            : `${rot > 0 ? 5 : -5}px 8px 24px rgba(0,0,0,0.32), 0 2px 6px rgba(0,0,0,0.16)`,
+          width: 160,
+          position: 'relative',
+          cursor: 'zoom-in',
+          transition: 'box-shadow 0.18s ease',
+        }}
+      >
         <img
           src={drawing.src}
           alt={drawing.caption || 'drawing'}
           style={{
             display: 'block', width: '100%',
             aspectRatio: '23/16', objectFit: 'cover',
-            borderRadius: 2, position: 'relative', zIndex: 1,
           }}
         />
         {drawing.caption && (
           <p style={{
             fontFamily: "'Caveat', cursive",
             fontSize: 13, color: '#4a3a28',
-            margin: '6px 0 0', textAlign: 'center',
-            lineHeight: 1.3,
-            position: 'relative', zIndex: 1,
+            margin: 0, padding: '5px 8px 7px',
+            textAlign: 'center', lineHeight: 1.3,
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {drawing.caption}
@@ -313,7 +470,7 @@ const CANVAS_W = 460
 const CANVAS_H = 300
 const PAPER_BG = '#faf5e4'
 
-function DrawingCanvas({ onSave, onCancel, uploading }) {
+function DrawingCanvas({ onSave, uploading }) {
   const canvasRef = useRef(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [color, setColor] = useState('#1c1c1c')
@@ -385,17 +542,16 @@ function DrawingCanvas({ onSave, onCancel, uploading }) {
   const isEraser = tool === 'eraser'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Canvas on paper */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+      {/* Canvas — floating paper sheet */}
       <div style={{
         background: PAPER_BG,
-        border: '1px solid rgba(180,165,130,0.4)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+        border: '1px solid rgba(180,165,130,0.35)',
+        boxShadow: '0 12px 48px rgba(0,0,0,0.6), 0 3px 10px rgba(0,0,0,0.3)',
         borderRadius: 2,
         padding: 2,
         position: 'relative',
       }}>
-        {/* Ruled lines on the paper */}
         <div style={{
           position: 'absolute', inset: 2,
           backgroundImage: 'repeating-linear-gradient(transparent, transparent 23px, rgba(180,190,220,0.28) 23px, rgba(180,190,220,0.28) 24px)',
@@ -422,8 +578,15 @@ function DrawingCanvas({ onSave, onCancel, uploading }) {
         />
       </div>
 
-      {/* Toolbar */}
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* Floating glass toolbar */}
+      <div style={{
+        display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
+        background: 'rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 14, padding: '10px 14px',
+      }}>
         {/* Colors */}
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {PALETTE.map(c => (
@@ -444,7 +607,7 @@ function DrawingCanvas({ onSave, onCancel, uploading }) {
               style={{
                 width: Math.max(s + 8, 16), height: Math.max(s + 8, 16),
                 borderRadius: '50%', flexShrink: 0,
-                background: brushSize === s ? '#ff3131' : '#3a4453',
+                background: brushSize === s ? '#ff3131' : 'rgba(255,255,255,0.2)',
                 border: 'none', cursor: 'pointer',
               }}
             />
@@ -454,16 +617,19 @@ function DrawingCanvas({ onSave, onCancel, uploading }) {
         <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
           <button onClick={() => setTool(t => t === 'eraser' ? 'pen' : 'eraser')}
             style={{
-              padding: '4px 10px', borderRadius: 6, border: 'none',
-              background: isEraser ? '#ff3131' : '#3a4453',
+              padding: '4px 10px', borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: isEraser ? '#ff3131' : 'rgba(255,255,255,0.1)',
               color: '#f3f4f6', fontSize: 12, cursor: 'pointer',
             }}>
             Eraser
           </button>
           <button onClick={clearCanvas}
             style={{
-              padding: '4px 10px', borderRadius: 6, border: 'none',
-              background: '#3a4453', color: '#9ca3af', fontSize: 12, cursor: 'pointer',
+              padding: '4px 10px', borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.07)',
+              color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer',
             }}>
             Clear
           </button>
@@ -473,182 +639,673 @@ function DrawingCanvas({ onSave, onCancel, uploading }) {
       {/* Caption */}
       <input
         style={{
-          background: '#242d3a', border: '1px solid #3a4453', borderRadius: 6,
-          padding: '7px 10px', color: '#f3f4f6', fontSize: 13,
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 10, padding: '9px 14px',
+          color: 'rgba(255,255,255,0.9)', fontSize: 14,
           width: '100%', boxSizing: 'border-box',
           fontFamily: "'Caveat', cursive",
+          outline: 'none',
         }}
         placeholder="Add a caption (optional)…"
         value={caption}
         onChange={e => setCaption(e.target.value)}
       />
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={onCancel}
-          style={{
-            flex: 1, padding: '10px', borderRadius: 8, border: '1.5px solid #3a4453',
-            background: 'transparent', color: '#9ca3af', fontSize: 14, cursor: 'pointer',
-          }}>
-          ← Back
-        </button>
-        <button onClick={handleSave} disabled={uploading}
-          style={{
-            flex: 3, padding: '10px', borderRadius: 8, border: 'none', fontWeight: 700, fontSize: 14,
-            background: uploading ? '#555' : 'linear-gradient(135deg, #e53e3e, #c0392b)',
-            color: '#fff', cursor: uploading ? 'not-allowed' : 'pointer',
-            boxShadow: uploading ? 'none' : '0 4px 12px rgba(192,57,43,0.4)',
-            transition: 'background 0.2s',
-          }}>
-          {uploading ? 'Uploading…' : '📌 Pin to board'}
-        </button>
-      </div>
+      {/* Save */}
+      <button onClick={handleSave} disabled={uploading}
+        style={{
+          width: '100%', padding: '12px', borderRadius: 10, border: 'none',
+          fontWeight: 700, fontSize: 15,
+          background: uploading ? 'rgba(255,255,255,0.12)' : 'linear-gradient(135deg, #e53e3e, #c0392b)',
+          color: uploading ? 'rgba(255,255,255,0.45)' : '#fff',
+          cursor: uploading ? 'not-allowed' : 'pointer',
+          boxShadow: uploading ? 'none' : '0 4px 16px rgba(192,57,43,0.45)',
+          transition: 'background 0.2s',
+          fontFamily: "'Caveat', cursive",
+        }}>
+        {uploading ? 'Uploading…' : '📌 Pin to board'}
+      </button>
     </div>
   )
 }
 
 // ── Gallery modal ─────────────────────────────────────────────────────────────
 function GalleryModal({ drawings, boardTitle, isEditing, onClose, onAdd, onRemove, uploading, uploadError }) {
-  const [view, setView] = useState('gallery') // 'gallery' | 'draw'
   const isEmpty = drawings.length === 0
+  // Skip straight to draw if the board is empty and visitor can draw
+  const [view, setView] = useState(isEmpty && onAdd ? 'draw' : 'gallery')
+  const [lightboxIdx, setLightboxIdx] = useState(null)
 
   return (
     <div
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.72)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 16,
+        background: 'rgba(8,6,16,0.9)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
       }}
       onMouseDown={e => { if (e.target === e.currentTarget && !uploading) onClose() }}
     >
-      <div style={{
-        background: '#1a202a',
-        borderRadius: 18,
-        width: '100%', maxWidth: 580,
-        maxHeight: '90vh',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: '0 28px 72px rgba(0,0,0,0.65)',
-        overflow: 'hidden',
-      }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '16px 20px 14px',
-          borderBottom: '1px solid #242d3a',
-          flexShrink: 0,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {view === 'draw' && (
-              <button onClick={() => setView('gallery')}
-                style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '2px 4px', fontSize: 13 }}>
-                ←
-              </button>
-            )}
-            <span style={{ fontFamily: "'Caveat', cursive", fontSize: 22, fontWeight: 700, color: '#f3f4f6' }}>
-              {view === 'draw' ? 'Draw yours' : (boardTitle || 'Drawing board')}
-            </span>
-            {view === 'gallery' && drawings.length > 0 && (
-              <span style={{
-                background: '#3a4453', color: '#9ca3af',
-                borderRadius: 10, padding: '2px 8px', fontSize: 12,
-              }}>
-                {drawings.length}
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {view === 'gallery' && isEditing && (
-              <button onClick={() => setView('draw')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  background: '#ff3131', color: '#fff', border: 'none',
-                  borderRadius: 8, padding: '6px 14px', fontSize: 13,
-                  fontWeight: 600, cursor: 'pointer',
-                }}>
-                <Plus size={14} /> Add yours
-              </button>
-            )}
-            <button onClick={() => { if (!uploading) onClose() }}
-              style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: 4 }}>
-              <X size={18} />
-            </button>
-          </div>
-        </div>
+      {/* Floating close — always visible */}
+      <button
+        onClick={() => { if (!uploading) onClose() }}
+        style={{
+          position: 'fixed', top: 18, right: 18, zIndex: 10002,
+          width: 38, height: 38, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          color: 'rgba(255,255,255,0.8)', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+      >
+        <X size={17} />
+      </button>
 
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-          {view === 'gallery' ? (
-            isEmpty ? (
+      {view === 'gallery' ? (
+        <>
+          {/* Floating title */}
+          <div style={{
+            position: 'fixed', top: 22, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 10001, pointerEvents: 'none',
+            fontFamily: "'Caveat', cursive", fontSize: 24, fontWeight: 700,
+            color: 'rgba(255,255,255,0.88)',
+            textShadow: '0 2px 18px rgba(0,0,0,0.7)',
+            whiteSpace: 'nowrap',
+          }}>
+            {boardTitle || 'Drawing board'}
+          </div>
+
+          {/* Floating "Add yours" at top-left — always visible when drawing is allowed */}
+          {onAdd && (
+            <button
+              onClick={() => setView('draw')}
+              style={{
+                position: 'fixed', top: 18, left: 18, zIndex: 10002,
+                display: 'flex', alignItems: 'center', gap: 6,
+                background: 'rgba(229,62,62,0.92)',
+                backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                color: '#fff', border: 'none', borderRadius: 20,
+                padding: '8px 16px', fontSize: 13, fontWeight: 700,
+                cursor: 'pointer', fontFamily: "'Caveat', cursive",
+                boxShadow: '0 4px 16px rgba(192,57,43,0.5)',
+              }}
+            >
+              <Plus size={14} /> Draw yours
+            </button>
+          )}
+
+          {/* Papers — float directly on the backdrop */}
+          <div
+            onMouseDown={e => { if (e.target === e.currentTarget && !uploading) onClose() }}
+            style={{
+              position: 'absolute', inset: 0,
+              overflowY: 'auto',
+              display: 'flex', flexWrap: 'wrap',
+              gap: '40px 44px', justifyContent: 'center', alignContent: 'flex-start',
+              padding: '70px 48px 120px',
+            }}
+          >
+            {isEmpty ? (
               <div style={{
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                minHeight: 200, gap: 14, textAlign: 'center',
+                minHeight: '55vh', gap: 18,
               }}>
-                {/* Mini table scene */}
-                <div style={{ position: 'relative', width: 180, height: 100, opacity: 0.7 }}>
-                  <div style={{
-                    position: 'absolute', inset: 0, borderRadius: 8,
-                    background: 'linear-gradient(160deg, #c4956a, #a87248)',
-                    backgroundImage: 'repeating-linear-gradient(88deg, transparent, transparent 18px, rgba(0,0,0,0.025) 18px, rgba(0,0,0,0.025) 20px)',
-                  }} />
-                  <div style={{
-                    position: 'absolute', left: '15%', top: '10%', width: '35%',
-                    transform: 'rotate(-8deg)', background: '#fdfcf8',
-                    padding: '5px 5px 14px',
-                    boxShadow: '-3px 5px 10px rgba(0,0,0,0.25)',
-                  }}>
-                    <div style={{ width: '100%', aspectRatio: '23/16', border: '1px dashed rgba(180,165,130,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Pencil size={10} color="rgba(160,145,120,0.5)" />
-                    </div>
-                  </div>
-                </div>
-                <p style={{ fontFamily: "'Caveat', cursive", fontSize: 18, color: '#9ca3af', margin: 0 }}>
+                <p style={{
+                  fontFamily: "'Caveat', cursive", fontSize: 22,
+                  color: 'rgba(255,255,255,0.38)', margin: 0,
+                }}>
                   No drawings yet
                 </p>
-                {isEditing && (
+                {onAdd && (
                   <button onClick={() => setView('draw')}
                     style={{
                       background: 'linear-gradient(135deg, #e53e3e, #c0392b)',
-                      color: '#fff', border: 'none', borderRadius: 10,
-                      padding: '10px 24px', fontSize: 15, fontWeight: 700,
+                      color: '#fff', border: 'none', borderRadius: 12,
+                      padding: '11px 28px', fontSize: 16, fontWeight: 700,
                       cursor: 'pointer', fontFamily: "'Caveat', cursive",
+                      boxShadow: '0 6px 20px rgba(192,57,43,0.45)',
                     }}>
                     ✏️ Be the first to draw!
                   </button>
                 )}
               </div>
             ) : (
-              <div style={{
-                display: 'flex', flexWrap: 'wrap',
-                gap: '28px 32px', justifyContent: 'center',
-                paddingTop: 12, paddingBottom: 8,
-              }}>
-                {drawings.map(d => (
-                  <GalleryPaper
-                    key={d.id}
-                    drawing={d}
-                    showRemove={isEditing}
-                    onRemove={onRemove}
-                  />
-                ))}
-              </div>
-            )
-          ) : (
-            <DrawingCanvas
-              onSave={onAdd}
-              onCancel={() => setView('gallery')}
-              uploading={uploading}
-            />
-          )}
+              drawings.map((d, i) => (
+                <GalleryPaper key={d.id} drawing={d} showRemove={isEditing} onRemove={onRemove} onClick={() => setLightboxIdx(i)} />
+              ))
+            )}
+          </div>
 
-          {uploadError && view === 'draw' && (
-            <p style={{ color: '#fc8181', fontSize: 12, margin: '8px 0 0', textAlign: 'center' }}>
-              {uploadError}
-            </p>
+          {lightboxIdx !== null && (
+            <Lightbox drawings={drawings} index={lightboxIdx} onClose={() => setLightboxIdx(null)} onNav={setLightboxIdx} />
           )}
+        </>
+      ) : (
+        <>
+          {/* Floating back button */}
+          <button
+            onClick={() => setView('gallery')}
+            style={{
+              position: 'fixed', top: 18, left: 18, zIndex: 10002,
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 20, padding: '8px 16px',
+              color: 'rgba(255,255,255,0.8)', fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            ← Back
+          </button>
+
+          {/* Floating title */}
+          <div style={{
+            position: 'fixed', top: 22, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 10001, pointerEvents: 'none',
+            fontFamily: "'Caveat', cursive", fontSize: 22, fontWeight: 700,
+            color: 'rgba(255,255,255,0.85)',
+            textShadow: '0 2px 16px rgba(0,0,0,0.6)',
+            whiteSpace: 'nowrap',
+          }}>
+            Draw yours
+          </div>
+
+          {/* Canvas — centered and floating */}
+          <div style={{
+            position: 'absolute', inset: 0, overflowY: 'auto',
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            padding: '70px 20px 48px',
+          }}>
+            <div style={{ width: '100%', maxWidth: 520 }}>
+              <DrawingCanvas onSave={onAdd} uploading={uploading} />
+              {uploadError && (
+                <p style={{ color: '#fc8181', fontSize: 12, margin: '10px 0 0', textAlign: 'center' }}>
+                  {uploadError}
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Windows XP / MS Paint variant ────────────────────────────────────────────
+const XPC = '#ece9d8'
+const XP_TITLE_GRAD = 'linear-gradient(to bottom, #4b9ee6 0%, #2e82d2 12%, #1e6ec4 50%, #165ab0 100%)'
+const XP_WIN_OUTER = '#0c327a'
+const XP_WIN_INNER = '#89b4f3'
+
+function XPTitleBar({ title, onClose }) {
+  return (
+    <div style={{
+      background: XP_TITLE_GRAD, height: 24,
+      display: 'flex', alignItems: 'center', gap: 3, padding: '0 3px 0 5px',
+      userSelect: 'none', flexShrink: 0,
+    }}>
+      <span style={{ fontSize: 14, lineHeight: 1, flexShrink: 0 }}>🎨</span>
+      <span style={{
+        flex: 1, color: '#fff', fontSize: 11, fontWeight: 700,
+        fontFamily: 'Tahoma, "Segoe UI", Arial, sans-serif',
+        textShadow: '0 1px 2px rgba(0,0,0,0.45)',
+        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+      }}>
+        {title} - Paint
+      </span>
+      <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+        {['—', '❐'].map(s => (
+          <button key={s} style={{
+            width: 21, height: 19, padding: 0, cursor: 'default',
+            background: 'linear-gradient(to bottom, #d4ccbe, #b0a898)',
+            border: '1px solid', borderColor: '#d0c8bc #5c5450 #5c5450 #d0c8bc',
+            color: '#000', fontSize: 9, fontFamily: 'Tahoma, sans-serif', fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>{s}</button>
+        ))}
+        <button onClick={onClose} style={{
+          width: 21, height: 19, padding: 0, cursor: 'pointer',
+          background: 'linear-gradient(to bottom, #e88, #c03)',
+          border: '1px solid', borderColor: '#faa #801010 #801010 #faa',
+          color: '#fff', fontSize: 10, fontWeight: 900,
+          fontFamily: 'Tahoma, sans-serif',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>✕</button>
+      </div>
+    </div>
+  )
+}
+
+function XPMenuBar({ onAddYours, showAdd }) {
+  return (
+    <div style={{
+      background: XPC, height: 20,
+      display: 'flex', alignItems: 'center',
+      borderBottom: '1px solid #b4ada4',
+      fontFamily: 'Tahoma, "Segoe UI", Arial, sans-serif', fontSize: 11,
+      userSelect: 'none', flexShrink: 0,
+    }}>
+      {['File', 'Edit', 'View', 'Image', 'Colors', 'Help'].map(m => (
+        <span key={m} style={{ padding: '1px 7px', cursor: 'default' }}>{m}</span>
+      ))}
+      {showAdd && (
+        <button onClick={onAddYours} style={{
+          marginLeft: 'auto', marginRight: 4,
+          background: XPC,
+          border: '1px solid', borderColor: '#fff #808080 #808080 #fff',
+          fontFamily: 'Tahoma, sans-serif', fontSize: 11,
+          padding: '0 8px', height: 17, cursor: 'pointer', color: '#000',
+        }}>
+          Add yours…
+        </button>
+      )}
+    </div>
+  )
+}
+
+const XP_TOOL_IDS = ['freesel','select','eraser','fill','eyedrop','zoom','pencil','brush','airbrush','text','line','curve','rect','poly','ellipse','rrect']
+const XP_TOOL_LABELS = { freesel:'Free Select',select:'Rectangle Select',eraser:'Eraser',fill:'Fill',eyedrop:'Pick Color',zoom:'Zoom',pencil:'Pencil',brush:'Brush',airbrush:'Airbrush',text:'Text',line:'Line',curve:'Curve',rect:'Rectangle',poly:'Polygon',ellipse:'Ellipse',rrect:'Rounded Rect' }
+
+function XPToolIcon({ id }) {
+  const p = { width: 14, height: 14, viewBox: '0 0 14 14' }
+  switch (id) {
+    case 'freesel':  return <svg {...p}><path d="M2,8 Q2,2 7,2 Q12,2 12,7 Q12,12 7,12 Q2,12 2,8Z" fill="none" stroke="#000" strokeWidth="1" strokeDasharray="2,1.5"/></svg>
+    case 'select':   return <svg {...p}><rect x="1" y="1" width="12" height="12" fill="none" stroke="#000" strokeWidth="1" strokeDasharray="2,1.5"/></svg>
+    case 'eraser':   return <svg {...p}><rect x="2" y="5" width="8" height="6" rx="1" fill="#f88" stroke="#000" strokeWidth="0.7"/><rect x="10" y="5" width="2" height="6" rx="0.5" fill="#faa"/><line x1="1" y1="11" x2="13" y2="11" stroke="#000" strokeWidth="0.8"/></svg>
+    case 'fill':     return <svg {...p}><path d="M3,10 L3,4 L8,4 L8,7 L5,7 L5,10Z" fill="#ffd700" stroke="#000" strokeWidth="0.7"/><path d="M9,9 Q11,8 12,10 Q13,12 11,12.5 Q9,13 9,11Z" fill="#333" stroke="#000" strokeWidth="0.5"/><line x1="8.5" y1="8.5" x2="10.5" y2="6.5" stroke="#333" strokeWidth="1"/></svg>
+    case 'eyedrop':  return <svg {...p}><path d="M10,1 L12,3 L6,9 L4,11 L2,12 L3,10 L5,8Z" fill="#9966ff" stroke="#000" strokeWidth="0.6"/><circle cx="3" cy="11" r="1.5" fill="#9966ff"/></svg>
+    case 'zoom':     return <svg {...p}><circle cx="6" cy="5.5" r="3.5" fill="none" stroke="#000" strokeWidth="1.2"/><line x1="8.5" y1="8.5" x2="12.5" y2="12.5" stroke="#000" strokeWidth="1.5" strokeLinecap="round"/><line x1="4" y1="5.5" x2="8" y2="5.5" stroke="#000" strokeWidth="1"/><line x1="6" y1="3.5" x2="6" y2="7.5" stroke="#000" strokeWidth="1"/></svg>
+    case 'pencil':   return <svg {...p}><path d="M10,1 L13,4 L5,12 L2,13 L3,10Z" fill="#ffee00" stroke="#000" strokeWidth="0.7"/><path d="M10,1 L13,4 L12.5,4.5 L9.5,1.5Z" fill="#c0c0c0"/><path d="M3,10 L4,11 L2,13Z" fill="#333"/></svg>
+    case 'brush':    return <svg {...p}><path d="M9,1 L12,4 L7,9 L5,8Z" fill="none" stroke="#000" strokeWidth="1.2"/><ellipse cx="4.5" cy="10.5" rx="2.2" ry="2.8" fill="#8844cc" transform="rotate(-20,4.5,10.5)" stroke="#000" strokeWidth="0.5"/></svg>
+    case 'airbrush': return <svg {...p}><ellipse cx="5" cy="7.5" rx="2.5" ry="3" fill="#ddd" stroke="#000" strokeWidth="0.8"/><line x1="7.5" y1="7.5" x2="12" y2="7.5" stroke="#000" strokeWidth="1.2"/><circle cx="4" cy="3" r="0.7" fill="#000"/><circle cx="7" cy="2" r="0.7" fill="#000"/><circle cx="9" cy="4.5" r="0.7" fill="#000"/><circle cx="3" cy="11.5" r="0.7" fill="#000"/><circle cx="9" cy="11" r="0.7" fill="#000"/></svg>
+    case 'text':     return <svg {...p}><text x="1" y="12" fontFamily="serif" fontSize="13" fontWeight="bold" fill="#000">A</text></svg>
+    case 'line':     return <svg {...p}><line x1="2" y1="12" x2="12" y2="2" stroke="#000" strokeWidth="1.5"/></svg>
+    case 'curve':    return <svg {...p}><path d="M2,12 Q7,-2 12,12" fill="none" stroke="#000" strokeWidth="1.5"/></svg>
+    case 'rect':     return <svg {...p}><rect x="2" y="3" width="10" height="8" fill="none" stroke="#000" strokeWidth="1.3"/></svg>
+    case 'poly':     return <svg {...p}><polygon points="7,1 13,6 11,13 3,13 1,6" fill="none" stroke="#000" strokeWidth="1.3"/></svg>
+    case 'ellipse':  return <svg {...p}><ellipse cx="7" cy="7" rx="5.5" ry="4" fill="none" stroke="#000" strokeWidth="1.3"/></svg>
+    case 'rrect':    return <svg {...p}><rect x="2" y="3" width="10" height="8" rx="2.5" fill="none" stroke="#000" strokeWidth="1.3"/></svg>
+    default: return null
+  }
+}
+
+function XPToolbox({ activeTool, onTool }) {
+  return (
+    <div style={{
+      width: 50, background: XPC,
+      borderRight: '1px solid #b4ada4',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', padding: '4px 2px',
+      flexShrink: 0,
+    }}>
+      <div style={{ border: '1px solid', borderColor: '#808080 #fff #fff #808080', padding: 1 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+          {XP_TOOL_IDS.map(id => (
+            <button key={id} onClick={() => onTool(id)} title={XP_TOOL_LABELS[id]} style={{
+              width: 20, height: 20, padding: 0, cursor: 'default',
+              background: activeTool === id ? 'linear-gradient(to br, #aab8d0, #8898b8)' : XPC,
+              border: '1px solid',
+              borderColor: activeTool === id ? '#808080 #fff #fff #808080' : '#fff #808080 #808080 #fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxSizing: 'border-box',
+            }}>
+              <XPToolIcon id={id} />
+            </button>
+          ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+const XP_PALETTE_COLORS = [
+  '#000000','#808080','#800000','#808000','#008000','#008080','#000080','#800080',
+  '#c0c0c0','#ffffff','#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff',
+  '#ff8040','#804000','#ff8080','#ffff80','#80ff80','#80ffff','#8080ff','#ff80ff',
+  '#ff6600','#666600','#663300','#003300','#003366','#0066ff','#660099','#993366',
+]
+
+function XPColorPalette({ activeColor, onColor }) {
+  return (
+    <div style={{
+      background: XPC, borderTop: '1px solid #b4ada4',
+      padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+    }}>
+      <div style={{ border: '1px solid', borderColor: '#808080 #fff #fff #808080', padding: 2, background: XPC, flexShrink: 0 }}>
+        <div style={{ width: 16, height: 16, background: activeColor, border: '1px solid #000' }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(16, 13px)', gap: '1px' }}>
+        {XP_PALETTE_COLORS.map(c => (
+          <button key={c} onClick={() => onColor(c)} title={c} style={{
+            width: 13, height: 13, padding: 0, background: c, flexShrink: 0,
+            border: '1px solid', borderColor: '#808080 #fff #fff #808080',
+            cursor: 'default', boxSizing: 'border-box',
+            outline: activeColor === c ? '1px solid #000' : 'none', outlineOffset: -1,
+          }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function XPStatusBar({ children }) {
+  return (
+    <div style={{
+      background: XPC, borderTop: '1px solid #b4ada4',
+      padding: '1px 6px', display: 'flex', alignItems: 'center',
+      fontFamily: 'Tahoma, "Segoe UI", Arial, sans-serif', fontSize: 11,
+      color: '#000', minHeight: 20, flexShrink: 0,
+    }}>
+      <span style={{
+        borderRight: '1px solid #808080', paddingRight: 8, marginRight: 4,
+        overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1,
+      }}>
+        {children}
+      </span>
+    </div>
+  )
+}
+
+function XPThumb({ drawing, onRemove, showRemove, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: 90 }}>
+      <div
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          border: hovered ? '2px solid #0a246a' : '1px solid #a0a0a0',
+          padding: hovered ? 1 : 2,
+          background: '#fff', position: 'relative', cursor: 'zoom-in',
+          transform: hovered ? 'scale(1.1)' : 'scale(1)',
+          transition: 'transform 0.15s cubic-bezier(0.34,1.56,0.64,1), border 0.1s, padding 0.1s',
+          boxShadow: hovered ? '0 4px 14px rgba(0,0,0,0.3)' : 'none',
+        }}
+      >
+        <img src={drawing.src} alt={drawing.caption || ''} style={{ width: 82, height: 60, objectFit: 'cover', display: 'block' }} />
+        {showRemove && (
+          <button onClick={e => { e.stopPropagation(); onRemove(drawing.id) }} style={{
+            position: 'absolute', top: -5, right: -5, width: 14, height: 14, borderRadius: '50%',
+            background: '#cc0000', border: '1px solid #800000', cursor: 'pointer',
+            color: '#fff', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+          }}>
+            <X size={7} />
+          </button>
+        )}
+      </div>
+      {drawing.caption && (
+        <span style={{
+          fontFamily: 'Tahoma, sans-serif', fontSize: 10, color: '#000',
+          textAlign: 'center', width: '100%',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {drawing.caption}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function PreviewViewXP({ drawings, boardTitle, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        border: `2px solid ${XP_WIN_OUTER}`,
+        outline: `1px solid ${XP_WIN_INNER}`, outlineOffset: -3,
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '3px 3px 14px rgba(0,0,0,0.55)',
+        cursor: 'pointer', userSelect: 'none',
+      }}
+    >
+      <XPTitleBar title={boardTitle || 'untitled'} onClose={() => {}} />
+      <XPMenuBar showAdd={false} />
+      <div style={{ display: 'flex', background: XPC, height: 156 }}>
+        <XPToolbox activeTool="pencil" onTool={() => {}} />
+        <div style={{ flex: 1, background: '#808080', padding: 4, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+            {drawings.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, padding: 5 }}>
+                {drawings.slice(0, 8).map(d => {
+                  const seed = (d.id ?? '').split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+                  const rot = ((seed % 7) - 3) * 1.2
+                  return (
+                    <div key={d.id} style={{ transform: `rotate(${rot}deg)`, boxShadow: '1px 2px 5px rgba(0,0,0,0.2)', flexShrink: 0 }}>
+                      <img src={d.src} alt="" style={{ width: 56, height: 40, objectFit: 'cover', display: 'block' }} />
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 22, opacity: 0.12 }}>🎨</span>
+                <span style={{ fontFamily: 'Tahoma, sans-serif', fontSize: 10, color: '#808080' }}>Click to start</span>
+              </div>
+            )}
+            {hovered && (
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(14,68,148,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{
+                  background: 'rgba(14,68,148,0.92)', color: '#fff',
+                  padding: '3px 14px', fontFamily: 'Tahoma, sans-serif', fontSize: 11,
+                  border: '1px solid #adc8ff',
+                }}>
+                  {drawings.length > 0 ? `View ${drawings.length} drawing${drawings.length === 1 ? '' : 's'}` : 'Open Paint'}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <XPColorPalette activeColor="#000000" onColor={() => {}} />
+      <XPStatusBar>
+        {drawings.length > 0 ? `${drawings.length} drawing${drawings.length === 1 ? '' : 's'}` : 'For Help, click Help Topics on the Help Menu.'}
+      </XPStatusBar>
+    </div>
+  )
+}
+
+function GalleryModalXP({ drawings, boardTitle, isEditing, onClose, onAdd, onRemove, uploading, uploadError }) {
+  const isEmpty = drawings.length === 0
+  const [view, setView] = useState(isEmpty && onAdd ? 'draw' : 'gallery')
+  const [lightboxIdx, setLightboxIdx] = useState(null)
+  const [activeTool, setActiveTool] = useState('pencil')
+  const [activeColor, setActiveColor] = useState('#000000')
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [caption, setCaption] = useState('')
+  const canvasRef = useRef(null)
+  const lastPos = useRef(null)
+
+  useEffect(() => {
+    if (view !== 'draw' || !canvasRef.current) return
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
+    setCaption('')
+  }, [view])
+
+  function getPos(e) {
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const touch = e.touches?.[0] ?? e
+    return {
+      x: (touch.clientX - rect.left) * (CANVAS_W / rect.width),
+      y: (touch.clientY - rect.top) * (CANVAS_H / rect.height),
+    }
+  }
+
+  const drawSize = activeTool === 'brush' ? 9 : activeTool === 'eraser' ? 16 : 3
+
+  function startDraw(e) {
+    e.preventDefault()
+    if (!['pencil','brush','eraser'].includes(activeTool)) return
+    const pos = getPos(e)
+    lastPos.current = pos
+    setIsDrawing(true)
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.beginPath()
+    ctx.arc(pos.x, pos.y, drawSize / 2, 0, Math.PI * 2)
+    ctx.fillStyle = activeTool === 'eraser' ? '#ffffff' : activeColor
+    ctx.fill()
+  }
+
+  function onDrawMove(e) {
+    if (!isDrawing) return
+    e.preventDefault()
+    const pos = getPos(e)
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.beginPath()
+    ctx.moveTo(lastPos.current.x, lastPos.current.y)
+    ctx.lineTo(pos.x, pos.y)
+    ctx.strokeStyle = activeTool === 'eraser' ? '#ffffff' : activeColor
+    ctx.lineWidth = drawSize
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.stroke()
+    lastPos.current = pos
+  }
+
+  function stopDraw() { setIsDrawing(false); lastPos.current = null }
+
+  function clearCanvas() {
+    const ctx = canvasRef.current.getContext('2d')
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H)
+  }
+
+  function handleSave() {
+    canvasRef.current.toBlob(blob => onAdd(blob, caption.trim()), 'image/png')
+  }
+
+  const cursorForTool = activeTool === 'eraser' ? 'cell' : ['pencil','brush'].includes(activeTool) ? 'crosshair' : 'default'
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,14,50,0.72)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+      onMouseDown={e => { if (e.target === e.currentTarget && !uploading) onClose() }}
+    >
+      <div style={{
+        border: `2px solid ${XP_WIN_OUTER}`,
+        outline: `1px solid ${XP_WIN_INNER}`, outlineOffset: -3,
+        display: 'flex', flexDirection: 'column',
+        width: '100%', maxWidth: 780,
+        maxHeight: '90vh',
+        boxShadow: '5px 5px 28px rgba(0,0,0,0.75)',
+      }}>
+        <XPTitleBar
+          title={view === 'draw' ? 'New Drawing' : (boardTitle || 'untitled')}
+          onClose={() => { if (!uploading) onClose() }}
+        />
+        <XPMenuBar showAdd={!!onAdd && view === 'gallery'} onAddYours={() => setView('draw')} />
+
+        {/* Main area */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+          <XPToolbox activeTool={activeTool} onTool={setActiveTool} />
+          <div style={{ flex: 1, background: '#808080', padding: 6, overflow: 'hidden', display: 'flex' }}>
+            {view === 'gallery' ? (
+              <div style={{
+                background: '#fff', flex: 1, overflowY: 'auto', padding: 16,
+                display: 'flex', flexWrap: 'wrap', gap: '24px 20px',
+                justifyContent: 'flex-start', alignContent: 'flex-start',
+              }}>
+                {isEmpty ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 180, gap: 10, width: '100%' }}>
+                    <span style={{ fontSize: 36, opacity: 0.15 }}>🎨</span>
+                    <span style={{ fontFamily: 'Tahoma, sans-serif', fontSize: 11, color: '#808080' }}>Canvas is empty</span>
+                    {isEditing && (
+                      <button onClick={() => setView('draw')} style={{
+                        background: XPC, border: '1px solid', borderColor: '#fff #808080 #808080 #fff',
+                        fontFamily: 'Tahoma, sans-serif', fontSize: 11, padding: '4px 14px', cursor: 'pointer', color: '#000',
+                      }}>
+                        ✏️ New Drawing…
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  drawings.map((d, i) => (
+                    <XPThumb key={d.id} drawing={d} showRemove={isEditing} onRemove={onRemove} onClick={() => setLightboxIdx(i)} />
+                  ))
+                )}
+              </div>
+            ) : (
+              <div style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start' }}>
+                <div style={{ padding: 4, flexShrink: 0 }}>
+                  <canvas
+                    ref={canvasRef}
+                    width={CANVAS_W} height={CANVAS_H}
+                    style={{ display: 'block', width: '100%', cursor: cursorForTool, touchAction: 'none', userSelect: 'none' }}
+                    onMouseDown={startDraw} onMouseMove={onDrawMove} onMouseUp={stopDraw} onMouseLeave={stopDraw}
+                    onTouchStart={startDraw} onTouchMove={onDrawMove} onTouchEnd={stopDraw}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Draw controls strip */}
+        {view === 'draw' && (
+          <div style={{
+            background: XPC, borderTop: '1px solid #b4ada4', borderBottom: '1px solid #b4ada4',
+            padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0,
+          }}>
+            <button onClick={() => setView('gallery')} style={{
+              background: XPC, border: '1px solid', borderColor: '#fff #808080 #808080 #fff',
+              fontFamily: 'Tahoma, sans-serif', fontSize: 11, padding: '2px 10px', cursor: 'pointer', color: '#000',
+            }}>← Gallery</button>
+            <button onClick={clearCanvas} style={{
+              background: XPC, border: '1px solid', borderColor: '#fff #808080 #808080 #fff',
+              fontFamily: 'Tahoma, sans-serif', fontSize: 11, padding: '2px 10px', cursor: 'pointer', color: '#000',
+            }}>Clear</button>
+            <span style={{ fontFamily: 'Tahoma, sans-serif', fontSize: 11, marginLeft: 4 }}>Caption:</span>
+            <input
+              value={caption}
+              onChange={e => setCaption(e.target.value)}
+              placeholder="(optional)"
+              style={{
+                flex: 1, border: '1px solid', borderColor: '#808080 #fff #fff #808080',
+                background: '#fff', fontFamily: 'Tahoma, sans-serif', fontSize: 11,
+                padding: '1px 4px', outline: 'none', color: '#000',
+              }}
+            />
+            <button onClick={handleSave} disabled={uploading} style={{
+              background: uploading ? '#c0bdb4' : XPC,
+              border: '1px solid', borderColor: '#fff #808080 #808080 #fff',
+              fontFamily: 'Tahoma, sans-serif', fontSize: 11, padding: '2px 12px',
+              cursor: uploading ? 'default' : 'pointer', color: '#000', fontWeight: 700,
+            }}>
+              {uploading ? 'Saving…' : '📌 Save'}
+            </button>
+          </div>
+        )}
+
+        <XPColorPalette activeColor={activeColor} onColor={c => { setActiveColor(c); setActiveTool('pencil') }} />
+        <XPStatusBar>
+          {view === 'gallery'
+            ? (isEmpty ? 'For Help, click Help Topics on the Help Menu.' : `${drawings.length} drawing${drawings.length === 1 ? '' : 's'}`)
+            : (uploading ? 'Saving drawing…' : `${CANVAS_W} × ${CANVAS_H} pixels`)}
+        </XPStatusBar>
+        {uploadError && view === 'draw' && (
+          <div style={{
+            background: '#ffffc0', border: '1px solid #808080', padding: '3px 10px',
+            fontFamily: 'Tahoma, sans-serif', fontSize: 11, color: '#c00', flexShrink: 0,
+          }}>
+            ⚠️ {uploadError}
+          </div>
+        )}
+      </div>
+      {lightboxIdx !== null && (
+        <Lightbox drawings={drawings} index={lightboxIdx} onClose={() => setLightboxIdx(null)} onNav={setLightboxIdx} />
+      )}
     </div>
   )
 }
@@ -657,7 +1314,13 @@ function GalleryModal({ drawings, boardTitle, isEditing, onClose, onAdd, onRemov
 const PIN_COLORS = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#e67e22', '#16a085', '#e91e8c', '#f39c12']
 
 export default function DrawingBlock({ block, isEditing, onChange }) {
-  const { drawings = [], boardTitle = '' } = block
+  const { boardTitle = '', variant = 'default' } = block
+
+  // Own local drawing state so public visitors see their drawing immediately
+  // and the draw button is always available regardless of onChange availability
+  const [drawings, setDrawings] = useState(block.drawings || [])
+  useEffect(() => { setDrawings(block.drawings || []) }, [block.drawings])
+
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState(null)
@@ -672,13 +1335,10 @@ export default function DrawingBlock({ block, isEditing, onChange }) {
       const { data } = supabase.storage.from('lovepages').getPublicUrl(path)
       const id = nanoid()
       const seed = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
-      onChange({
-        drawings: [
-          ...drawings,
-          { id, src: data.publicUrl, caption, pinColor: PIN_COLORS[seed % PIN_COLORS.length] },
-        ],
-      })
-      // Stay in gallery view after save — user will see their new drawing
+      const newDrawing = { id, src: data.publicUrl, caption, pinColor: PIN_COLORS[seed % PIN_COLORS.length] }
+      const next = [...drawings, newDrawing]
+      setDrawings(next)                    // always update local state
+      onChange?.({ drawings: next })        // persist if editor; RPC if public (PublicPage provides onChange)
     } catch (err) {
       console.error('Drawing upload failed:', err.message)
       setUploadError('Upload failed — please try again.')
@@ -688,7 +1348,16 @@ export default function DrawingBlock({ block, isEditing, onChange }) {
   }
 
   function removeDrawing(id) {
-    onChange({ drawings: drawings.filter(d => d.id !== id) })
+    const next = drawings.filter(d => d.id !== id)
+    setDrawings(next)
+    onChange?.({ drawings: next })
+  }
+
+  const sharedModalProps = {
+    drawings, boardTitle,
+    onClose: () => setGalleryOpen(false),
+    onAdd: addDrawing,
+    uploading, uploadError,
   }
 
   if (isEditing) {
@@ -701,47 +1370,49 @@ export default function DrawingBlock({ block, isEditing, onChange }) {
           onChange={e => onChange({ boardTitle: e.target.value })}
         />
 
-        <PreviewView
-          drawings={drawings}
-          boardTitle={boardTitle}
-          onClick={() => setGalleryOpen(true)}
-        />
+        {/* Variant picker */}
+        <div className="grid grid-cols-2 gap-2">
+          {[{ v: 'default', label: 'Default' }, { v: 'xp', label: '🖥 MS Paint' }].map(({ v, label }) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => onChange({ variant: v })}
+              className={`py-1.5 rounded-lg border-2 text-sm transition ${
+                variant === v
+                  ? 'border-primary bg-primary/10 text-primary-dim font-medium'
+                  : 'border-overlay bg-surface text-fg-muted hover:border-subtle'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-        {galleryOpen && (
-          <GalleryModal
-            drawings={drawings}
-            boardTitle={boardTitle}
-            isEditing
-            onClose={() => setGalleryOpen(false)}
-            onAdd={addDrawing}
-            onRemove={removeDrawing}
-            uploading={uploading}
-            uploadError={uploadError}
-          />
+        {variant === 'xp' ? (
+          <PreviewViewXP drawings={drawings} boardTitle={boardTitle} onClick={() => setGalleryOpen(true)} />
+        ) : (
+          <PreviewView drawings={drawings} boardTitle={boardTitle} onClick={() => setGalleryOpen(true)} />
+        )}
+
+        {galleryOpen && (variant === 'xp'
+          ? <GalleryModalXP {...sharedModalProps} isEditing onRemove={removeDrawing} />
+          : <GalleryModal {...sharedModalProps} isEditing onRemove={removeDrawing} />
         )}
       </div>
     )
   }
 
-  // Public view
+  // Public view — onAdd is always provided; visitors can always draw
   return (
     <>
-      <PreviewView
-        drawings={drawings}
-        boardTitle={boardTitle}
-        onClick={() => setGalleryOpen(true)}
-      />
-      {galleryOpen && (
-        <GalleryModal
-          drawings={drawings}
-          boardTitle={boardTitle}
-          isEditing={false}
-          onClose={() => setGalleryOpen(false)}
-          onAdd={null}
-          onRemove={null}
-          uploading={false}
-          uploadError={null}
-        />
+      {variant === 'xp' ? (
+        <PreviewViewXP drawings={drawings} boardTitle={boardTitle} onClick={() => setGalleryOpen(true)} />
+      ) : (
+        <PreviewView drawings={drawings} boardTitle={boardTitle} onClick={() => setGalleryOpen(true)} />
+      )}
+      {galleryOpen && (variant === 'xp'
+        ? <GalleryModalXP {...sharedModalProps} isEditing={false} onRemove={null} />
+        : <GalleryModal {...sharedModalProps} isEditing={false} onRemove={null} />
       )}
     </>
   )

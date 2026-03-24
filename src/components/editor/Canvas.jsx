@@ -64,28 +64,35 @@ export default function Canvas({
 
     return (
       <div className="w-full">
-        {segments.map((seg, i) =>
-          seg.fullBleed ? (
+        {segments.map((seg, i) => {
+          const isLast = i === segments.length - 1
+          return seg.fullBleed ? (
             <BlockRenderer key={seg.block.id} block={seg.block} isHighlighted={seg.block.id === hoveredBlockId} />
           ) : (
             <div
               key={i}
               className="flex flex-col max-w-3xl mx-auto"
-              style={{ gap: colGap, padding: colPadding }}
+              style={{
+                gap: colGap,
+                paddingTop: colPadding,
+                paddingLeft: colPadding,
+                paddingRight: colPadding,
+                paddingBottom: isLast ? 0 : colPadding,
+              }}
             >
               {seg.blocks.map(block => (
                 <BlockRenderer key={block.id} block={block} isHighlighted={block.id === hoveredBlockId} />
               ))}
             </div>
           )
-        )}
+        })}
       </div>
     )
   }
 
   return (
     <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
-      <div className="p-6 space-y-3 w-full max-w-2xl mx-auto">
+      <div className="pt-6 px-6 pb-0 space-y-3 w-full max-w-2xl mx-auto">
         {pageSettings && onChangeSettings && (
           <PageOptionsBlock pageSettings={pageSettings} onChange={onChangeSettings} />
         )}
@@ -118,7 +125,7 @@ export default function Canvas({
         {onAddBlock && (
           <div className="md:hidden mt-2">
             {showAddMenu ? (
-              <div className="bg-surface border border-overlay rounded-xl overflow-hidden">
+              <div className="border border-overlay/60 rounded-xl overflow-hidden" style={{ background: 'rgba(19,17,24,0.90)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
                 <div className="flex items-center justify-between px-4 py-2 border-b border-overlay">
                   <span className="text-xs font-semibold text-fg-muted uppercase tracking-wide">Add a block</span>
                   <button onClick={() => setShowAddMenu(false)} className="text-fg-muted text-lg leading-none">×</button>

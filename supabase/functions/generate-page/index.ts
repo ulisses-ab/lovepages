@@ -416,8 +416,8 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        max_tokens: 4096,
+        model: 'gpt-5',
+        max_completion_tokens: 4096,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: description },
